@@ -66,7 +66,7 @@ const getAge = (dateOfBirth) => {
 const validateForm = (values) => {
   const nextErrors = {};
 
-  ['fullName', 'email', 'mobileNumber', 'landPhoneNumber', 'address', 'dateOfBirth', 'gender'].forEach((field) => {
+  ['fullName', 'email', 'password', 'confirmPassword', 'mobileNumber', 'landPhoneNumber', 'address', 'dateOfBirth', 'gender'].forEach((field) => {
     const value = values[field];
     if (typeof value === 'string' && !value.trim()) {
       nextErrors[field] = 'This field is required.';
@@ -79,6 +79,23 @@ const validateForm = (values) => {
 
   if (!nextErrors.email && !EMAIL_REGEX.test(values.email.trim())) {
     nextErrors.email = 'Enter a valid email address.';
+  }
+
+  if (!nextErrors.password) {
+    const password = values.password;
+    const hasMinimumLength = password.length >= 6;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+    if (!(hasMinimumLength && hasUppercase && hasLowercase && hasNumber && hasSpecial)) {
+      nextErrors.password = 'Use 6+ characters with uppercase, lowercase, number, and special character.';
+    }
+  }
+
+  if (!nextErrors.confirmPassword && values.confirmPassword !== values.password) {
+    nextErrors.confirmPassword = 'Passwords do not match.';
   }
 
   if (!nextErrors.dateOfBirth) {
@@ -132,12 +149,11 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const defaultPassword = 'CareNova@2026';
       const payload = {
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
-        password: formData.password?.trim() || defaultPassword,
-        confirmPassword: formData.confirmPassword?.trim() || defaultPassword,
+        password: formData.password.trim(),
+        confirmPassword: formData.confirmPassword.trim(),
         mobileNumber: formData.mobileNumber.trim(),
         landPhoneNumber: formData.landPhoneNumber.trim(),
         address: formData.address.trim(),
@@ -230,6 +246,36 @@ const Register = () => {
                 aria-invalid={Boolean(errors.email)}
               />
               {errors.email && <span className="field-error">{errors.email}</span>}
+            </div>
+
+            <div className="form-row form-row-single">
+              <label className="field-label" htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                name="password"
+                className="field-input"
+                placeholder="Create a strong password"
+                value={formData.password}
+                onChange={handleChange}
+                aria-invalid={Boolean(errors.password)}
+              />
+              {errors.password && <span className="field-error">{errors.password}</span>}
+            </div>
+
+            <div className="form-row form-row-single">
+              <label className="field-label" htmlFor="confirmPassword">Confirm password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                name="confirmPassword"
+                className="field-input"
+                placeholder="Re-enter your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                aria-invalid={Boolean(errors.confirmPassword)}
+              />
+              {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
             </div>
 
             <div className="form-row two-column">
