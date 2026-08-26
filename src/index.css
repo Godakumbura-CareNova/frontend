@@ -299,6 +299,12 @@ a:hover {
   color: var(--red-deep);
 }
 
+.registration-success {
+  background: #fff0f1;
+  border: 1px solid #e7a9ad;
+  color: var(--red-deep);
+}
+
 @media (max-width: 560px) {
   .two-column {
     grid-template-columns: 1fr;

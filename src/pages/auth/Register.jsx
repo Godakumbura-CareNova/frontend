@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import pharmacyLogo from '../../assets/PHARMACY LOGO .jpeg';
 import { registerCustomer } from '../../services/authService';
 
@@ -122,8 +121,8 @@ const Register = () => {
   const [formData, setFormData] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -134,11 +133,15 @@ const Register = () => {
     if (formError) {
       setFormError('');
     }
+    if (successMessage) {
+      setSuccessMessage('');
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setFormError('');
+    setSuccessMessage('');
 
     const nextErrors = validateForm(formData);
     if (Object.keys(nextErrors).length > 0) {
@@ -162,9 +165,10 @@ const Register = () => {
       };
 
       await registerCustomer(payload);
-      navigate('/register', { state: { message: 'Registration successful.' } });
+      setSuccessMessage('Registration successful! Your account has been created.');
     } catch (error) {
       const status = error?.response?.status;
+      const backendMessage = error?.response?.data?.message;
       const serverErrors = error?.response?.data?.errors || {};
 
       if (status === 409) {
@@ -172,6 +176,7 @@ const Register = () => {
           ...current,
           email: 'already registered',
         }));
+        setFormError(backendMessage || 'Registration failed. Please check your details and try again.');
         return;
       }
 
@@ -190,7 +195,7 @@ const Register = () => {
         }
       }
 
-      setFormError('Registration failed. Please try again.');
+      setFormError(backendMessage || 'Registration failed. Please check your details and try again.');
     } finally {
       setLoading(false);
     }
@@ -215,6 +220,7 @@ const Register = () => {
           <h2 className="registration-title">Create your account</h2>
           <p className="registration-subtitle">Personal details for your CareNova profile</p>
 
+          {successMessage && <div className="alert registration-success">{successMessage}</div>}
           {formError && <div className="alert alert-error">{formError}</div>}
 
           <form onSubmit={handleSubmit} noValidate>
