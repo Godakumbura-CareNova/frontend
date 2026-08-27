@@ -1,93 +1,48 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Users, Server, Activity, UserPlus, FileSpreadsheet } from 'lucide-react';
+import { ShieldCheck, Users, Server, User } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
 
   return (
     <div className="container">
-      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>System Administration</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Welcome back, System Admin {user?.fullName}. Platform metrics & user governance.</p>
-        </div>
-        <Link to="/admin/users" className="btn btn-primary">
-          <Users size={18} /> Manage All Users
-        </Link>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Admin Dashboard</h1>
+        <p style={{ color: 'var(--text-muted)' }}>Welcome back, {user?.fullName || 'Admin'}.</p>
       </div>
 
-      <div className="grid grid-4" style={{ marginBottom: '2rem' }}>
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Total Users</span>
-            <Users color="var(--primary)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>1,284</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>+48 new this week</p>
+      <div className="grid grid-3" style={{ marginBottom: '2rem' }}>
+        <div className="glass-card" style={{ opacity: 0.7 }}>
+          <Server color="var(--primary)" size={20} />
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>System Metrics</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
         </div>
 
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Active Sessions</span>
-            <Activity color="var(--success)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>186</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>Peak usage time</p>
+        <div className="glass-card" style={{ opacity: 0.7 }}>
+          <ShieldCheck color="var(--primary)" size={20} />
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Audit Logs</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
         </div>
 
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>System Status</span>
-            <Server color="var(--accent)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>99.98%</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>All microservices operational</p>
-        </div>
-
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Security Audit</span>
-            <ShieldCheck color="var(--warning)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>0 Alerts</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>Compliance verified</p>
+        <div className="glass-card" style={{ opacity: 0.7 }}>
+          <Users color="var(--primary)" size={20} />
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Reports</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
         </div>
       </div>
 
       <div className="glass-card">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Recent System Audit Logs</h2>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>User</th>
-              <th>Role</th>
-              <th>Action</th>
-              <th>IP Address</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>2026-08-22 13:45:12</td>
-              <td>admin@carenova.org</td>
-              <td><span className="badge badge-admin">Admin</span></td>
-              <td>Role change for user ID #204</td>
-              <td>192.168.1.45</td>
-              <td><span className="badge badge-patient">Success</span></td>
-            </tr>
-            <tr>
-              <td>2026-08-22 13:30:05</td>
-              <td>dr.jenkins@carenova.org</td>
-              <td><span className="badge badge-doctor">Doctor</span></td>
-              <td>EHR Record Access</td>
-              <td>192.168.1.88</td>
-              <td><span className="badge badge-patient">Success</span></td>
-            </tr>
-          </tbody>
-        </table>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>Quick Links</h2>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <Link to="/admin/users" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Users size={16} /> Manage Users
+          </Link>
+          <Link to="/profile" className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <User size={16} /> View My Profile
+          </Link>
+        </div>
       </div>
     </div>
   );
