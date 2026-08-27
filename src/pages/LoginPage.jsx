@@ -12,6 +12,39 @@ const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const getDashboardRouteByRole = (role) => {
+    if (role === 'Patient' || role === 'User') return '/patient-dashboard';
+    if (role === 'Doctor') return '/doctor-dashboard';
+    if (role === 'PharmacyStaff' || role === 'Pharmacy Staff') return '/pharmacy-dashboard';
+    if (role === 'Admin') return '/admin-dashboard';
+    return '/forbidden';
+  };
+
+  const mapAuthErrorMessage = (err) => {
+    if (!err?.response) {
+      return 'Unable to reach the server. Please check your connection and try again.';
+    }
+
+    const status = err.response.status;
+    const backendCode = String(err.response.data?.code || '').toLowerCase();
+    const backendMessage = String(err.response.data?.message || '').toLowerCase();
+    const inactiveSignal = backendCode.includes('inactive') || backendMessage.includes('inactive');
+
+    if (status === 401) {
+      return 'Invalid email or password.';
+    }
+
+    if (status === 403 || status === 423 || inactiveSignal) {
+      return 'Your account is inactive or you do not have access.';
+    }
+
+    if (status >= 500) {
+      return 'Sign in is temporarily unavailable. Please try again later.';
+    }
+
+    return 'Failed to sign in. Please check your credentials.';
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (errors[e.target.name]) {
@@ -31,15 +64,10 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      const user = await login(formData.email, formData.password);
-      // Redirect based on user role
-      if (user.role === 'Patient') navigate('/patient-dashboard');
-      else if (user.role === 'Doctor') navigate('/doctor-dashboard');
-      else if (user.role === 'PharmacyStaff') navigate('/pharmacy-dashboard');
-      else if (user.role === 'Admin') navigate('/admin-dashboard');
-      else navigate('/profile');
+      const user = await login(formData.email.trim(), formData.password);
+      navigate(getDashboardRouteByRole(user.role), { replace: true });
     } catch (err) {
-      setServerError(err.response?.data?.message || 'Failed to sign in. Please check your credentials.');
+      setServerError(mapAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -66,10 +94,11 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label" htmlFor="login-email">Email Address</label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
+                id="login-email"
                 type="email"
                 name="email"
                 className="form-input"
@@ -84,12 +113,13 @@ const LoginPage = () => {
 
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+              <label className="form-label" htmlFor="login-password" style={{ marginBottom: 0 }}>Password</label>
               <Link to="/forgot-password" style={{ fontSize: '0.8rem' }}>Forgot password?</Link>
             </div>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
+                id="login-password"
                 type="password"
                 name="password"
                 className="form-input"
