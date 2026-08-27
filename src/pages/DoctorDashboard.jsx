@@ -1,45 +1,37 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Users, Calendar, FilePlus, User } from 'lucide-react';
+import DashboardLayout from '../components/DashboardLayout';
+import StatCard from '../components/StatCard';
+import { Calendar, CalendarClock, Users, CheckCircle2 } from 'lucide-react';
+import { getFirstName } from '../utils/formatName';
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
 
   return (
-    <div className="container">
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Doctor Dashboard</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Welcome back, Dr. {user?.fullName || 'Doctor'}.</p>
+    <DashboardLayout>
+      <div className="welcome-banner">
+        <h1>
+          Welcome back, <span className="welcome-name">Dr. {getFirstName(user?.fullName) || 'Doctor'}</span> 👋
+        </h1>
+        <p>Your schedule and patient queue for today.</p>
       </div>
 
-      <div className="grid grid-3" style={{ marginBottom: '2rem' }}>
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <Calendar color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Appointments</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
-
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <Users color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Patient Records</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
-
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <FilePlus color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Prescriptions</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
+      <div className="stat-card-grid">
+        <StatCard icon={Calendar} title="Today's Appointments" />
+        <StatCard icon={CalendarClock} title="Upcoming Appointments" />
+        <StatCard icon={Users} title="Patient Count" />
+        <StatCard icon={CheckCircle2} title="Completed Appointments" />
       </div>
 
-      <div className="glass-card">
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>Quick Links</h2>
-        <Link to="/profile" className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-          <User size={16} /> View My Profile
-        </Link>
+      <div className="dashboard-section">
+        <h2>Appointment Details</h2>
+        <p className="empty-state">
+          No appointments yet — once the Appointment module is live, each row here will let you mark a visit
+          as <strong>Confirmed</strong>, <strong>Completed</strong>, or <strong>No Show</strong>.
+        </p>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

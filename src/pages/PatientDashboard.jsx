@@ -1,45 +1,55 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Pill, ShoppingCart, User } from 'lucide-react';
+import DashboardLayout from '../components/DashboardLayout';
+import StatCard from '../components/StatCard';
+import { ShoppingBag, Calendar, CreditCard, Pill, Stethoscope, Heart } from 'lucide-react';
+import { getFirstName } from '../utils/formatName';
 
 const PatientDashboard = () => {
   const { user } = useAuth();
 
   return (
-    <div className="container">
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Patient Dashboard</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Welcome back, {user?.fullName || 'Patient'}.</p>
+    <DashboardLayout>
+      <div className="welcome-banner">
+        <Heart size={72} className="welcome-decoration" />
+        <h1>
+          Welcome back, <span className="welcome-name">{getFirstName(user?.fullName) || 'Patient'}</span> 👋
+        </h1>
+        <p>Manage your health easily with CareNova.</p>
       </div>
 
-      <div className="grid grid-3" style={{ marginBottom: '2rem' }}>
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <Calendar color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Appointments</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
-
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <ShoppingCart color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Medicine Orders</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
-
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <Pill color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Prescriptions</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
+      <div className="stat-card-grid">
+        <StatCard icon={ShoppingBag} title="Recent Medicine Orders" />
+        <StatCard icon={Calendar} title="Upcoming Appointments" />
+        <StatCard icon={CreditCard} title="Payment Statuses" />
+        <StatCard icon={Pill} title="Quick Links" />
       </div>
 
-      <div className="glass-card">
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>Quick Links</h2>
-        <Link to="/profile" className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-          <User size={16} /> View My Profile
-        </Link>
+      <div className="dashboard-section">
+        <h2>Quick Links</h2>
+        <div className="quicklink-row">
+          <Link to="#" className="quicklink-card" onClick={(e) => e.preventDefault()}>
+            <div>
+              <div className="quicklink-card-title">Medicines</div>
+              <div className="quicklink-card-subtitle">Browse and order medicines</div>
+            </div>
+            <div className="quicklink-card-icon" style={{ background: 'var(--red-soft)', color: 'var(--red-strong)' }}>
+              <Pill size={20} />
+            </div>
+          </Link>
+          <Link to="#" className="quicklink-card" onClick={(e) => e.preventDefault()}>
+            <div>
+              <div className="quicklink-card-title">Doctors</div>
+              <div className="quicklink-card-subtitle">Find and book appointments</div>
+            </div>
+            <div className="quicklink-card-icon" style={{ background: '#ecfdf3', color: 'var(--success)' }}>
+              <Stethoscope size={20} />
+            </div>
+          </Link>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

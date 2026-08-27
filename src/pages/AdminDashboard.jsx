@@ -1,50 +1,56 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Users, Server, User } from 'lucide-react';
+import DashboardLayout from '../components/DashboardLayout';
+import StatCard from '../components/StatCard';
+import {
+  Users,
+  UserCircle,
+  Briefcase,
+  Stethoscope,
+  ShoppingBag,
+  Calendar,
+  DollarSign,
+  CreditCard,
+  AlertTriangle,
+} from 'lucide-react';
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
-
   return (
-    <div className="container">
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Admin Dashboard</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Welcome back, {user?.fullName || 'Admin'}.</p>
+    <DashboardLayout>
+      <div className="welcome-banner">
+        <h1>
+          Welcome back, <span className="welcome-name">Admin</span> 👋
+        </h1>
+        <p>Platform overview and user governance.</p>
       </div>
 
-      <div className="grid grid-3" style={{ marginBottom: '2rem' }}>
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <Server color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>System Metrics</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
-
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <ShieldCheck color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Audit Logs</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
-
-        <div className="glass-card" style={{ opacity: 0.7 }}>
-          <Users color="var(--primary)" size={20} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0.75rem 0 0.25rem' }}>Reports</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Coming soon</p>
-        </div>
+      <div className="stat-card-grid">
+        <StatCard icon={Users} title="Total Users" />
+        <StatCard icon={UserCircle} title="Patients" />
+        <StatCard icon={Briefcase} title="Pharmacy Staff" />
+        <StatCard icon={Stethoscope} title="Doctors" />
+        <StatCard icon={ShoppingBag} title="Medicine Orders" />
+        <StatCard icon={Calendar} title="Appointments" />
+        <StatCard icon={DollarSign} title="Sales Totals" />
+        <StatCard icon={CreditCard} title="Payment Summary" />
+        <StatCard icon={AlertTriangle} title="Low-Stock Alerts" />
       </div>
 
-      <div className="glass-card">
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>Quick Links</h2>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Link to="/admin/users" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Users size={16} /> Manage Users
-          </Link>
-          <Link to="/profile" className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-            <User size={16} /> View My Profile
+      <div className="dashboard-section">
+        <h2>Quick Links</h2>
+        <div className="quicklink-row">
+          <Link to="/admin/users" className="quicklink-card">
+            <div>
+              <div className="quicklink-card-title">Manage Users</div>
+              <div className="quicklink-card-subtitle">View users, change roles, activate or deactivate accounts</div>
+            </div>
+            <div className="quicklink-card-icon" style={{ background: 'var(--red-soft)', color: 'var(--red-strong)' }}>
+              <Users size={20} />
+            </div>
           </Link>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

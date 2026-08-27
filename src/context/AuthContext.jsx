@@ -27,9 +27,14 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const data = await authApi.login({ email, password });
-      // Expected response format: { token, user: { id, email, fullName, role } }
-      const authToken = data.token || 'mock-jwt-token-carenova';
-      const authUser = data.user || { email, role: data.role || 'Patient', fullName: email.split('@')[0] };
+      // Actual backend response (LoginResponseDto): { token, expiresAtUtc, userId, email, fullName, role }
+      const authToken = data.token;
+      const authUser = {
+        id: data.userId,
+        email: data.email,
+        fullName: data.fullName,
+        role: data.role,
+      };
 
       setToken(authToken);
       setUser(authUser);

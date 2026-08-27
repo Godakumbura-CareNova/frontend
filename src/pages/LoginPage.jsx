@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { validateLoginForm } from '../utils/validation';
-import { Lock, Mail, Activity, ArrowRight } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import pharmacyLogo from '../assets/PHARMACY LOGO .jpeg';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -75,18 +78,10 @@ const LoginPage = () => {
 
   return (
     <div className="auth-wrapper">
-      <div className="glass-card auth-card">
+      <div className="glass-card auth-card login-card">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            padding: '0.75rem',
-            borderRadius: '1rem',
-            background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.2))',
-            marginBottom: '1rem'
-          }}>
-            <Activity size={32} color="var(--primary)" />
-          </div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Welcome Back</h2>
+          <img className="login-logo-image" src={pharmacyLogo} alt="CareNova logo" />
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Welcome</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Sign in to access your CareNova portal</p>
         </div>
 
@@ -112,27 +107,47 @@ const LoginPage = () => {
           </div>
 
           <div className="form-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label className="form-label" htmlFor="login-password" style={{ marginBottom: 0 }}>Password</label>
-              <Link to="/forgot-password" style={{ fontSize: '0.8rem' }}>Forgot password?</Link>
-            </div>
+            <label className="form-label" htmlFor="login-password">Password</label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
                 id="login-password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 className="form-input"
-                style={{ paddingLeft: '2.75rem' }}
+                style={{ paddingLeft: '2.75rem', paddingRight: '2.75rem' }}
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
               />
+              <button
+                type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="password-toggle-button"
+                onClick={() => setShowPassword((current) => !current)}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
             {errors.password && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{errors.password}</span>}
+            <div style={{ textAlign: 'right', marginTop: '0.4rem' }}>
+              <Link to="/forgot-password" className="forgot-password-link" style={{ fontSize: '0.8rem' }}>Forgot password?</Link>
+            </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
+          <div className="remember-row">
+            <label className="remember-label" htmlFor="remember-me">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <span>Remember me</span>
+            </label>
+          </div>
+
+          <button type="submit" className="btn btn-primary login-submit-button" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'} <ArrowRight size={18} />
           </button>
         </form>
