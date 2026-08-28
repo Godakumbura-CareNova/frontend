@@ -12,7 +12,7 @@ export const profileApi = {
   },
 
   changePassword: async (passwordData) => {
-    const response = await apiClient.post('/profile/change-password', passwordData);
+    const response = await apiClient.put('/profile/password', passwordData);
     return response.data;
   },
 };
