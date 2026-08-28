@@ -74,17 +74,19 @@ const Navbar = () => {
                 </Link>
               )}
 
-              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 500 }}>
-                <User size={16} />
-                Profile
-              </Link>
+              {role === 'Patient' && (
+                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 500 }}>
+                  <User size={16} />
+                  Profile
+                </Link>
+              )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingLeft: '1rem', borderLeft: '1px solid var(--border-color)' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{user?.fullName || user?.email}</div>
                   <span className={`badge ${getBadgeClass(role)}`}>{role}</span>
                 </div>
-                
+
                 <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.5rem 0.8rem', fontSize: '0.85rem' }} title="Logout">
                   <LogOut size={16} />
                 </button>
