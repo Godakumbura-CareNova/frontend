@@ -12,6 +12,7 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('carenova_token');
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -26,6 +27,7 @@ apiClient.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('carenova_token');
       localStorage.removeItem('carenova_user');
+      window.dispatchEvent(new Event('carenova:unauthorized'));
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
