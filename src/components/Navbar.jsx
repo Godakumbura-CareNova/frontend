@@ -7,8 +7,8 @@ const Navbar = () => {
   const { user, isAuthenticated, role, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -84,7 +84,7 @@ const Navbar = () => {
                   <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{user?.fullName || user?.email}</div>
                   <span className={`badge ${getBadgeClass(role)}`}>{role}</span>
                 </div>
-                
+
                 <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.5rem 0.8rem', fontSize: '0.85rem' }} title="Logout">
                   <LogOut size={16} />
                 </button>

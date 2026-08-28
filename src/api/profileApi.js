@@ -12,7 +12,17 @@ export const profileApi = {
   },
 
   changePassword: async (passwordData) => {
-    const response = await apiClient.post('/profile/change-password', passwordData);
+    const response = await apiClient.put('/profile/password', passwordData);
+    return response.data;
+  },
+
+  uploadProfilePicture: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await apiClient.post('/profile/picture', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return response.data;
   },
 };
