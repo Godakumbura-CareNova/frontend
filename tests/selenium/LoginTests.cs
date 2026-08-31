@@ -11,32 +11,124 @@ namespace CareNova.Frontend.Tests.Selenium
     {
         private IWebDriver _driver;
         private WebDriverWait _wait;
+
         private readonly string _baseUrl = "http://localhost:3000";
 
         [SetUp]
         public void Setup()
         {
             var options = new ChromeOptions();
+
             options.AddArgument("--headless");
+            options.AddArgument("--window-size=1920,1080");
+
             _driver = new ChromeDriver(options);
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+
+            _wait = new WebDriverWait(
+                _driver,
+                TimeSpan.FromSeconds(10)
+            );
         }
 
-        [Test]
-        public void UserLogin_WithValidCredentials_ShouldRedirectToDashboard()
+        private void Login(string email, string password)
         {
             _driver.Navigate().GoToUrl($"{_baseUrl}/login");
 
-            var emailInput = _wait.Until(d => d.FindElement(By.Name("email")));
-            var passwordInput = _driver.FindElement(By.Name("password"));
-            var submitButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
+            var emailInput = _wait.Until(
+                d => d.FindElement(By.Name("email"))
+            );
 
-            emailInput.SendKeys("patient@carenova.org");
-            passwordInput.SendKeys("Password123");
+            var passwordInput = _driver.FindElement(
+                By.Name("password")
+            );
+
+            var submitButton = _driver.FindElement(
+                By.CssSelector("button[type='submit']")
+            );
+
+            emailInput.Clear();
+            emailInput.SendKeys(email);
+
+            passwordInput.Clear();
+            passwordInput.SendKeys(password);
+
             submitButton.Click();
+        }
 
-            _wait.Until(d => d.Url.Contains("-dashboard"));
-            Assert.IsTrue(_driver.Url.Contains("dashboard"), "Successful login should redirect to a dashboard page.");
+        [Test]
+        public void PatientLogin_ShouldRedirectToPatientDashboard()
+        {
+            Login(
+                "test-patient@carenova.dev",
+                "Patient@2026"
+            );
+
+            _wait.Until(
+                d => d.Url.Contains("/patient-dashboard")
+            );
+
+            Assert.That(
+                _driver.Url,
+                Does.Contain("/patient-dashboard"),
+                "Patient should be redirected to /patient-dashboard."
+            );
+        }
+
+        [Test]
+        public void DoctorLogin_ShouldRedirectToDoctorDashboard()
+        {
+            Login(
+                "test-doctor@carenova.dev",
+                "Doctor@2026"
+            );
+
+            _wait.Until(
+                d => d.Url.Contains("/doctor-dashboard")
+            );
+
+            Assert.That(
+                _driver.Url,
+                Does.Contain("/doctor-dashboard"),
+                "Doctor should be redirected to /doctor-dashboard."
+            );
+        }
+
+        [Test]
+        public void PharmacyStaffLogin_ShouldRedirectToPharmacyDashboard()
+        {
+            Login(
+                "test-pharmacy@carenova.dev",
+                "Pharmacy@2026"
+            );
+
+            _wait.Until(
+                d => d.Url.Contains("/pharmacy-dashboard")
+            );
+
+            Assert.That(
+                _driver.Url,
+                Does.Contain("/pharmacy-dashboard"),
+                "PharmacyStaff should be redirected to /pharmacy-dashboard."
+            );
+        }
+
+        [Test]
+        public void AdminLogin_ShouldRedirectToAdminDashboard()
+        {
+            Login(
+                "admin@carenova.dev",
+                "Admin@2026"
+            );
+
+            _wait.Until(
+                d => d.Url.Contains("/admin-dashboard")
+            );
+
+            Assert.That(
+                _driver.Url,
+                Does.Contain("/admin-dashboard"),
+                "Admin should be redirected to /admin-dashboard."
+            );
         }
 
         [TearDown]
