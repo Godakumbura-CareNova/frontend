@@ -18,36 +18,57 @@ namespace CareNova.Frontend.Tests.Selenium
         {
             var options = new ChromeOptions();
             options.AddArgument("--headless");
+
             _driver = new ChromeDriver(options);
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
 
         [Test]
-        public void ProfileUpdate_ShouldDisplaySuccessAlert()
+        public void GCN18_ProfileUpdate_WithAuthenticatedSession_ShouldDisplaySuccessAlert()
         {
+            // Open the application first so localStorage is available
             _driver.Navigate().GoToUrl($"{_baseUrl}/login");
 
-            // Perform mock login
-            var emailInput = _wait.Until(d => d.FindElement(By.Name("email")));
-            var passwordInput = _driver.FindElement(By.Name("password"));
-            emailInput.SendKeys("testuser@carenova.org");
-            passwordInput.SendKeys("Password123");
-            _driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+            var js = (IJavaScriptExecutor)_driver;
 
-            _wait.Until(d => d.Url.Contains("-dashboard"));
+            js.ExecuteScript(
+                "localStorage.setItem('carenova_token', 'gcn18-qa-token');");
 
-            // Navigate to profile page
+            js.ExecuteScript(
+                @"localStorage.setItem(
+                    'carenova_user',
+                    JSON.stringify({
+                        id: '00000000-0000-0000-0000-000000000018',
+                        email: 'gcn18.qa@example.com',
+                        fullName: 'GCN18 QA Customer',
+                        role: 'Patient'
+                    })
+                );");
+
+            // Reload application with authenticated frontend state
             _driver.Navigate().GoToUrl($"{_baseUrl}/profile");
 
-            var nameInput = _wait.Until(d => d.FindElement(By.XPath("//input[@value]")));
-            nameInput.Clear();
-            nameInput.SendKeys("Updated Test User");
+            var nameInput = _wait.Until(d =>
+                d.FindElement(
+                    By.XPath("//label[normalize-space()='Full Name']/following::input[1]")));
 
-            var saveButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
+            nameInput.Clear();
+            nameInput.SendKeys("GCN18 Selenium Updated Customer");
+
+            var saveButton = _driver.FindElement(
+                By.XPath("//button[contains(., 'Save Changes')]"));
+
             saveButton.Click();
 
-            var alert = _wait.Until(d => d.FindElement(By.ClassName("alert-success")));
-            Assert.IsNotNull(alert, "Profile update should trigger a success alert message.");
+            // Wait for either success or error so a defect produces
+            // a useful assertion instead of a generic timeout.
+            var alert = _wait.Until(d =>
+                d.FindElement(By.CssSelector(".alert")));
+
+            Assert.That(
+                alert.GetAttribute("class"),
+                Does.Contain("alert-success"),
+                $"Expected successful GCN-18 profile update, but application displayed: '{alert.Text}'");
         }
 
         [TearDown]
