@@ -1,9 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, FileText, Pill, Activity, Clock, Plus } from 'lucide-react';
+import { Calendar, FileText, Pill, Activity, Clock, LogOut, Plus } from 'lucide-react';
 
 const PatientDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <div className="container">
@@ -12,9 +19,14 @@ const PatientDashboard = () => {
           <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Patient Health Portal</h1>
           <p style={{ color: 'var(--text-muted)' }}>Welcome back, {user?.fullName || 'Patient'}. Here is your healthcare summary.</p>
         </div>
-        <button className="btn btn-primary">
-          <Plus size={18} /> Book Appointment
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button className="btn btn-primary">
+            <Plus size={18} /> Book Appointment
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={handleLogout}>
+            <LogOut size={18} /> Logout
+          </button>
+        </div>
       </div>
 
       {/* Metrics Row */}
