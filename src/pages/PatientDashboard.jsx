@@ -1,96 +1,55 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, FileText, Pill, Activity, Clock, LogOut, Plus } from 'lucide-react';
+import DashboardLayout from '../components/DashboardLayout';
+import StatCard from '../components/StatCard';
+import { ShoppingBag, Calendar, CreditCard, Pill, Stethoscope, Heart } from 'lucide-react';
+import { getFirstName } from '../utils/formatName';
 
 const PatientDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
-  };
+  const { user } = useAuth();
 
   return (
-    <div className="container">
-      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Patient Health Portal</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Welcome back, {user?.fullName || 'Patient'}. Here is your healthcare summary.</p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button className="btn btn-primary">
-            <Plus size={18} /> Book Appointment
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={handleLogout}>
-            <LogOut size={18} /> Logout
-          </button>
-        </div>
+    <DashboardLayout>
+      <div className="welcome-banner">
+        <Heart size={72} className="welcome-decoration" />
+        <h1>
+          Welcome back, <span className="welcome-name">{getFirstName(user?.fullName) || 'Patient'}</span> 👋
+        </h1>
+        <p>Manage your health easily with CareNova.</p>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-3" style={{ marginBottom: '2rem' }}>
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Upcoming Appointment</span>
-            <Calendar color="var(--primary)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>Tomorrow, 10:30 AM</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>Dr. Sarah Jenkins (Cardiology)</p>
-        </div>
-
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Active Prescriptions</span>
-            <Pill color="var(--warning)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>3 Active</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Ready for refilling at CareNova Pharmacy</p>
-        </div>
-
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Recent Medical Reports</span>
-            <FileText color="var(--accent)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>2 New Reports</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Blood Work & Lipid Panel</p>
-        </div>
+      <div className="stat-card-grid">
+        <StatCard icon={ShoppingBag} title="Recent Medicine Orders" />
+        <StatCard icon={Calendar} title="Upcoming Appointments" />
+        <StatCard icon={CreditCard} title="Payment Statuses" />
+        <StatCard icon={Pill} title="Quick Links" />
       </div>
 
-      {/* Active Prescriptions Table */}
-      <div className="glass-card">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Active Prescriptions</h2>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Medication</th>
-              <th>Dosage</th>
-              <th>Doctor</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Amoxicillin 500mg</td>
-              <td>1 tablet / 8 hours</td>
-              <td>Dr. Sarah Jenkins</td>
-              <td><span className="badge badge-pharmacy">Ready for Pickup</span></td>
-              <td><button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>Request Refill</button></td>
-            </tr>
-            <tr>
-              <td>Lisinopril 10mg</td>
-              <td>1 tablet / daily</td>
-              <td>Dr. Robert Vance</td>
-              <td><span className="badge badge-patient">Active</span></td>
-              <td><button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>Request Refill</button></td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="dashboard-section">
+        <h2>Quick Links</h2>
+        <div className="quicklink-row">
+          <Link to="#" className="quicklink-card" onClick={(e) => e.preventDefault()}>
+            <div>
+              <div className="quicklink-card-title">Medicines</div>
+              <div className="quicklink-card-subtitle">Browse and order medicines</div>
+            </div>
+            <div className="quicklink-card-icon" style={{ background: 'var(--red-soft)', color: 'var(--red-strong)' }}>
+              <Pill size={20} />
+            </div>
+          </Link>
+          <Link to="#" className="quicklink-card" onClick={(e) => e.preventDefault()}>
+            <div>
+              <div className="quicklink-card-title">Doctors</div>
+              <div className="quicklink-card-subtitle">Find and book appointments</div>
+            </div>
+            <div className="quicklink-card-icon" style={{ background: '#ecfdf3', color: 'var(--success)' }}>
+              <Stethoscope size={20} />
+            </div>
+          </Link>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
