@@ -54,6 +54,19 @@ export const validateProfilePictureFile = (file) => {
   return { isValid: true, error: '' };
 };
 
+// GCN-16 password requirements, reused by GCN-23 (Forgot/Reset Password) —
+// must match the backend's PasswordPolicy.IsStrong exactly.
+export const PASSWORD_REQUIREMENTS_MESSAGE =
+  'Password must be at least 6 characters and include an uppercase letter, lowercase letter, number, and special character.';
+
+export const validateStrongPassword = (password) => {
+  if (!password || password.length < 6) return false;
+  return /[A-Z]/.test(password)
+    && /[a-z]/.test(password)
+    && /\d/.test(password)
+    && /[^A-Za-z0-9]/.test(password);
+};
+
 export const validateRegistrationForm = (formData) => {
   const errors = {};
 

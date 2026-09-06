@@ -2,65 +2,148 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import authApi from '../api/authApi';
 
 const AuthContext = createContext(null);
+const TOKEN_KEY = 'carenova_token';
+const USER_KEY = 'carenova_user';
+
+const normalizeRole = (role) => {
+  if (!role || typeof role !== 'string') return 'Patient';
+  const raw = role.trim().toLowerCase();
+
+  if (raw === 'patient' || raw === 'user') return 'Patient';
+  if (raw === 'doctor') return 'Doctor';
+  if (raw === 'admin') return 'Admin';
+  if (raw === 'pharmacystaff' || raw === 'pharmacy staff') return 'PharmacyStaff';
+
+  return 'Patient';
+};
+
+const clearStoredAuth = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+};
+
+const isTokenExpired = (jwt) => {
+  if (!jwt || typeof jwt !== 'string') {
+    return true;
+  }
+
+  const tokenParts = jwt.split('.');
+  if (tokenParts.length !== 3) {
+    return true;
+  }
+
+  try {
+    const payload = JSON.parse(atob(tokenParts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (!payload.exp) {
+      return false;
+    }
+    return payload.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+};
+
+const getFirstDefined = (...values) => values.find((value) => value !== undefined && value !== null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const applyAuthState = (nextToken, nextUser) => {
+    const normalizedUser = {
+      ...nextUser,
+      role: normalizeRole(nextUser?.role),
+    };
+
+    setToken(nextToken);
+    setUser(normalizedUser);
+    localStorage.setItem(TOKEN_KEY, nextToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
+  };
+
+  const clearAuthState = () => {
+    setToken(null);
+    setUser(null);
+    clearStoredAuth();
+  };
+
   useEffect(() => {
     // Restore session from localStorage on app boot
-    const storedToken = localStorage.getItem('carenova_token');
-    const storedUser = localStorage.getItem('carenova_user');
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    const storedUser = localStorage.getItem(USER_KEY);
 
     if (storedToken && storedUser) {
-      setToken(storedToken);
       try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Failed to parse cached user data', e);
+        const parsedUser = JSON.parse(storedUser);
+        if (isTokenExpired(storedToken)) {
+          clearStoredAuth();
+        } else {
+          setToken(storedToken);
+          setUser({ ...parsedUser, role: normalizeRole(parsedUser?.role) });
+        }
+      } catch {
+        clearStoredAuth();
       }
     }
+
+    const onUnauthorized = () => {
+      clearAuthState();
+    };
+
+    window.addEventListener('carenova:unauthorized', onUnauthorized);
     setLoading(false);
+
+    return () => {
+      window.removeEventListener('carenova:unauthorized', onUnauthorized);
+    };
   }, []);
 
   const login = async (email, password) => {
-    try {
-      const data = await authApi.login({ email, password });
-      // Actual backend response (LoginResponseDto): { token, expiresAtUtc, userId, email, fullName, role }
-      const authToken = data.token;
-      const authUser = {
-        id: data.userId,
-        email: data.email,
-        fullName: data.fullName,
-        role: data.role,
-      };
+    const data = await authApi.login({ email, password });
+    const authToken = getFirstDefined(
+      data?.token,
+      data?.Token,
+      data?.jwt,
+      data?.Jwt,
+      data?.accessToken,
+      data?.AccessToken
+    );
 
-      setToken(authToken);
-      setUser(authUser);
-      localStorage.setItem('carenova_token', authToken);
-      localStorage.setItem('carenova_user', JSON.stringify(authUser));
-
-      return authUser;
-    } catch (error) {
-      throw error;
+    if (!authToken) {
+      throw new Error('Authentication failed. Missing token in login response.');
     }
+
+    const authUser = data?.user || data?.User || {
+      userId: getFirstDefined(data?.userId, data?.UserId, null),
+      email: getFirstDefined(data?.email, data?.Email, email),
+      role: normalizeRole(getFirstDefined(data?.role, data?.Role, 'Patient')),
+      fullName: getFirstDefined(data?.fullName, data?.FullName, email.split('@')[0]),
+    };
+
+    applyAuthState(authToken, authUser);
+    return authUser;
   };
 
   const register = async (userData) => {
+    return authApi.register(userData);
+  };
+
+  const logout = async () => {
     try {
-      const data = await authApi.register(userData);
-      return data;
-    } catch (error) {
-      throw error;
+      await authApi.logout();
+    } catch {
+    } finally {
+      clearAuthState();
     }
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('carenova_token');
-    localStorage.removeItem('carenova_user');
+  const updateUser = (nextUser) => {
+    const normalizedUser = nextUser ? { ...nextUser, role: normalizeRole(nextUser?.role) } : null;
+    setUser(normalizedUser);
+    if (normalizedUser) {
+      localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
+    }
   };
 
   const value = {
@@ -72,7 +155,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    setUser,
+    setUser: updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

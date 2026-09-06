@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import authApi from '../api/authApi';
-import { validatePassword } from '../utils/validation';
+import { validateStrongPassword, PASSWORD_REQUIREMENTS_MESSAGE } from '../utils/validation';
 import { Lock, CheckCircle, ArrowRight } from 'lucide-react';
 
 const ResetPasswordPage = () => {
@@ -18,8 +18,8 @@ const ResetPasswordPage = () => {
     e.preventDefault();
     setError('');
 
-    if (!validatePassword(password)) {
-      setError('Password must be at least 6 characters long.');
+    if (!validateStrongPassword(password)) {
+      setError(PASSWORD_REQUIREMENTS_MESSAGE);
       return;
     }
 
@@ -30,7 +30,7 @@ const ResetPasswordPage = () => {
 
     setLoading(true);
     try {
-      await authApi.resetPassword(token, password);
+      await authApi.resetPassword(token, password, confirmPassword);
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {

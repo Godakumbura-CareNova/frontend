@@ -6,6 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    open: true
+    open: true,
+    host: true
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test/setupTests.js',
+    globals: true,
+    clearMocks: true,
   }
 });

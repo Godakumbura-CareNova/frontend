@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Camera, Save, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import profileApi from '../api/profileApi';
-import { validateProfilePictureFile, validateProfileForm } from '../utils/validation';
-import { Camera, Pencil, X } from 'lucide-react';
+import { validateProfileForm, validateProfilePictureFile } from '../utils/validation';
 
 const DEFAULT_AVATAR =
   'data:image/svg+xml;utf8,' +
@@ -26,23 +27,17 @@ const PREVIEW_PROFILE = {
 };
 
 const asText = (value) => {
-  if (value === null || value === undefined) {
-    return 'Not provided';
-  }
+  if (value === null || value === undefined) return 'Not provided';
 
   const text = String(value).trim();
   return text.length > 0 ? text : 'Not provided';
 };
 
 const formatDate = (value) => {
-  if (!value) {
-    return 'Not provided';
-  }
+  if (!value) return 'Not provided';
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return 'Not provided';
-  }
+  if (Number.isNaN(date.getTime())) return 'Not provided';
 
   return date.toLocaleDateString('en-CA', {
     year: 'numeric',
@@ -51,39 +46,32 @@ const formatDate = (value) => {
   });
 };
 
-const toDateInputValue = (value) => {
-  if (!value) {
-    return '';
-  }
+const toDateInputValue = (value) => (value ? String(value).slice(0, 10) : '');
 
-  const match = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
-  return match ? match[1] : '';
-};
-
-const buildEditForm = (profile) => ({
-  fullName: profile?.fullName ?? profile?.FullName ?? '',
-  mobileNumber: profile?.mobileNumber ?? profile?.MobileNumber ?? '',
-  landPhoneNumber: profile?.landPhoneNumber ?? profile?.LandPhoneNumber ?? '',
-  address: profile?.address ?? profile?.Address ?? '',
-  dateOfBirth: toDateInputValue(profile?.dateOfBirth ?? profile?.DateOfBirth),
-  gender: profile?.gender ?? profile?.Gender ?? '',
+const toEditableProfile = (data) => ({
+  fullName: data?.fullName ?? data?.FullName ?? data?.name ?? data?.Name ?? '',
+  email: data?.email ?? data?.Email ?? '',
+  mobileNumber: data?.mobileNumber ?? data?.MobileNumber ?? '',
+  landPhoneNumber: data?.landPhoneNumber ?? data?.LandPhoneNumber ?? '',
+  address: data?.address ?? data?.Address ?? '',
+  dateOfBirth: toDateInputValue(data?.dateOfBirth ?? data?.DateOfBirth),
+  gender: data?.gender ?? data?.Gender ?? '',
 });
 
 const ProfilePage = ({ previewMode = false }) => {
+  const { user, role, setUser } = useAuth();
   const [profile, setProfile] = useState(null);
+  const [editableProfile, setEditableProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errors, setErrors] = useState({});
 
   const [uploading, setUploading] = useState(false);
   const [pictureError, setPictureError] = useState('');
   const [lastFile, setLastFile] = useState(null);
   const fileInputRef = useRef(null);
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState(buildEditForm(null));
-  const [editErrors, setEditErrors] = useState({});
-  const [editSaving, setEditSaving] = useState(false);
-  const [editMessage, setEditMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     let cancelled = false;
@@ -91,6 +79,7 @@ const ProfilePage = ({ previewMode = false }) => {
     const loadProfile = async () => {
       if (previewMode) {
         setProfile(PREVIEW_PROFILE);
+        setEditableProfile(toEditableProfile(PREVIEW_PROFILE));
         setLoading(false);
         return;
       }
@@ -102,15 +91,14 @@ const ProfilePage = ({ previewMode = false }) => {
         const data = await profileApi.getProfile();
         if (!cancelled) {
           setProfile(data || null);
+          setEditableProfile(toEditableProfile(data));
         }
-      } catch (err) {
+      } catch (requestError) {
         if (!cancelled) {
-          setError(err?.response?.data?.message || 'Failed to load profile. Please try again.');
+          setError(requestError?.response?.data?.message || 'Failed to load profile. Please try again.');
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     };
 
@@ -122,18 +110,13 @@ const ProfilePage = ({ previewMode = false }) => {
   }, [previewMode]);
 
   const profilePictureUrl = useMemo(() => {
-    if (!profile) {
-      return DEFAULT_AVATAR;
-    }
+    if (!profile) return DEFAULT_AVATAR;
 
     const hasPicture = Boolean(profile.hasProfilePicture ?? profile.HasProfilePicture);
     const uploadedUrl = profile.profilePictureUrl ?? profile.ProfilePictureUrl;
-
-    if (hasPicture && typeof uploadedUrl === 'string' && uploadedUrl.trim().length > 0) {
-      return uploadedUrl;
-    }
-
-    return DEFAULT_AVATAR;
+    return hasPicture && typeof uploadedUrl === 'string' && uploadedUrl.trim().length > 0
+      ? uploadedUrl
+      : DEFAULT_AVATAR;
   }, [profile]);
 
   const uploadFile = async (file) => {
@@ -142,11 +125,14 @@ const ProfilePage = ({ previewMode = false }) => {
 
     try {
       const updatedProfile = await profileApi.uploadProfilePicture(file);
-      setProfile(updatedProfile || null);
+      if (updatedProfile) {
+        setProfile(updatedProfile);
+        setEditableProfile(toEditableProfile(updatedProfile));
+      }
       setLastFile(null);
-    } catch (err) {
+    } catch (requestError) {
       setPictureError(
-        err?.response?.data?.message || 'Failed to upload the profile picture. Please try again.'
+        requestError?.response?.data?.message || 'Failed to upload the profile picture. Please try again.'
       );
     } finally {
       setUploading(false);
@@ -154,9 +140,7 @@ const ProfilePage = ({ previewMode = false }) => {
   };
 
   const handleAvatarEditClick = () => {
-    if (uploading || previewMode) {
-      return;
-    }
+    if (uploading || previewMode) return;
     fileInputRef.current?.click();
   };
 
@@ -164,9 +148,7 @@ const ProfilePage = ({ previewMode = false }) => {
     const file = event.target.files?.[0] || null;
     event.target.value = '';
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     const validation = validateProfilePictureFile(file);
     if (!validation.isValid) {
@@ -187,77 +169,54 @@ const ProfilePage = ({ previewMode = false }) => {
     }
   };
 
-  const handleStartEdit = () => {
-    setEditForm(buildEditForm(profile));
-    setEditErrors({});
-    setEditMessage({ type: '', text: '' });
-    setIsEditing(true);
+  const handleProfileChange = (event) => {
+    const { name, value } = event.target;
+    setEditableProfile((current) => ({ ...current, [name]: value }));
+    if (errors[name]) setErrors((current) => ({ ...current, [name]: null }));
   };
 
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditErrors({});
-    setEditMessage({ type: '', text: '' });
-  };
-
-  const handleEditFieldChange = (field) => (event) => {
-    const { value } = event.target;
-    setEditForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleEditSubmit = async (event) => {
+  const handleProfileUpdate = async (event) => {
     event.preventDefault();
-    setEditMessage({ type: '', text: '' });
+    setSuccessMessage('');
+    setError('');
 
-    const { isValid, errors } = validateProfileForm(editForm);
-    setEditErrors(errors);
-    if (!isValid) {
+    const validation = validateProfileForm(editableProfile);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
       return;
     }
 
-    setEditSaving(true);
+    setSaving(true);
     try {
-      const updatedProfile = await profileApi.updateProfile({
-        fullName: editForm.fullName.trim(),
-        mobileNumber: editForm.mobileNumber.trim(),
-        landPhoneNumber: editForm.landPhoneNumber.trim(),
-        address: editForm.address.trim(),
-        dateOfBirth: editForm.dateOfBirth,
-        gender: editForm.gender,
-      });
-      setProfile(updatedProfile || null);
-      setIsEditing(false);
-    } catch (err) {
-      setEditMessage({
-        type: 'error',
-        text: err?.response?.data?.message || 'Failed to update profile. Please try again.',
-      });
+      const updateRequest = {
+        fullName: editableProfile.fullName.trim(),
+        mobileNumber: editableProfile.mobileNumber.trim(),
+        landPhoneNumber: editableProfile.landPhoneNumber.trim() || null,
+        address: editableProfile.address.trim(),
+        dateOfBirth: editableProfile.dateOfBirth,
+        gender: editableProfile.gender,
+      };
+      const updatedProfile = await profileApi.updateProfile(updateRequest);
+      setProfile(updatedProfile);
+      setEditableProfile(toEditableProfile(updatedProfile));
+      setUser({ ...user, fullName: updateRequest.fullName });
+      setSuccessMessage('Profile updated successfully!');
+    } catch (requestError) {
+      setError(requestError?.response?.data?.message || 'Failed to update profile.');
     } finally {
-      setEditSaving(false);
+      setSaving(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="container profile-shell">
-        <div className="glass-card profile-card">
-          <p className="profile-status-text">Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <div className="container profile-shell"><div className="glass-card profile-card"><p className="profile-status-text">Loading profile...</p></div></div>;
   }
 
-  if (error) {
-    return (
-      <div className="container profile-shell">
-        <div className="glass-card profile-card">
-          <div className="alert alert-error">{error}</div>
-        </div>
-      </div>
-    );
+  if (error && !profile) {
+    return <div className="container profile-shell"><div className="glass-card profile-card"><div className="alert alert-error">{error}</div></div></div>;
   }
 
-  const fullName = asText(profile?.fullName ?? profile?.FullName);
+  const fullName = asText(profile?.fullName ?? profile?.FullName ?? profile?.name ?? profile?.Name);
   const email = asText(profile?.email ?? profile?.Email);
   const mobileNumber = asText(profile?.mobileNumber ?? profile?.MobileNumber);
   const landPhoneNumber = asText(profile?.landPhoneNumber ?? profile?.LandPhoneNumber);
@@ -265,27 +224,22 @@ const ProfilePage = ({ previewMode = false }) => {
   const dateOfBirth = formatDate(profile?.dateOfBirth ?? profile?.DateOfBirth);
   const gender = asText(profile?.gender ?? profile?.Gender);
 
+  const avatarButtonLabel = profile?.hasProfilePicture ? 'Change profile picture' : 'Add profile picture';
+
   return (
     <div className="container profile-shell">
       <div className="glass-card profile-card">
         <div className="profile-header">
           <div className="profile-avatar-wrap">
-            <img
-              src={profilePictureUrl}
-              alt="Customer profile"
-              className="profile-avatar-image"
-              onError={(event) => {
-                event.currentTarget.src = DEFAULT_AVATAR;
-              }}
-            />
+            <img src={profilePictureUrl} alt="Customer profile" className="profile-avatar-image" onError={(event) => { event.currentTarget.src = DEFAULT_AVATAR; }} />
             {!previewMode && (
               <button
                 type="button"
-                className={`profile-avatar-edit-btn${uploading ? ' uploading' : ''}`}
+                className={uploading ? 'profile-avatar-edit-btn uploading' : 'profile-avatar-edit-btn'}
                 onClick={handleAvatarEditClick}
                 disabled={uploading}
-                title={profile?.hasProfilePicture ? 'Change profile picture' : 'Add profile picture'}
-                aria-label={profile?.hasProfilePicture ? 'Change profile picture' : 'Add profile picture'}
+                title={avatarButtonLabel}
+                aria-label={avatarButtonLabel}
               >
                 <Camera size={15} />
               </button>
@@ -301,173 +255,75 @@ const ProfilePage = ({ previewMode = false }) => {
             />
           </div>
           <div className="profile-header-text">
-            <div className="profile-header-title-row">
-              <h1 className="profile-title">Customer Profile</h1>
-              {!previewMode && !isEditing && (
-                <button type="button" className="profile-edit-toggle-btn" onClick={handleStartEdit}>
-                  <Pencil size={13} />
-                  Edit
-                </button>
-              )}
-            </div>
+            <h1 className="profile-title">Customer Profile</h1>
             <p className="profile-subtitle">Your account details</p>
             {uploading && <p className="profile-picture-status">Uploading picture...</p>}
             {pictureError && (
               <div className="profile-picture-error">
                 {pictureError}
-                <button type="button" className="retry-link" onClick={handleRetry}>
-                  Retry
-                </button>
+                <button type="button" className="retry-link" onClick={handleRetry}>Retry</button>
               </div>
             )}
           </div>
         </div>
 
-        {isEditing ? (
-          <form onSubmit={handleEditSubmit} noValidate>
-            {editMessage.text && (
-              <div className={`alert alert-${editMessage.type}`}>{editMessage.text}</div>
-            )}
+        {error && <div className="alert alert-error">{error}</div>}
+        {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
-            <div className="grid grid-2 profile-edit-grid">
-              <div className="form-row">
-                <label className="field-label" htmlFor="edit-fullName">Full Name</label>
-                <input
-                  id="edit-fullName"
-                  className="field-input"
-                  type="text"
-                  value={editForm.fullName}
-                  onChange={handleEditFieldChange('fullName')}
-                />
-                {editErrors.fullName && <span className="field-error">{editErrors.fullName}</span>}
-              </div>
+        <div className="grid grid-2">
+          <div className="profile-field"><span className="profile-field-label">Full Name</span><span className="profile-field-value">{fullName}</span></div>
+          <div className="profile-field"><span className="profile-field-label">Email Address</span><span className="profile-field-value">{email}</span></div>
+          <div className="profile-field"><span className="profile-field-label">Mobile Number</span><span className="profile-field-value">{mobileNumber}</span></div>
+          <div className="profile-field"><span className="profile-field-label">Land Phone Number</span><span className="profile-field-value">{landPhoneNumber}</span></div>
+          <div className="profile-field profile-field-full"><span className="profile-field-label">Address</span><span className="profile-field-value">{address}</span></div>
+          <div className="profile-field"><span className="profile-field-label">Date of Birth</span><span className="profile-field-value">{dateOfBirth}</span></div>
+          <div className="profile-field"><span className="profile-field-label">Gender</span><span className="profile-field-value">{gender}</span></div>
+        </div>
 
-              <div className="form-row">
-                <label className="field-label">Email Address</label>
-                <input className="field-input" type="email" value={email} disabled />
-              </div>
-
-              <div className="form-row">
-                <label className="field-label" htmlFor="edit-mobileNumber">Mobile Number</label>
-                <input
-                  id="edit-mobileNumber"
-                  className="field-input"
-                  type="text"
-                  value={editForm.mobileNumber}
-                  onChange={handleEditFieldChange('mobileNumber')}
-                />
-                {editErrors.mobileNumber && <span className="field-error">{editErrors.mobileNumber}</span>}
-              </div>
-
-              <div className="form-row">
-                <label className="field-label" htmlFor="edit-landPhoneNumber">Land Phone Number</label>
-                <input
-                  id="edit-landPhoneNumber"
-                  className="field-input"
-                  type="text"
-                  value={editForm.landPhoneNumber}
-                  onChange={handleEditFieldChange('landPhoneNumber')}
-                />
-                {editErrors.landPhoneNumber && <span className="field-error">{editErrors.landPhoneNumber}</span>}
-              </div>
-
-              <div className="form-row form-row-single">
-                <label className="field-label" htmlFor="edit-address">Address</label>
-                <input
-                  id="edit-address"
-                  className="field-input"
-                  type="text"
-                  value={editForm.address}
-                  onChange={handleEditFieldChange('address')}
-                />
-                {editErrors.address && <span className="field-error">{editErrors.address}</span>}
-              </div>
-
-              <div className="form-row">
-                <label className="field-label" htmlFor="edit-dateOfBirth">Date of Birth</label>
-                <input
-                  id="edit-dateOfBirth"
-                  className="field-input"
-                  type="date"
-                  value={editForm.dateOfBirth}
-                  onChange={handleEditFieldChange('dateOfBirth')}
-                />
-                {editErrors.dateOfBirth && <span className="field-error">{editErrors.dateOfBirth}</span>}
-              </div>
-
-              <div className="form-row">
-                <label className="field-label" htmlFor="edit-gender">Gender</label>
-                <select
-                  id="edit-gender"
-                  className="field-input"
-                  value={editForm.gender}
-                  onChange={handleEditFieldChange('gender')}
-                >
-                  <option value="">Select gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-                {editErrors.gender && <span className="field-error">{editErrors.gender}</span>}
-              </div>
-            </div>
-
-            <div className="profile-edit-actions">
-              <button type="submit" className="submit-button" disabled={editSaving}>
-                {editSaving ? 'Saving...' : 'Save Changes'}
-              </button>
-              <button
-                type="button"
-                className="profile-edit-cancel-btn"
-                onClick={handleCancelEdit}
-                disabled={editSaving}
-              >
-                <X size={14} />
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="grid grid-2">
-            <div className="profile-field">
-              <span className="profile-field-label">Full Name</span>
-              <span className="profile-field-value">{fullName}</span>
-            </div>
-
-            <div className="profile-field">
-              <span className="profile-field-label">Email Address</span>
-              <span className="profile-field-value">{email}</span>
-            </div>
-
-            <div className="profile-field">
-              <span className="profile-field-label">Mobile Number</span>
-              <span className="profile-field-value">{mobileNumber}</span>
-            </div>
-
-            <div className="profile-field">
-              <span className="profile-field-label">Land Phone Number</span>
-              <span className="profile-field-value">{landPhoneNumber}</span>
-            </div>
-
-            <div className="profile-field profile-field-full">
-              <span className="profile-field-label">Address</span>
-              <span className="profile-field-value">{address}</span>
-            </div>
-
-            <div className="profile-field">
-              <span className="profile-field-label">Date of Birth</span>
-              <span className="profile-field-value">{dateOfBirth}</span>
-            </div>
-
-            <div className="profile-field">
-              <span className="profile-field-label">Gender</span>
-              <span className="profile-field-value">{gender}</span>
-            </div>
+        <form onSubmit={handleProfileUpdate} style={{ marginTop: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <User color="var(--primary)" size={24} />
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Edit Profile</h2>
           </div>
-        )}
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="profile-email">Email Address</label>
+            <input id="profile-email" type="email" className="form-input" value={editableProfile?.email || ''} readOnly style={{ opacity: 0.7 }} />
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="profile-role">Role</label>
+            <input id="profile-role" type="text" className="form-input" value={role || ''} readOnly style={{ opacity: 0.7 }} />
+          </div>
+          <ProfileInput id="profile-full-name" label="Full Name" name="fullName" value={editableProfile?.fullName || ''} error={errors.fullName} onChange={handleProfileChange} />
+          <ProfileInput id="profile-mobile-number" label="Mobile Number" name="mobileNumber" type="tel" value={editableProfile?.mobileNumber || ''} error={errors.mobileNumber} onChange={handleProfileChange} />
+          <ProfileInput id="profile-land-phone-number" label="Land Phone Number (Optional)" name="landPhoneNumber" type="tel" value={editableProfile?.landPhoneNumber || ''} error={errors.landPhoneNumber} onChange={handleProfileChange} />
+          <ProfileInput id="profile-address" label="Address" name="address" value={editableProfile?.address || ''} error={errors.address} onChange={handleProfileChange} />
+          <ProfileInput id="profile-date-of-birth" label="Date of Birth" name="dateOfBirth" type="date" value={editableProfile?.dateOfBirth || ''} error={errors.dateOfBirth} onChange={handleProfileChange} />
+          <div className="form-group">
+            <label className="form-label" htmlFor="profile-gender">Gender</label>
+            <select id="profile-gender" name="gender" className="form-select" value={editableProfile?.gender || ''} onChange={handleProfileChange}>
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+            {errors.gender && <span className="field-error">{errors.gender}</span>}
+          </div>
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            <Save size={18} /> {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </form>
       </div>
     </div>
   );
 };
+
+const ProfileInput = ({ id, label, name, type = 'text', value, error, onChange }) => (
+  <div className="form-group">
+    <label className="form-label" htmlFor={id}>{label}</label>
+    <input id={id} type={type} name={name} className="form-input" value={value} onChange={onChange} />
+    {error && <span className="field-error">{error}</span>}
+  </div>
+);
 
 export default ProfilePage;
