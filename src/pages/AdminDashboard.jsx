@@ -1,95 +1,56 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Users, Server, Activity, UserPlus, FileSpreadsheet } from 'lucide-react';
+import DashboardLayout from '../components/DashboardLayout';
+import StatCard from '../components/StatCard';
+import {
+  Users,
+  UserCircle,
+  Briefcase,
+  Stethoscope,
+  ShoppingBag,
+  Calendar,
+  DollarSign,
+  CreditCard,
+  AlertTriangle,
+} from 'lucide-react';
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
-
   return (
-    <div className="container">
-      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>System Administration</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Welcome back, System Admin {user?.fullName}. Platform metrics & user governance.</p>
-        </div>
-        <Link to="/admin/users" className="btn btn-primary">
-          <Users size={18} /> Manage All Users
-        </Link>
+    <DashboardLayout>
+      <div className="welcome-banner">
+        <h1>
+          Welcome back, <span className="welcome-name">Admin</span> 👋
+        </h1>
+        <p>Platform overview and user governance.</p>
       </div>
 
-      <div className="grid grid-4" style={{ marginBottom: '2rem' }}>
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Total Users</span>
-            <Users color="var(--primary)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>1,284</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>+48 new this week</p>
-        </div>
-
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Active Sessions</span>
-            <Activity color="var(--success)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>186</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>Peak usage time</p>
-        </div>
-
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>System Status</span>
-            <Server color="var(--accent)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>99.98%</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>All microservices operational</p>
-        </div>
-
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Security Audit</span>
-            <ShieldCheck color="var(--warning)" size={20} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0' }}>0 Alerts</h3>
-          <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>Compliance verified</p>
-        </div>
+      <div className="stat-card-grid">
+        <StatCard icon={Users} title="Total Users" />
+        <StatCard icon={UserCircle} title="Patients" />
+        <StatCard icon={Briefcase} title="Pharmacy Staff" />
+        <StatCard icon={Stethoscope} title="Doctors" />
+        <StatCard icon={ShoppingBag} title="Medicine Orders" />
+        <StatCard icon={Calendar} title="Appointments" />
+        <StatCard icon={DollarSign} title="Sales Totals" />
+        <StatCard icon={CreditCard} title="Payment Summary" />
+        <StatCard icon={AlertTriangle} title="Low-Stock Alerts" />
       </div>
 
-      <div className="glass-card">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Recent System Audit Logs</h2>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>User</th>
-              <th>Role</th>
-              <th>Action</th>
-              <th>IP Address</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>2026-08-22 13:45:12</td>
-              <td>admin@carenova.org</td>
-              <td><span className="badge badge-admin">Admin</span></td>
-              <td>Role change for user ID #204</td>
-              <td>192.168.1.45</td>
-              <td><span className="badge badge-patient">Success</span></td>
-            </tr>
-            <tr>
-              <td>2026-08-22 13:30:05</td>
-              <td>dr.jenkins@carenova.org</td>
-              <td><span className="badge badge-doctor">Doctor</span></td>
-              <td>EHR Record Access</td>
-              <td>192.168.1.88</td>
-              <td><span className="badge badge-patient">Success</span></td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="dashboard-section">
+        <h2>Quick Links</h2>
+        <div className="quicklink-row">
+          <Link to="/admin/users" className="quicklink-card">
+            <div>
+              <div className="quicklink-card-title">Manage Users</div>
+              <div className="quicklink-card-subtitle">View users, change roles, activate or deactivate accounts</div>
+            </div>
+            <div className="quicklink-card-icon" style={{ background: 'var(--red-soft)', color: 'var(--red-strong)' }}>
+              <Users size={20} />
+            </div>
+          </Link>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
