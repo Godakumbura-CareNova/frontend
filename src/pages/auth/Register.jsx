@@ -171,6 +171,13 @@ const Register = () => {
       const backendMessage = error?.response?.data?.message;
       const serverErrors = error?.response?.data?.errors || {};
 
+      // No response at all means the request never reached the API (server down,
+      // wrong VITE_API_BASE_URL, blocked by CORS) — not a problem with the form.
+      if (!error?.response) {
+        setFormError('Unable to reach the server. Please check your connection and try again.');
+        return;
+      }
+
       if (status === 409) {
         setErrors((current) => ({
           ...current,
