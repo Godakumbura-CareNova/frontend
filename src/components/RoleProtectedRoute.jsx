@@ -2,6 +2,18 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const normalizeRole = (role) => {
+  if (!role || typeof role !== 'string') return '';
+  const raw = role.trim().toLowerCase();
+
+  if (raw === 'patient' || raw === 'user') return 'Patient';
+  if (raw === 'doctor') return 'Doctor';
+  if (raw === 'admin') return 'Admin';
+  if (raw === 'pharmacystaff' || raw === 'pharmacy staff') return 'PharmacyStaff';
+
+  return role;
+};
+
 const RoleProtectedRoute = ({ allowedRoles = [] }) => {
   const { isAuthenticated, role, loading } = useAuth();
 
@@ -17,15 +29,11 @@ const RoleProtectedRoute = ({ allowedRoles = [] }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-    // Redirect to respective user role default dashboard if unauthorized for this specific page
-    const fallbackRoute = 
-      role === 'Patient' ? '/patient-dashboard' :
-      role === 'Doctor' ? '/doctor-dashboard' :
-      role === 'PharmacyStaff' ? '/pharmacy-dashboard' :
-      role === 'Admin' ? '/admin-dashboard' : '/login';
+  const normalizedRole = normalizeRole(role);
+  const allowedNormalized = allowedRoles.map((nextRole) => normalizeRole(nextRole));
 
-    return <Navigate to={fallbackRoute} replace />;
+  if (allowedNormalized.length > 0 && !allowedNormalized.includes(normalizedRole)) {
+    return <Navigate to="/forbidden" replace state={{ message: 'You do not have permission to access this page.' }} />;
   }
 
   return <Outlet />;

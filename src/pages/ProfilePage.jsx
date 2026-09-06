@@ -98,11 +98,9 @@ const ProfilePage = ({ previewMode = false }) => {
     const hasPicture = Boolean(profile.hasProfilePicture ?? profile.HasProfilePicture);
     const uploadedUrl = profile.profilePictureUrl ?? profile.ProfilePictureUrl;
 
-    if (hasPicture && typeof uploadedUrl === 'string' && uploadedUrl.trim().length > 0) {
-      return uploadedUrl;
-    }
-
-    return DEFAULT_AVATAR;
+    return hasPicture && typeof uploadedUrl === 'string' && uploadedUrl.trim().length > 0
+      ? uploadedUrl
+      : DEFAULT_AVATAR;
   }, [profile]);
 
   if (loading) {
@@ -125,7 +123,7 @@ const ProfilePage = ({ previewMode = false }) => {
     );
   }
 
-  const fullName = asText(profile?.fullName ?? profile?.FullName);
+  const fullName = asText(profile?.fullName ?? profile?.FullName ?? profile?.name ?? profile?.Name);
   const email = asText(profile?.email ?? profile?.Email);
   const mobileNumber = asText(profile?.mobileNumber ?? profile?.MobileNumber);
   const landPhoneNumber = asText(profile?.landPhoneNumber ?? profile?.LandPhoneNumber);
