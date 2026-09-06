@@ -5,6 +5,18 @@ const AuthContext = createContext(null);
 const TOKEN_KEY = 'carenova_token';
 const USER_KEY = 'carenova_user';
 
+const normalizeRole = (role) => {
+  if (!role || typeof role !== 'string') return 'Patient';
+  const raw = role.trim().toLowerCase();
+
+  if (raw === 'patient' || raw === 'user') return 'Patient';
+  if (raw === 'doctor') return 'Doctor';
+  if (raw === 'admin') return 'Admin';
+  if (raw === 'pharmacystaff' || raw === 'pharmacy staff') return 'PharmacyStaff';
+
+  return 'Patient';
+};
+
 const clearStoredAuth = () => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
@@ -39,10 +51,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const applyAuthState = (nextToken, nextUser) => {
+    const normalizedUser = {
+      ...nextUser,
+      role: normalizeRole(nextUser?.role),
+    };
+
     setToken(nextToken);
-    setUser(nextUser);
+    setUser(normalizedUser);
     localStorage.setItem(TOKEN_KEY, nextToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+    localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
   };
 
   const clearAuthState = () => {
@@ -63,7 +80,7 @@ export const AuthProvider = ({ children }) => {
           clearStoredAuth();
         } else {
           setToken(storedToken);
-          setUser(parsedUser);
+          setUser({ ...parsedUser, role: normalizeRole(parsedUser?.role) });
         }
       } catch {
         clearStoredAuth();
@@ -100,7 +117,7 @@ export const AuthProvider = ({ children }) => {
     const authUser = data?.user || data?.User || {
       userId: getFirstDefined(data?.userId, data?.UserId, null),
       email: getFirstDefined(data?.email, data?.Email, email),
-      role: getFirstDefined(data?.role, data?.Role, 'Patient'),
+      role: normalizeRole(getFirstDefined(data?.role, data?.Role, 'Patient')),
       fullName: getFirstDefined(data?.fullName, data?.FullName, email.split('@')[0]),
     };
 
@@ -112,14 +129,20 @@ export const AuthProvider = ({ children }) => {
     return authApi.register(userData);
   };
 
-  const logout = () => {
-    clearAuthState();
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+    } finally {
+      clearAuthState();
+    }
   };
 
   const updateUser = (nextUser) => {
-    setUser(nextUser);
-    if (nextUser) {
-      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+    const normalizedUser = nextUser ? { ...nextUser, role: normalizeRole(nextUser?.role) } : null;
+    setUser(normalizedUser);
+    if (normalizedUser) {
+      localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
     }
   };
 
