@@ -8,5 +8,11 @@ export default defineConfig({
     port: 3000,
     open: true,
     host: true
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test/setupTests.js',
+    globals: true,
+    clearMocks: true,
   }
 });

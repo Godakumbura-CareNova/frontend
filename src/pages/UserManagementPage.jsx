@@ -3,12 +3,7 @@ import userApi from '../api/userApi';
 import { Users, Search, Edit2, Trash2, Shield, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 const UserManagementPage = () => {
-  const [users, setUsers] = useState([
-    { id: '1', fullName: 'Sarah Jenkins', email: 's.jenkins@carenova.org', role: 'Doctor', isActive: true, createdAt: '2026-01-15' },
-    { id: '2', fullName: 'Alan Turing', email: 'a.turing@carenova.org', role: 'PharmacyStaff', isActive: true, createdAt: '2026-02-01' },
-    { id: '3', fullName: 'John Doe', email: 'j.doe@example.com', role: 'Patient', isActive: true, createdAt: '2026-03-10' },
-    { id: '4', fullName: 'Admin User', email: 'admin@carenova.org', role: 'Admin', isActive: true, createdAt: '2026-01-01' },
-  ]);
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('All');
   const [loading, setLoading] = useState(false);
@@ -19,7 +14,7 @@ const UserManagementPage = () => {
       const data = await userApi.getAllUsers();
       if (Array.isArray(data)) setUsers(data);
     } catch (e) {
-      console.warn('Using mock user data for presentation');
+      // No backend endpoint yet (GCN-24) — list stays empty rather than showing fake data.
     } finally {
       setLoading(false);
     }
@@ -121,6 +116,13 @@ const UserManagementPage = () => {
             </tr>
           </thead>
           <tbody>
+            {filteredUsers.length === 0 && (
+              <tr>
+                <td colSpan={6} className="empty-state" style={{ textAlign: 'center' }}>
+                  No users to show yet.
+                </td>
+              </tr>
+            )}
             {filteredUsers.map(u => (
               <tr key={u.id}>
                 <td style={{ fontWeight: 600 }}>{u.fullName}</td>
