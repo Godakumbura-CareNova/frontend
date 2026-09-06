@@ -69,6 +69,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    // Restore session from localStorage on app boot
     const storedToken = localStorage.getItem(TOKEN_KEY);
     const storedUser = localStorage.getItem(USER_KEY);
 
