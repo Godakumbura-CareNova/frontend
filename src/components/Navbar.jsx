@@ -7,8 +7,8 @@ const Navbar = () => {
   const { user, isAuthenticated, role, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -74,10 +74,12 @@ const Navbar = () => {
                 </Link>
               )}
 
-              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 500 }}>
-                <User size={16} />
-                Profile
-              </Link>
+              {role === 'Patient' && (
+                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 500 }}>
+                  <User size={16} />
+                  Profile
+                </Link>
+              )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingLeft: '1rem', borderLeft: '1px solid var(--border-color)' }}>
                 <div style={{ textAlign: 'right' }}>
