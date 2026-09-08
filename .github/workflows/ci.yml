@@ -12,8 +12,8 @@ on:
       - develop
 
 jobs:
-  build:
-    name: Build Frontend
+  build-and-test:
+    name: Build and Test Frontend
     runs-on: ubuntu-latest
 
     steps:
@@ -29,5 +29,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm run test:run
+
       - name: Build
         run: npm run build
+
+      - name: Build Docker image
+        run: docker build -t carenova-frontend:ci-test --build-arg VITE_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net .
