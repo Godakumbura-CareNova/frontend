@@ -107,7 +107,7 @@ describe('LoginPage', () => {
     await user.type(screen.getByLabelText('Password'), 'SecurePass123');
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
-    expect(await screen.findByText('Your account is inactive. Please contact support.')).toBeInTheDocument();
+    expect(await screen.findByText('Your account is inactive or you do not have access.')).toBeInTheDocument();
   });
 
   it('shows network failure message when api is unreachable', async () => {
