@@ -146,3 +146,4 @@ vite.config.ts.timestamp-*
 **/bin/
 **/obj/
 .dotnet_home/
+.npm-cache/
