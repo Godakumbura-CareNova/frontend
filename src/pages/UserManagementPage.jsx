@@ -1,93 +1,160 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import DashboardLayout from '../components/DashboardLayout';
 import userApi from '../api/userApi';
-import { Users, Search, Edit2, Trash2, Shield, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { Search, CheckCircle, XCircle, RefreshCw, Eye, X } from 'lucide-react';
+
+const ASSIGNABLE_ROLES = ['Patient', 'PharmacyStaff', 'Doctor'];
+
+const ROLE_LABELS = {
+  Patient: 'Patient',
+  PharmacyStaff: 'Pharmacy Staff',
+  Doctor: 'Doctor',
+  Admin: 'Admin',
+};
+
+const getBadgeClass = (role) => {
+  switch (role) {
+    case 'Patient': return 'badge-patient';
+    case 'Doctor': return 'badge-doctor';
+    case 'PharmacyStaff': return 'badge-pharmacy';
+    case 'Admin': return 'badge-admin';
+    default: return 'badge-patient';
+  }
+};
+
+const extractErrorMessage = (err, fallback) => err?.response?.data?.message || fallback;
+
+const formatDate = (value) => {
+  if (!value) return 'Not provided';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not provided';
+  return date.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const asText = (value) => {
+  if (value === null || value === undefined || value === '') return 'Not provided';
+  return value;
+};
 
 const UserManagementPage = () => {
-  const [users, setUsers] = useState([
-    { id: '1', fullName: 'Sarah Jenkins', email: 's.jenkins@carenova.org', role: 'Doctor', isActive: true, createdAt: '2026-01-15' },
-    { id: '2', fullName: 'Alan Turing', email: 'a.turing@carenova.org', role: 'PharmacyStaff', isActive: true, createdAt: '2026-02-01' },
-    { id: '3', fullName: 'John Doe', email: 'j.doe@example.com', role: 'Patient', isActive: true, createdAt: '2026-03-10' },
-    { id: '4', fullName: 'Admin User', email: 'admin@carenova.org', role: 'Admin', isActive: true, createdAt: '2026-01-01' },
-  ]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('All');
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  const fetchUsers = async () => {
+  const [searchInput, setSearchInput] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
+  const [selectedRole, setSelectedRole] = useState('All');
+
+  const [rowBusy, setRowBusy] = useState({});
+  const [rowError, setRowError] = useState({});
+
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [userDetail, setUserDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState('');
+
+  const fetchUsers = async (search) => {
     setLoading(true);
+    setLoadError('');
     try {
-      const data = await userApi.getAllUsers();
-      if (Array.isArray(data)) setUsers(data);
-    } catch (e) {
-      console.warn('Using mock user data for presentation');
+      const data = await userApi.getAllUsers(search);
+      setUsers(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setLoadError(extractErrorMessage(err, 'Failed to load users. Please try again.'));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers('');
   }, []);
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const term = searchInput.trim();
+    setAppliedSearch(term);
+    fetchUsers(term);
+  };
+
   const handleRoleChange = async (userId, newRole) => {
+    setRowError((prev) => ({ ...prev, [userId]: '' }));
+    setRowBusy((prev) => ({ ...prev, [userId]: true }));
     try {
-      await userApi.updateUserRole(userId, newRole);
-      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    } catch (e) {
-      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      const updated = await userApi.updateUserRole(userId, newRole);
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: updated.role } : u)));
+    } catch (err) {
+      setRowError((prev) => ({
+        ...prev,
+        [userId]: extractErrorMessage(err, 'Failed to update role. Please try again.'),
+      }));
+    } finally {
+      setRowBusy((prev) => ({ ...prev, [userId]: false }));
     }
   };
 
   const handleToggleStatus = async (userId, currentStatus) => {
+    setRowError((prev) => ({ ...prev, [userId]: '' }));
+    setRowBusy((prev) => ({ ...prev, [userId]: true }));
     try {
-      await userApi.toggleUserStatus(userId, !currentStatus);
-      setUsers(users.map(u => u.id === userId ? { ...u, isActive: !currentStatus } : u));
-    } catch (e) {
-      setUsers(users.map(u => u.id === userId ? { ...u, isActive: !currentStatus } : u));
+      const updated = await userApi.toggleUserStatus(userId, !currentStatus);
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isActive: updated.isActive } : u)));
+    } catch (err) {
+      setRowError((prev) => ({
+        ...prev,
+        [userId]: extractErrorMessage(err, 'Failed to update account status. Please try again.'),
+      }));
+    } finally {
+      setRowBusy((prev) => ({ ...prev, [userId]: false }));
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to remove this user?')) {
-      try {
-        await userApi.deleteUser(userId);
-        setUsers(users.filter(u => u.id !== userId));
-      } catch (e) {
-        setUsers(users.filter(u => u.id !== userId));
-      }
+  const handleViewUser = async (userId) => {
+    setSelectedUserId(userId);
+    setUserDetail(null);
+    setDetailError('');
+    setDetailLoading(true);
+    try {
+      const data = await userApi.getUserById(userId);
+      setUserDetail(data);
+    } catch (err) {
+      setDetailError(extractErrorMessage(err, 'Failed to load user details. Please try again.'));
+    } finally {
+      setDetailLoading(false);
     }
   };
 
-  const filteredUsers = users.filter(u => {
-    const matchesSearch = u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = selectedRole === 'All' || u.role === selectedRole;
-    return matchesSearch && matchesRole;
-  });
+  const closeDetail = () => {
+    setSelectedUserId(null);
+    setUserDetail(null);
+    setDetailError('');
+  };
+
+  const filteredUsers = users.filter((u) => selectedRole === 'All' || u.role === selectedRole);
 
   return (
-    <div className="container">
-      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <DashboardLayout>
+      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>User Management</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Manage user accounts, roles, permissions, and security status</p>
+          <p style={{ color: 'var(--text-muted)' }}>View registered users, assign roles, and manage account status</p>
         </div>
-        <button onClick={fetchUsers} className="btn btn-secondary" disabled={loading}>
+        <button onClick={() => fetchUsers(appliedSearch)} className="btn btn-secondary" disabled={loading}>
           <RefreshCw size={16} className={loading ? 'spin' : ''} /> Refresh List
         </button>
       </div>
 
-      {/* Filter and Search controls */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
             <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               type="text"
               className="form-input"
               style={{ paddingLeft: '2.75rem' }}
-              placeholder="Search by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by full name or email..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
 
@@ -104,68 +171,176 @@ const UserManagementPage = () => {
               <option value="Admin">Admin</option>
             </select>
           </div>
+
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            <Search size={16} /> Search
+          </button>
+        </form>
+      </div>
+
+      {loadError && <div className="alert alert-error">{loadError}</div>}
+
+      <div className="glass-card">
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>Mobile Number</th>
+                <th>Role</th>
+                <th>Account Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {!loading && filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="empty-state" style={{ textAlign: 'center' }}>
+                    {appliedSearch
+                      ? `No matching user found for "${appliedSearch}".`
+                      : 'No users to show yet.'}
+                  </td>
+                </tr>
+              )}
+              {loading && (
+                <tr>
+                  <td colSpan={6} className="empty-state" style={{ textAlign: 'center' }}>
+                    Loading users...
+                  </td>
+                </tr>
+              )}
+              {!loading && filteredUsers.map((u) => {
+                const busy = Boolean(rowBusy[u.id]);
+                const error = rowError[u.id];
+                const canReassignRole = u.role !== 'Admin';
+
+                return (
+                  <tr key={u.id}>
+                    <td style={{ fontWeight: 600 }}>{u.fullName}</td>
+                    <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
+                    <td style={{ color: 'var(--text-muted)' }}>{u.mobileNumber}</td>
+                    <td>
+                      {canReassignRole ? (
+                        <select
+                          className="form-select"
+                          style={{ padding: '0.3rem 0.5rem', fontSize: '0.85rem' }}
+                          value={u.role}
+                          disabled={busy}
+                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                        >
+                          {ASSIGNABLE_ROLES.map((role) => (
+                            <option key={role} value={role}>{ROLE_LABELS[role]}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className={`badge ${getBadgeClass(u.role)}`}>{ROLE_LABELS[u.role]}</span>
+                      )}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleToggleStatus(u.id, u.isActive)}
+                        disabled={busy}
+                        style={{ background: 'none', border: 'none', cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1 }}
+                      >
+                        {u.isActive ? (
+                          <span className="badge badge-patient"><CheckCircle size={12} style={{ marginRight: '4px' }} /> Active</span>
+                        ) : (
+                          <span className="badge badge-pharmacy"><XCircle size={12} style={{ marginRight: '4px' }} /> Inactive</span>
+                        )}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleViewUser(u.id)}
+                        className="btn btn-secondary"
+                        style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
+                      >
+                        <Eye size={14} /> View
+                      </button>
+                      {error && (
+                        <div style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '0.35rem' }}>
+                          {error}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="glass-card">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Current Role</th>
-              <th>Status</th>
-              <th>Created Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map(u => (
-              <tr key={u.id}>
-                <td style={{ fontWeight: 600 }}>{u.fullName}</td>
-                <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
-                <td>
-                  <select
-                    className="form-select"
-                    style={{ padding: '0.3rem 0.5rem', fontSize: '0.85rem' }}
-                    value={u.role}
-                    onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                  >
-                    <option value="Patient">Patient</option>
-                    <option value="Doctor">Doctor</option>
-                    <option value="PharmacyStaff">Pharmacy Staff</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                </td>
-                <td>
-                  <button
-                    onClick={() => handleToggleStatus(u.id, u.isActive)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                  >
-                    {u.isActive ? (
+      {selectedUserId && (
+        <div className="user-detail-backdrop" onClick={closeDetail}>
+          <div className="user-detail-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="user-detail-header">
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 700 }}>User Details</h2>
+              <button type="button" className="icon-button" onClick={closeDetail} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
+
+            {detailLoading && <p className="profile-status-text">Loading...</p>}
+            {detailError && <div className="alert alert-error">{detailError}</div>}
+
+            {userDetail && !detailLoading && (
+              <>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Full Name</span>
+                  <span className="user-detail-row-value">{asText(userDetail.fullName)}</span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Email Address</span>
+                  <span className="user-detail-row-value">{asText(userDetail.email)}</span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Mobile Number</span>
+                  <span className="user-detail-row-value">{asText(userDetail.mobileNumber)}</span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Land Phone Number</span>
+                  <span className="user-detail-row-value">{asText(userDetail.landPhoneNumber)}</span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Address</span>
+                  <span className="user-detail-row-value">{asText(userDetail.address)}</span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Date of Birth</span>
+                  <span className="user-detail-row-value">{formatDate(userDetail.dateOfBirth)}</span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Gender</span>
+                  <span className="user-detail-row-value">{asText(userDetail.gender)}</span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Role</span>
+                  <span className="user-detail-row-value">
+                    <span className={`badge ${getBadgeClass(userDetail.role)}`}>{ROLE_LABELS[userDetail.role] || userDetail.role}</span>
+                  </span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Account Status</span>
+                  <span className="user-detail-row-value">
+                    {userDetail.isActive ? (
                       <span className="badge badge-patient"><CheckCircle size={12} style={{ marginRight: '4px' }} /> Active</span>
                     ) : (
                       <span className="badge badge-pharmacy"><XCircle size={12} style={{ marginRight: '4px' }} /> Inactive</span>
                     )}
-                  </button>
-                </td>
-                <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{u.createdAt}</td>
-                <td>
-                  <button
-                    onClick={() => handleDeleteUser(u.id)}
-                    className="btn btn-danger"
-                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
-                  >
-                    <Trash2 size={14} /> Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                  </span>
+                </div>
+                <div className="user-detail-row">
+                  <span className="user-detail-row-label">Registered On</span>
+                  <span className="user-detail-row-value">{formatDate(userDetail.createdAt)}</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </DashboardLayout>
   );
 };
 

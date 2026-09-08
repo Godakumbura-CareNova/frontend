@@ -6,6 +6,11 @@ export const authApi = {
     return response.data;
   },
 
+  logout: async () => {
+    const response = await apiClient.post('/auth/logout');
+    return response.data;
+  },
+
   register: async (userData) => {
     const response = await apiClient.post('/auth/register', userData);
     return response.data;
@@ -16,8 +21,8 @@ export const authApi = {
     return response.data;
   },
 
-  resetPassword: async (token, newPassword) => {
-    const response = await apiClient.post('/auth/reset-password', { token, newPassword });
+  resetPassword: async (token, newPassword, confirmPassword) => {
+    const response = await apiClient.post('/auth/reset-password', { token, newPassword, confirmPassword });
     return response.data;
   },
 };

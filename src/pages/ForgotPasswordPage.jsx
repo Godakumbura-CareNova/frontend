@@ -25,6 +25,10 @@ const ForgotPasswordPage = () => {
       await authApi.forgotPassword(email);
       setSuccess('If an account exists with this email, reset instructions have been sent.');
     } catch (err) {
+      if (!err?.response) {
+        setError('Unable to reach the server. Please check your connection and try again.');
+        return;
+      }
       setError(err.response?.data?.message || 'Failed to process request. Please try again.');
     } finally {
       setLoading(false);

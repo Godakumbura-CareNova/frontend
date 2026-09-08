@@ -1,8 +1,10 @@
 import apiClient from './apiClient';
 
 export const userApi = {
-  getAllUsers: async () => {
-    const response = await apiClient.get('/admin/users');
+  getAllUsers: async (search) => {
+    const response = await apiClient.get('/admin/users', {
+      params: search ? { search } : undefined,
+    });
     return response.data;
   },
 
@@ -18,11 +20,6 @@ export const userApi = {
 
   toggleUserStatus: async (id, isActive) => {
     const response = await apiClient.patch(`/admin/users/${id}/status`, { isActive });
-    return response.data;
-  },
-
-  deleteUser: async (id) => {
-    const response = await apiClient.delete(`/admin/users/${id}`);
     return response.data;
   },
 };
