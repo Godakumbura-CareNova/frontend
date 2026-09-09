@@ -37,17 +37,17 @@ const normalizeRole = (role) => {
 const NAV_BY_ROLE = {
   Patient: [
     { to: '/patient-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
-    { label: 'Medicine Orders', icon: ShoppingBag, enabled: false },
+    { to: '/my-orders', label: 'Medicine Orders', icon: ShoppingBag, enabled: true },
     { label: 'Appointments', icon: Calendar, enabled: false },
     { label: 'Payments', icon: CreditCard, enabled: false },
-    { label: 'Medicines', icon: Pill, enabled: false },
+    { to: '/medicines', label: 'Medicines', icon: Pill, enabled: true },
     { label: 'Doctors', icon: Stethoscope, enabled: false },
   ],
   PharmacyStaff: [
     { to: '/pharmacy-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
-    { label: 'Medicine Orders', icon: ShoppingBag, enabled: false },
+    { to: '/staff/orders', label: 'Medicine Orders', icon: ShoppingBag, enabled: true },
     { label: 'Prescriptions', icon: FileCheck, enabled: false },
-    { label: 'Inventory', icon: PackageSearch, enabled: false },
+    { to: '/staff/stock', label: 'Inventory', icon: PackageSearch, enabled: true },
     { label: 'Payments', icon: CreditCard, enabled: false },
   ],
   Doctor: [
