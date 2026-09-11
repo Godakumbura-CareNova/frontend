@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { resolveApiBaseUrl } from '../utils/apiBaseUrl';
 
 const TOKEN_KEY = 'carenova_token';
 const USER_KEY = 'carenova_user';
@@ -9,7 +10,7 @@ const clearStoredAuth = () => {
 };
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5133/api',
+  baseURL: resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL),
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
+import ConfirmDialog from '../components/ConfirmDialog';
 import userApi from '../api/userApi';
 import { Search, CheckCircle, XCircle, RefreshCw, Eye, X } from 'lucide-react';
 
@@ -52,6 +53,9 @@ const UserManagementPage = () => {
   const [userDetail, setUserDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState('');
+
+  const [pendingRoleChange, setPendingRoleChange] = useState(null);
+  const [pendingStatusChange, setPendingStatusChange] = useState(null);
 
   const fetchUsers = async (search) => {
     setLoading(true);
@@ -107,6 +111,29 @@ const UserManagementPage = () => {
     } finally {
       setRowBusy((prev) => ({ ...prev, [userId]: false }));
     }
+  };
+
+  const requestRoleChange = (user, newRole) => {
+    if (newRole === user.role) return;
+    setPendingRoleChange({ userId: user.id, fullName: user.fullName, currentRole: user.role, newRole });
+  };
+
+  const confirmRoleChange = async () => {
+    if (!pendingRoleChange) return;
+    const { userId, newRole } = pendingRoleChange;
+    setPendingRoleChange(null);
+    await handleRoleChange(userId, newRole);
+  };
+
+  const requestStatusToggle = (user) => {
+    setPendingStatusChange({ userId: user.id, fullName: user.fullName, currentStatus: user.isActive });
+  };
+
+  const confirmStatusToggle = async () => {
+    if (!pendingStatusChange) return;
+    const { userId, currentStatus } = pendingStatusChange;
+    setPendingStatusChange(null);
+    await handleToggleStatus(userId, currentStatus);
   };
 
   const handleViewUser = async (userId) => {
@@ -227,7 +254,7 @@ const UserManagementPage = () => {
                           style={{ padding: '0.3rem 0.5rem', fontSize: '0.85rem' }}
                           value={u.role}
                           disabled={busy}
-                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                          onChange={(e) => requestRoleChange(u, e.target.value)}
                         >
                           {ASSIGNABLE_ROLES.map((role) => (
                             <option key={role} value={role}>{ROLE_LABELS[role]}</option>
@@ -239,7 +266,7 @@ const UserManagementPage = () => {
                     </td>
                     <td>
                       <button
-                        onClick={() => handleToggleStatus(u.id, u.isActive)}
+                        onClick={() => requestStatusToggle(u)}
                         disabled={busy}
                         style={{ background: 'none', border: 'none', cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1 }}
                       >
@@ -340,6 +367,33 @@ const UserManagementPage = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(pendingRoleChange)}
+        title="Change user role?"
+        message={
+          pendingRoleChange
+            ? `Change ${pendingRoleChange.fullName}'s role from ${ROLE_LABELS[pendingRoleChange.currentRole]} to ${ROLE_LABELS[pendingRoleChange.newRole]}?`
+            : ''
+        }
+        confirmLabel="Change Role"
+        onConfirm={confirmRoleChange}
+        onCancel={() => setPendingRoleChange(null)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(pendingStatusChange)}
+        title={pendingStatusChange?.currentStatus ? 'Deactivate account?' : 'Activate account?'}
+        message={
+          pendingStatusChange
+            ? `Are you sure you want to ${pendingStatusChange.currentStatus ? 'deactivate' : 'activate'} ${pendingStatusChange.fullName}'s account?`
+            : ''
+        }
+        confirmLabel={pendingStatusChange?.currentStatus ? 'Deactivate' : 'Activate'}
+        danger={Boolean(pendingStatusChange?.currentStatus)}
+        onConfirm={confirmStatusToggle}
+        onCancel={() => setPendingStatusChange(null)}
+      />
     </DashboardLayout>
   );
 };
