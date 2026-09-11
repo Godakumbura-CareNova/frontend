@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ProfilePage from './ProfilePage';
+import { AuthProvider } from '../context/AuthContext';
 
 const { mockGetProfile } = vi.hoisted(() => ({
   mockGetProfile: vi.fn(),
@@ -26,7 +27,11 @@ describe('ProfilePage', () => {
       Role: 'Patient',
     });
 
-    render(<ProfilePage />);
+    render(
+      <AuthProvider>
+        <ProfilePage />
+      </AuthProvider>
+    );
 
     expect(await screen.findByRole('heading', { name: 'Customer Profile' })).toBeInTheDocument();
     expect(mockGetProfile).toHaveBeenCalledTimes(1);
