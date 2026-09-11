@@ -29,7 +29,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            VITE_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net
+            VITE_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net/api
           tags: |
             it24101493/carenova-frontend:latest
             it24101493/carenova-frontend:${{ github.sha }}

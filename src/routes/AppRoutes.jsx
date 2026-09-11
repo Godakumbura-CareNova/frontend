@@ -14,6 +14,15 @@ import DoctorDashboard from '../pages/DoctorDashboard';
 import PharmacyStaffDashboard from '../pages/PharmacyStaffDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
 import UserManagementPage from '../pages/UserManagementPage';
+import MedicineCataloguePage from '../pages/pharmacy/MedicineCataloguePage';
+import MedicineDetailPage from '../pages/pharmacy/MedicineDetailPage';
+import CartPage from '../pages/pharmacy/CartPage';
+import CheckoutPage from '../pages/pharmacy/CheckoutPage';
+import MyOrdersPage from '../pages/pharmacy/MyOrdersPage';
+import MedicineManagementPage from '../pages/staff/MedicineManagementPage';
+import CategoryManagementPage from '../pages/staff/CategoryManagementPage';
+import StockManagementPage from '../pages/staff/StockManagementPage';
+import OrderReviewPage from '../pages/staff/OrderReviewPage';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -65,12 +74,21 @@ const AppRoutes = () => (
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Patient']} />}>
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
+        <Route path="/medicines" element={<MedicineCataloguePage />} />
+        <Route path="/medicines/:id" element={<MedicineDetailPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/my-orders" element={<MyOrdersPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Doctor']} />}>
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Pharmacy Staff', 'PharmacyStaff']} />}>
         <Route path="/pharmacy-dashboard" element={<PharmacyStaffDashboard />} />
+        <Route path="/staff/medicines" element={<MedicineManagementPage />} />
+        <Route path="/staff/categories" element={<CategoryManagementPage />} />
+        <Route path="/staff/stock" element={<StockManagementPage />} />
+        <Route path="/staff/orders" element={<OrderReviewPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
         <Route path="/admin-dashboard" element={<AdminDashboard />} />

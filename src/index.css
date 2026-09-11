@@ -68,7 +68,7 @@ a:hover {
 }
 
 .registration-header {
-  background: #d3271f;
+  background: var(--red-strong);
   padding: 16px 20px;
   display: flex;
   align-items: center;
@@ -276,6 +276,10 @@ a:hover {
   opacity: 0.96;
 }
 
+.registration-card .submit-button {
+  background: var(--success);
+}
+
 .submit-button:disabled {
   cursor: not-allowed;
   opacity: 0.8;
@@ -313,9 +317,9 @@ a:hover {
 }
 
 .registration-success {
-  background: #fff0f1;
-  border: 1px solid #e7a9ad;
-  color: var(--red-deep);
+  background: rgba(21, 128, 61, 0.08);
+  border: 1px solid rgba(21, 128, 61, 0.2);
+  color: #166534;
 }
 
 .profile-shell {
@@ -751,6 +755,15 @@ a:hover {
   color: var(--white);
 }
 
+.btn-green {
+  background: var(--success);
+  color: var(--white);
+}
+
+.btn-green:hover {
+  opacity: 0.92;
+}
+
 .alert-success {
   background: rgba(21, 128, 61, 0.08);
   border: 1px solid rgba(21, 128, 61, 0.2);
@@ -847,6 +860,59 @@ a:hover {
   .grid-4 {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* Confirm dialog */
+
+.confirm-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 300;
+}
+
+.confirm-dialog-panel {
+  width: min(100%, 400px);
+  background: var(--white);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+}
+
+.confirm-dialog-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(211, 39, 31, 0.1);
+  color: var(--red-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.confirm-dialog-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.confirm-dialog-message {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 /* Dashboard shell: sidebar + topbar */
