@@ -14,6 +14,8 @@ import DoctorDashboard from '../pages/DoctorDashboard';
 import PharmacyStaffDashboard from '../pages/PharmacyStaffDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
 import UserManagementPage from '../pages/UserManagementPage';
+import MedicineManagementPage from '../pages/MedicineManagementPage';
+import CategoryManagementPage from '../pages/CategoryManagementPage';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -71,6 +73,8 @@ const AppRoutes = () => (
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Pharmacy Staff', 'PharmacyStaff']} />}>
         <Route path="/pharmacy-dashboard" element={<PharmacyStaffDashboard />} />
+        <Route path="/pharmacy/medicines" element={<MedicineManagementPage />} />
+        <Route path="/pharmacy/categories" element={<CategoryManagementPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
         <Route path="/admin-dashboard" element={<AdminDashboard />} />

@@ -47,7 +47,8 @@ const NAV_BY_ROLE = {
     { to: '/pharmacy-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
     { label: 'Medicine Orders', icon: ShoppingBag, enabled: false },
     { label: 'Prescriptions', icon: FileCheck, enabled: false },
-    { label: 'Inventory', icon: PackageSearch, enabled: false },
+    { to: '/pharmacy/medicines', label: 'Medicines', icon: Pill, enabled: true },
+    { to: '/pharmacy/categories', label: 'Categories', icon: PackageSearch, enabled: true },
     { label: 'Payments', icon: CreditCard, enabled: false },
   ],
   Doctor: [
