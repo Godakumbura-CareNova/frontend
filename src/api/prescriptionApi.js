@@ -3,5 +3,5 @@ import pharmacyApi from './pharmacyApi';
 export const prescriptionApi = {
   upload: (formData) => pharmacyApi.post('/prescriptions', formData),
   list: () => pharmacyApi.get('/prescriptions'),
-  getFileUrl: (id) => `/prescriptions/${id}/file`,
+  download: (id) => pharmacyApi.get(`/prescriptions/${id}/file`, { responseType: 'blob' }),
 };
