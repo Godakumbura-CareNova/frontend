@@ -49,6 +49,7 @@ const NAV_BY_ROLE = {
     { label: 'Prescriptions', icon: FileCheck, enabled: false },
     { to: '/pharmacy/medicines', label: 'Medicines', icon: Pill, enabled: true },
     { to: '/pharmacy/categories', label: 'Categories', icon: PackageSearch, enabled: true },
+    { to: '/pharmacy/inventory', label: 'Inventory', icon: PackageSearch, enabled: true },
     { label: 'Payments', icon: CreditCard, enabled: false },
   ],
   Doctor: [
