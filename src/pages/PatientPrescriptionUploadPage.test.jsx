@@ -27,5 +27,6 @@ describe('PatientPrescriptionUploadPage', () => {
     await user.click(screen.getByRole('button', { name: /upload prescription/i }));
 
     expect(await screen.findByText(/prescription uploaded successfully/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /view my cart/i })).toBeInTheDocument();
   });
 });

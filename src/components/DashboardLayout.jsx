@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard,
   ShoppingBag,
+  ShoppingCart,
   Calendar,
   CreditCard,
   Pill,
@@ -41,6 +42,7 @@ const NAV_BY_ROLE = {
     { label: 'Appointments', icon: Calendar, enabled: false },
     { label: 'Payments', icon: CreditCard, enabled: false },
     { to: '/patient/medicines', label: 'Medicines', icon: Pill, enabled: true },
+    { to: '/patient/cart', label: 'My cart', icon: ShoppingCart, enabled: true },
     { to: '/patient/prescriptions', label: 'Prescriptions', icon: FileCheck, enabled: true },
     { label: 'Doctors', icon: Stethoscope, enabled: false },
   ],
@@ -145,6 +147,16 @@ const DashboardLayout = ({ children }) => {
             <button type="button" className="icon-button" aria-label="Notifications">
               <Bell size={20} />
             </button>
+            {normalizeRole(role) === 'Patient' && (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="My cart"
+                onClick={() => navigate('/patient/cart')}
+              >
+                <ShoppingCart size={20} />
+              </button>
+            )}
             <button
               type="button"
               className="user-menu"
