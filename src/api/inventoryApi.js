@@ -1,0 +1,2 @@
+import pharmacyApi from './pharmacyApi';
+export const inventoryApi = { list: (lowStockOnly = false) => pharmacyApi.get(`/staff/inventory?lowStockOnly=${lowStockOnly}`), batches: (id) => pharmacyApi.get(`/staff/inventory/${id}/batches`), createBatch: (payload) => pharmacyApi.post('/staff/inventory/batches', payload), updateBatch: (id, payload) => pharmacyApi.put(`/staff/inventory/batches/${id}`, payload) };
