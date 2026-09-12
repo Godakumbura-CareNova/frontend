@@ -1,0 +1,20 @@
+.medicine-details-page { max-width: 1080px; margin: 0 auto; }
+.medicine-details-card { display: grid; grid-template-columns: minmax(260px, 0.8fr) 1.2fr; overflow: hidden; background: var(--white); border: 1px solid var(--border-color); border-radius: 18px; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05); }
+.medicine-image-panel { display: flex; align-items: center; justify-content: center; min-height: 420px; overflow: hidden; background: var(--red-soft); color: var(--red-strong); font-size: 22px; font-weight: 700; }
+.medicine-image-panel img { width: 100%; height: 100%; object-fit: cover; }
+.medicine-details-content { display: grid; align-content: center; gap: 18px; padding: 42px; }
+.medicine-details-content h1 { margin: 0; font-size: 34px; }
+.category-badge, .prescription-badge, .stock-badge { width: max-content; padding: 6px 10px; border-radius: 999px; font-size: 14px; }
+.category-badge { background: var(--red-soft); color: var(--red-deep); }
+.medicine-description { margin: 0; color: var(--text-muted); line-height: 1.6; }
+.medicine-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.medicine-meta strong { font-size: 22px; }
+.prescription-badge { background: #ecfdf3; color: #166534; }
+.prescription-badge.required { background: #fff7ed; color: #c2410c; }
+.stock-badge { background: #eff6ff; color: #1d4ed8; }
+.quantity-section { display: flex; align-items: center; justify-content: space-between; padding-top: 18px; border-top: 1px solid var(--border-color); font-weight: 700; }
+.quantity-control { display: flex; align-items: center; gap: 16px; }
+.quantity-control button { width: 36px; height: 36px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--white); font-size: 20px; cursor: pointer; }
+.total-box { display: flex; justify-content: space-between; padding: 16px; border-radius: 10px; background: var(--red-soft); }
+.details-action { width: 100%; padding: 14px; }
+@media (max-width: 720px) { .medicine-details-card { grid-template-columns: 1fr; } .medicine-image-panel { min-height: 220px; } .medicine-details-content { padding: 26px; } .medicine-details-content h1 { font-size: 28px; } }
