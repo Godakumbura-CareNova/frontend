@@ -147,6 +147,16 @@ const DashboardLayout = ({ children }) => {
             <button type="button" className="icon-button" aria-label="Notifications">
               <Bell size={20} />
             </button>
+            {normalizeRole(role) === 'Patient' && (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="My cart"
+                onClick={() => navigate('/patient/cart')}
+              >
+                <ShoppingCart size={20} />
+              </button>
+            )}
             <button
               type="button"
               className="user-menu"
