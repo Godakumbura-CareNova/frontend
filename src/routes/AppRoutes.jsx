@@ -17,6 +17,7 @@ import UserManagementPage from '../pages/UserManagementPage';
 import MedicineManagementPage from '../pages/MedicineManagementPage';
 import CategoryManagementPage from '../pages/CategoryManagementPage';
 import InventoryManagementPage from '../pages/InventoryManagementPage';
+import PatientMedicineCataloguePage from '../pages/PatientMedicineCataloguePage';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -68,6 +69,7 @@ const AppRoutes = () => (
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Patient']} />}>
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
+        <Route path="/patient/medicines" element={<PatientMedicineCataloguePage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Doctor']} />}>
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
