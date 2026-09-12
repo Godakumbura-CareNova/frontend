@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { catalogueApi } from '../api/catalogueApi';
 import './patientMedicineDetails.css';
@@ -8,6 +8,7 @@ const pharmacyHost = (import.meta.env.VITE_PHARMACY_API_BASE_URL || 'http://loca
 
 export default function PatientMedicineDetailsPage() {
   const { medicineId } = useParams();
+  const navigate = useNavigate();
   const [medicine, setMedicine] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
@@ -31,6 +32,7 @@ export default function PatientMedicineDetailsPage() {
       quantity,
       prescriptionRequired: medicine.prescriptionRequired,
     }));
+    if (medicine.prescriptionRequired) navigate('/patient/prescriptions/upload');
   };
 
   return (
