@@ -1,6 +1,7 @@
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import PatientMedicineCataloguePage from './PatientMedicineCataloguePage';
 
 const { listMedicines, listCategories } = vi.hoisted(() => ({ listMedicines: vi.fn(), listCategories: vi.fn() }));
@@ -21,11 +22,20 @@ describe('PatientMedicineCataloguePage', () => {
     });
   });
 
+  const renderPage = () => render(<MemoryRouter><PatientMedicineCataloguePage /></MemoryRouter>);
+
   it('renders an out-of-stock medicine with disabled details action', async () => {
-    render(<PatientMedicineCataloguePage />);
+    renderPage();
 
     expect(await screen.findByText('Paracetamol')).toBeInTheDocument();
     expect(screen.getByText('Out of stock')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /view details/i })).toBeDisabled();
+  });
+
+  it('renders a highlighted non-prescription status badge', async () => {
+    renderPage();
+
+    const badge = await screen.findByText('No prescription required');
+    expect(badge).toHaveClass('prescription-status', 'non-prescription');
   });
 });
