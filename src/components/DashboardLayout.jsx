@@ -40,7 +40,7 @@ const NAV_BY_ROLE = {
     { label: 'Medicine Orders', icon: ShoppingBag, enabled: false },
     { label: 'Appointments', icon: Calendar, enabled: false },
     { label: 'Payments', icon: CreditCard, enabled: false },
-    { label: 'Medicines', icon: Pill, enabled: false },
+    { to: '/patient/medicines', label: 'Medicines', icon: Pill, enabled: true },
     { label: 'Doctors', icon: Stethoscope, enabled: false },
   ],
   PharmacyStaff: [

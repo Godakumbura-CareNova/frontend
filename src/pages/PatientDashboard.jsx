@@ -29,7 +29,7 @@ const PatientDashboard = () => {
       <div className="dashboard-section">
         <h2>Quick Links</h2>
         <div className="quicklink-row">
-          <Link to="#" className="quicklink-card" onClick={(e) => e.preventDefault()}>
+          <Link to="/patient/medicines" className="quicklink-card">
             <div>
               <div className="quicklink-card-title">Medicines</div>
               <div className="quicklink-card-subtitle">Browse and order medicines</div>
