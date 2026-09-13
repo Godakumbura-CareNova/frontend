@@ -1,4 +1,7 @@
 .medicine-details-page { max-width: 1080px; margin: 0 auto; }
+.medicine-back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--white); color: var(--red-deep); text-decoration: none; font-weight: 600; }
+.medicine-back-link:hover { background: var(--red-soft); }
+.medicine-back-link:focus-visible { outline: 2px solid var(--red-deep); outline-offset: 3px; }
 .medicine-details-card { display: grid; grid-template-columns: minmax(260px, 0.8fr) 1.2fr; overflow: hidden; background: var(--white); border: 1px solid var(--border-color); border-radius: 18px; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05); }
 .medicine-image-panel { display: flex; align-items: center; justify-content: center; min-height: 420px; overflow: hidden; background: var(--red-soft); color: var(--red-strong); font-size: 22px; font-weight: 700; }
 .medicine-image-panel img { width: 100%; height: 100%; object-fit: cover; }

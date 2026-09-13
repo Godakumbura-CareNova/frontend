@@ -22,6 +22,9 @@ import PatientMedicineDetailsPage from '../pages/PatientMedicineDetailsPage';
 import PatientPrescriptionUploadPage from '../pages/PatientPrescriptionUploadPage';
 import PatientPrescriptionsPage from '../pages/PatientPrescriptionsPage';
 import PatientCartPage from '../pages/PatientCartPage';
+import PatientCheckoutPage from '../pages/PatientCheckoutPage';
+import PatientOrdersPage from '../pages/PatientOrdersPage';
+import PatientOrderDetailsPage from '../pages/PatientOrderDetailsPage';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -78,6 +81,9 @@ const AppRoutes = () => (
         <Route path="/patient/prescriptions/upload" element={<PatientPrescriptionUploadPage />} />
         <Route path="/patient/prescriptions" element={<PatientPrescriptionsPage />} />
         <Route path="/patient/cart" element={<PatientCartPage />} />
+        <Route path="/patient/checkout" element={<PatientCheckoutPage />} />
+        <Route path="/patient/orders" element={<PatientOrdersPage />} />
+        <Route path="/patient/orders/:orderId" element={<PatientOrderDetailsPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Doctor']} />}>
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { catalogueApi } from '../api/catalogueApi';
 import { cartApi } from '../api/cartApi';
@@ -22,8 +22,9 @@ export default function PatientMedicineDetailsPage() {
       .catch(() => setError('This medicine is unavailable.'));
   }, [medicineId]);
 
-  if (error) return <DashboardLayout><div className="management-alert error">{error}</div></DashboardLayout>;
-  if (!medicine) return <DashboardLayout><p>Loading medicine...</p></DashboardLayout>;
+  const backLink = <Link className="medicine-back-link" to="/patient/medicines"><span aria-hidden="true">←</span> Back to medicines</Link>;
+  if (error) return <DashboardLayout><section className="medicine-details-page">{backLink}<div className="management-alert error">{error}</div></section></DashboardLayout>;
+  if (!medicine) return <DashboardLayout><section className="medicine-details-page">{backLink}<p>Loading medicine...</p></section></DashboardLayout>;
 
   const imageUrl = medicine.imagePath
     ? `${pharmacyHost}${medicine.imagePath.startsWith('/') ? '' : '/'}${medicine.imagePath}`
@@ -55,6 +56,7 @@ export default function PatientMedicineDetailsPage() {
   return (
     <DashboardLayout>
       <section className="medicine-details-page">
+        {backLink}
         <div className="medicine-details-card">
           <div className="medicine-image-panel">
             {imageUrl ? <img src={imageUrl} alt={`${medicine.name} medicine`} /> : <span>Medicine</span>}
