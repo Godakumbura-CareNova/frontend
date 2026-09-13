@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { cartApi } from '../api/cartApi';
 import './patientCart.css';
@@ -6,6 +7,7 @@ import './patientCart.css';
 const money = (amount) => `LKR ${Number(amount || 0).toFixed(2)}`;
 
 export default function PatientCartPage() {
+  const navigate = useNavigate();
   const [cart, setCart] = useState(null);
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
@@ -34,5 +36,5 @@ export default function PatientCartPage() {
 
   const section = (title, items, subtotal, status) => !items?.length ? null : <section className="cart-section"><div className="cart-section-heading"><h2>{title}</h2><strong>{money(subtotal)}</strong></div>{items.map(item => <article className="cart-item" key={item.id}><div><h3>{item.medicineName}</h3><span>{money(item.unitPrice)} each</span><span>Quantity: {item.quantity}</span>{status && <span className={`cart-status ${status}`}>{status === 'pending' ? 'Prescription pending verification' : 'Requires pharmacy attention'}</span>}</div><div className="cart-item-actions">{!status && <div className="cart-quantity"><button disabled={updatingId === item.id || item.quantity === 1} onClick={() => changeQuantity(item, item.quantity - 1)} aria-label={`Decrease ${item.medicineName}`}>−</button><strong>{item.quantity}</strong><button disabled={updatingId === item.id} onClick={() => changeQuantity(item, item.quantity + 1)} aria-label={`Increase ${item.medicineName}`}>+</button></div>}<strong>{money(item.lineTotal)}</strong><button className="cart-remove" disabled={updatingId === item.id} onClick={() => remove(item.id)}>Remove</button></div></article>)}</section>;
 
-  return <DashboardLayout><section className="cart-page"><div className="management-heading"><h1>My cart</h1><p>Ready medicines can be checked out in a future story. Prescription medicines remain here while the pharmacy reviews them.</p></div>{error && <div className="management-alert error">{error}<button onClick={load}>Retry</button></div>}{!cart ? <p>Loading your cart...</p> : <>{section('Ready to order', cart.readyItems, cart.readySubtotal, '')}{section('Waiting for pharmacy verification', cart.pendingItems, cart.pendingSubtotal, 'pending')}{section('Requires attention', cart.attentionItems, cart.attentionSubtotal, 'attention')}{!cart.cartTotal ? <div className="cart-empty">Your cart is empty.</div> : <div className="cart-total"><span>Cart total</span><strong>{money(cart.cartTotal)}</strong></div>}</>}</section></DashboardLayout>;
+  return <DashboardLayout><section className="cart-page"><div className="management-heading"><h1>My cart</h1><p>Check out ready medicines for pharmacy pickup. Prescription medicines remain here while the pharmacy reviews them.</p></div>{error && <div className="management-alert error">{error}<button onClick={load}>Retry</button></div>}{!cart ? <p>Loading your cart...</p> : <>{section('Ready to order', cart.readyItems, cart.readySubtotal, '')}<button className="order-primary" disabled={!cart.readyItems?.length || updatingId !== null} onClick={() => navigate('/patient/checkout')}>Checkout ready medicines</button>{section('Waiting for pharmacy verification', cart.pendingItems, cart.pendingSubtotal, 'pending')}{section('Requires attention', cart.attentionItems, cart.attentionSubtotal, 'attention')}{!cart.cartTotal ? <div className="cart-empty">Your cart is empty.</div> : <div className="cart-total"><span>Cart total</span><strong>{money(cart.cartTotal)}</strong></div>}</>}</section></DashboardLayout>;
 }
