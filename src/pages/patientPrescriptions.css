@@ -7,7 +7,9 @@
 .prescription-file { display: flex; align-items: center; gap: 8px; font-weight: 700; }
 .prescription-status-badge { width: max-content; padding: 7px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
 .prescription-status-badge.pending { color: #9a3412; background: #fff7ed; }
-.open-prescription { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 11px; color: var(--red-deep); border: 0; border-radius: 8px; background: var(--red-soft); cursor: pointer; }
+.open-prescription { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 11px; color: #fff; border: 0; border-radius: 8px; background: #087443; cursor: pointer; }
+.open-prescription:hover { background: #065e36; }
+.open-prescription:focus-visible { outline: 3px solid #55ac7e; outline-offset: 3px; }
 .prescription-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .delete-prescription { padding: 9px 11px; color: #b91c1c; border: 1px solid #fecaca; border-radius: 8px; background: #fff; cursor: pointer; }
 .delete-prescription:hover { background: #fff1f1; }

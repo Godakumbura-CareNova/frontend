@@ -51,6 +51,7 @@ it('blocks a fresh request if persisted checkout cannot be recovered', async () 
 it('shows history with readable status and order links', async () => {
   api.list.mockResolvedValue({ data: [{ ...order, status: 'ReadyForCollection' }] });
   render(<MemoryRouter><PatientOrdersPage /></MemoryRouter>);
+  expect(await screen.findByText('Order history')).toBeInTheDocument();
   expect(await screen.findByText('Ready for Collection')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'CN-000012' })).toHaveAttribute('href', '/patient/orders/12');
 });
