@@ -19,6 +19,7 @@ describe('PatientMedicineDetailsPage', () => {
     await user.click(screen.getByLabelText('Increase quantity'));
     await user.click(screen.getByLabelText('Increase quantity'));
     expect(screen.getByText('Total: LKR 200.00')).toBeInTheDocument();
+    expect(screen.getByText('Only 2 units are available.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /continue to prescription upload/i })).toBeInTheDocument();
   });
 
@@ -36,5 +37,25 @@ describe('PatientMedicineDetailsPage', () => {
 
     expect(addItem).toHaveBeenCalledWith({ medicineId: 2, quantity: 1 });
     expect(await screen.findByText(/added to your cart/i)).toBeInTheDocument();
+  });
+
+  it('shows a validation message and blocks checkout for an invalid typed quantity', async () => {
+    const user = userEvent.setup();
+    render(<MemoryRouter initialEntries={['/patient/medicines/1']}><Routes><Route path="/patient/medicines/:medicineId" element={<PatientMedicineDetailsPage />}/></Routes></MemoryRouter>);
+
+    const quantityInput = await screen.findByRole('textbox', { name: 'Quantity' });
+    await user.clear(quantityInput);
+    await user.type(quantityInput, '3');
+
+    expect(screen.getByText('Only 2 units are available.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /continue to prescription upload/i })).toBeDisabled();
+
+    await user.clear(quantityInput);
+    await user.type(quantityInput, '0');
+    expect(screen.getByText('Enter a quantity of at least 1.')).toBeInTheDocument();
+
+    await user.clear(quantityInput);
+    await user.type(quantityInput, 'abc');
+    expect(screen.getByText('Enter a whole number.')).toBeInTheDocument();
   });
 });
