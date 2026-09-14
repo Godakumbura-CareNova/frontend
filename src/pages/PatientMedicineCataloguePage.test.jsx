@@ -1,6 +1,7 @@
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import PatientMedicineCataloguePage from './PatientMedicineCataloguePage';
 
 const { listMedicines, listCategories } = vi.hoisted(() => ({ listMedicines: vi.fn(), listCategories: vi.fn() }));
@@ -8,24 +9,90 @@ const { listMedicines, listCategories } = vi.hoisted(() => ({ listMedicines: vi.
 vi.mock('../components/DashboardLayout', () => ({ default: ({ children }) => <main>{children}</main> }));
 vi.mock('../api/catalogueApi', () => ({ catalogueApi: { listMedicines, listCategories } }));
 
+const page = (items) => ({ data: { items, page: 1, totalPages: items.length ? 1 : 0, totalCount: items.length } });
+const paracetamol = { id: 5, name: 'Paracetamol', description: 'Fever relief', categoryName: 'Pain Relief', price: 150, prescriptionRequired: false, availabilityStatus: 'Available', stockQuantity: 20 };
+const ibuprofen = { id: 6, name: 'Ibuprofen', description: 'Anti-inflammatory', categoryName: 'Pain Relief', price: 220.5, prescriptionRequired: true, availabilityStatus: 'Out of stock', stockQuantity: 0 };
+
 describe('PatientMedicineCataloguePage', () => {
   beforeEach(() => {
-    listCategories.mockResolvedValue({ data: [{ id: 1, name: 'Pain Relief' }] });
-    listMedicines.mockResolvedValue({
-      data: {
-        items: [{ id: 5, name: 'Paracetamol', description: 'Pain relief', categoryName: 'Pain Relief', price: 150, prescriptionRequired: false, availabilityStatus: 'Out of stock', stockQuantity: 0 }],
-        page: 1,
-        totalPages: 1,
-        totalCount: 1
-      }
-    });
+    vi.clearAllMocks();
+    listCategories.mockResolvedValue({ data: [{ id: 1, name: 'Pain Relief' }, { id: 2, name: 'Vitamins' }] });
+    listMedicines.mockResolvedValue(page([paracetamol, ibuprofen]));
   });
 
-  it('renders an out-of-stock medicine with disabled details action', async () => {
+  // 1 — listing shows name, price, category and stock status; out-of-stock cannot be opened
+  it('lists medicines with name, price, category and stock status', async () => {
     render(<PatientMedicineCataloguePage />);
 
-    expect(await screen.findByText('Paracetamol')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Paracetamol' })).toBeInTheDocument();
+    expect(screen.getByText('LKR 150.00')).toBeInTheDocument();
+    expect(screen.getAllByText('Pain Relief').length).toBeGreaterThan(0);
+    expect(screen.getByText('Available')).toBeInTheDocument();
     expect(screen.getByText('Out of stock')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /view details/i })).toBeDisabled();
+    expect(screen.getByText('Prescription required')).toBeInTheDocument();
+
+    const detailButtons = screen.getAllByRole('button', { name: /view details/i });
+    expect(detailButtons[0]).toBeEnabled();
+    expect(detailButtons[1]).toBeDisabled();
+  });
+
+  // 2 — Scenario 1 + Scenario 3: search sends the term; no matches shows the empty message
+  it('searches by name and shows "no results" when nothing matches', async () => {
+    const user = userEvent.setup();
+    render(<PatientMedicineCataloguePage />);
+    await screen.findByRole('heading', { name: 'Paracetamol' });
+
+    listMedicines.mockResolvedValueOnce(page([]));
+    await user.type(screen.getByLabelText('Search medicines'), 'unicorn tablets');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+
+    await waitFor(() => expect(listMedicines).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'unicorn tablets', page: 1 })));
+    expect(await screen.findByText('No medicines match your search.')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Paracetamol' })).not.toBeInTheDocument();
+  });
+
+  // 3 — Scenario 2: category filter is sent to the API
+  it('filters by the selected category', async () => {
+    const user = userEvent.setup();
+    render(<PatientMedicineCataloguePage />);
+    await screen.findByRole('heading', { name: 'Paracetamol' });
+    expect(await screen.findByRole('option', { name: 'Vitamins' })).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText('Category'), '2');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+
+    await waitFor(() => expect(listMedicines).toHaveBeenLastCalledWith(expect.objectContaining({ categoryId: '2', page: 1 })));
+  });
+
+  // 4 — "Medicine list fails to load → show an appropriate error message" and Retry reloads
+  it('shows an error message when the catalogue fails to load and retries on demand', async () => {
+    const user = userEvent.setup();
+    listMedicines.mockRejectedValueOnce(new Error('network down'));
+    render(<PatientMedicineCataloguePage />);
+
+    expect(await screen.findByText(/Unable to load medicines/)).toBeInTheDocument();
+    expect(screen.queryByText('No medicines match your search.')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+
+    expect(await screen.findByRole('heading', { name: 'Paracetamol' })).toBeInTheDocument();
+    expect(screen.queryByText(/Unable to load medicines/)).not.toBeInTheDocument();
+    expect(listMedicines).toHaveBeenCalledTimes(2);
+  });
+
+  // 5 - REQUIREMENT (user story: "Filter medicines by stock availability").
+  //     The page must offer a stock-availability control and hide out-of-stock medicines when it is applied.
+  //     EXPECTED TO FAIL on the current build: no such control exists on the catalogue page.
+  it('offers a stock-availability filter that hides out-of-stock medicines', async () => {
+    const user = userEvent.setup();
+    render(<PatientMedicineCataloguePage />);
+    await screen.findByRole('heading', { name: 'Paracetamol' });
+
+    const availabilityFilter = screen.queryByLabelText(/availability|in stock/i);
+    expect(availabilityFilter, 'Stock-availability filter is not implemented: no control labelled "Availability" / "In stock" on the catalogue page').not.toBeNull();
+
+    await user.click(availabilityFilter);
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+    await waitFor(() => expect(listMedicines).toHaveBeenLastCalledWith(expect.objectContaining({ inStockOnly: true })));
   });
 });
