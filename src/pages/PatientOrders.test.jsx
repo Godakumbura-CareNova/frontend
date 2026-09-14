@@ -17,6 +17,8 @@ it('reviews pickup items then confirms the saved order', async () => {
   api.place.mockResolvedValue({ data: order });
   render(<MemoryRouter><PatientCheckoutPage /></MemoryRouter>);
   expect(await screen.findByText('Ibuprofen')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Order summary' })).toBeInTheDocument();
+  expect(screen.getByText('1 medicine')).toBeInTheDocument();
   expect(screen.getByText('Pharmacy pickup')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Confirm and place order' }));
   expect(await screen.findByText('Order placed successfully')).toBeInTheDocument();

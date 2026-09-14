@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft, CheckCircle2, ShoppingBag, Store } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import { orderApi } from '../api/orderApi';
@@ -66,14 +67,28 @@ export default function PatientCheckoutPage() {
     catch { setError('Unable to reset checkout progress.'); return; }
     setSaved(null); setCanReview(false); await loadReview();
   };
-  return <DashboardLayout><section className="orders-page">
+  return <DashboardLayout><section className="orders-page checkout-page">
     {order ? <><h1>Order placed successfully</h1><div className="order-card order-summary"><h2>{order.orderNumber}</h2><OrderStatus status={order.status} /><p>Total: {money(order.totalAmount)}</p><p>Collection: Pharmacy pickup</p><Link className="order-primary" to={`/patient/orders/${order.id}`}>View my order</Link></div></> : <>
-      <h1>Review your order</h1><p className="order-intro">Confirm your medicines for collection at the pharmacy.</p>
+      <header className="checkout-hero">
+        <span className="checkout-hero-icon"><ShoppingBag size={25} /></span>
+        <div><p className="checkout-eyebrow">PHARMACY PICKUP</p><h1>Review your order</h1><p>Confirm your medicines for collection at the pharmacy.</p></div>
+      </header>
       {error && <div role="alert" className="order-error">{error}</div>}
       {!review && !error && <p>Loading checkout...</p>}
       {recoveryBlocked && <Link to="/patient/orders">View My orders</Link>}
       {!review && error && !saved && storageKey && !recoveryBlocked && <button onClick={loadReview}>Retry loading checkout</button>}
-      {review && (review.items.length ? <><OrderItems {...review} /><div className="order-card order-summary"><strong>Pharmacy pickup</strong><p>Your order starts as Pending. Wait until it is Ready for Collection.</p></div><div className="order-actions"><Link to="/patient/cart">Back to cart</Link>{canReview && <button disabled={busy} onClick={refresh}>Refresh and review</button>}<button className="order-primary" disabled={busy} onClick={place}>{busy ? 'Placing order...' : saved ? 'Retry order placement' : 'Confirm and place order'}</button></div></> : <div className="order-card order-summary"><p>No medicines are ready to order yet.</p><Link to="/patient/cart">Back to cart</Link></div>)}
+      {review && (review.items.length ? <>
+        <OrderItems {...review} heading="Order summary" />
+        <div className="checkout-pickup-card">
+          <span className="checkout-pickup-icon"><Store size={21} /></span>
+          <div><h2>Pharmacy pickup</h2><p>Your order starts as <strong>Pending</strong>. We will notify you when it is ready for collection.</p></div>
+          <CheckCircle2 className="checkout-pickup-check" size={23} aria-hidden="true" />
+        </div>
+        <div className="order-actions checkout-actions">
+          <Link className="checkout-back" to="/patient/cart"><ArrowLeft size={17} />Back to cart</Link>
+          <span className="checkout-action-group">{canReview && <button disabled={busy} onClick={refresh}>Refresh and review</button>}<button className="order-primary" disabled={busy} onClick={place}>{busy ? 'Placing order...' : saved ? 'Retry order placement' : 'Confirm and place order'}</button></span>
+        </div>
+      </> : <div className="order-card order-summary"><p>No medicines are ready to order yet.</p><Link to="/patient/cart">Back to cart</Link></div>)}
     </>}
   </section></DashboardLayout>;
 }
