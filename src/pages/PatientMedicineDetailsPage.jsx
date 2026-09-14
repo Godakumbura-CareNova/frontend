@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ShoppingCart } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
 import { catalogueApi } from '../api/catalogueApi';
 import { cartApi } from '../api/cartApi';
@@ -80,10 +81,10 @@ export default function PatientMedicineDetailsPage() {
                 <button aria-label="Increase quantity" onClick={() => setQuantity(Math.min(medicine.stockQuantity, quantity + 1))}>+</button>
               </div>
             </div>
-            <div className="total-box"><strong>Total: LKR {(medicine.price * quantity).toFixed(2)}</strong></div>
+            <div className="total-box"><strong className="total-price">Total: LKR {(medicine.price * quantity).toFixed(2)}</strong></div>
             {message && <div className="management-alert success">{message}</div>}
-            <button onClick={continueToNextStep} disabled={adding} className="primary-action details-action">
-              {medicine.prescriptionRequired ? 'Continue to prescription upload' : adding ? 'Adding to cart...' : 'Add to Cart'}
+            <button onClick={continueToNextStep} disabled={adding} className={`primary-action details-action ${medicine.prescriptionRequired ? '' : 'details-add-to-cart'}`}>
+              {medicine.prescriptionRequired ? 'Continue to prescription upload' : <>{!adding && <ShoppingCart size={19} />} {adding ? 'Adding to cart...' : 'Add to Cart'}</>}
             </button>
           </div>
         </div>

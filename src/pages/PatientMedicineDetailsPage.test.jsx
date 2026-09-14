@@ -28,7 +28,11 @@ describe('PatientMedicineDetailsPage', () => {
     const user = userEvent.setup();
     render(<MemoryRouter initialEntries={['/patient/medicines/2']}><Routes><Route path="/patient/medicines/:medicineId" element={<PatientMedicineDetailsPage />}/></Routes></MemoryRouter>);
 
-    await user.click(await screen.findByRole('button', { name: /add to cart/i }));
+    const addToCartButton = await screen.findByRole('button', { name: /add to cart/i });
+    expect(addToCartButton).toHaveClass('details-add-to-cart');
+    expect(addToCartButton.querySelector('svg')).not.toBeNull();
+    expect(screen.getByText('Total: LKR 200.00')).toHaveClass('total-price');
+    await user.click(addToCartButton);
 
     expect(addItem).toHaveBeenCalledWith({ medicineId: 2, quantity: 1 });
     expect(await screen.findByText(/added to your cart/i)).toBeInTheDocument();
