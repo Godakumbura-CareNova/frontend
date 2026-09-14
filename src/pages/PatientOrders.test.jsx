@@ -58,5 +58,6 @@ it('shows rejection reason and saved item quantity', async () => {
   api.get.mockResolvedValue({ data: { ...order, status: 'Rejected', rejectionReason: 'Unavailable' } });
   render(<MemoryRouter initialEntries={['/patient/orders/12']}><Routes><Route path='/patient/orders/:orderId' element={<PatientOrderDetailsPage />} /></Routes></MemoryRouter>);
   expect(await screen.findByText('Unavailable')).toBeInTheDocument();
+  expect(screen.getByText('PHARMACY PICKUP ORDER')).toBeInTheDocument();
   expect(screen.getByText('Quantity: 2')).toBeInTheDocument();
 });
