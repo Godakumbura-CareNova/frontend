@@ -37,5 +37,46 @@ export default function PatientPrescriptionsPage() {
     }
   };
 
-  return <DashboardLayout><section className="prescriptions-page"><div className="management-heading"><h1>My prescriptions</h1><p>View prescriptions you have uploaded for pharmacy verification.</p></div>{error && <div className="management-alert error">{error}<button onClick={load}>Retry</button></div>}{loading ? <p>Loading prescriptions...</p> : prescriptions.length === 0 ? <div className="prescriptions-empty"><FileText size={34} /><h2>No prescriptions uploaded</h2><p>Your uploaded prescription records will appear here.</p></div> : <div className="prescriptions-card"><div className="prescriptions-table"><div className="prescription-table-head"><span>Prescription</span><span>Medicine</span><span>Quantity</span><span>Status</span><span /></div>{prescriptions.map((prescription) => <div className="prescription-table-row" key={prescription.id}><span className="prescription-file"><FileText size={18} />{prescription.originalFileName}</span><span>{prescription.medicineName}{prescription.decisionReason && <small>Pharmacy note: {prescription.decisionReason}</small>}</span><span>{prescription.quantity}</span><span className={`prescription-status-badge ${prescription.status === 'PendingVerification' ? 'pending' : ''}`}>{statusLabel(prescription.status)}</span><button type="button" onClick={() => openFile(prescription.id)} className="open-prescription"><FolderOpen size={17} />Open file</button></div>)}</div></div>}</section></DashboardLayout>;
+  const removePrescription = async (prescription) => {
+    if (!window.confirm(`Delete ${prescription.originalFileName}? This also removes the linked medicine from your cart.`)) return;
+    try {
+      await prescriptionApi.remove(prescription.id);
+      await load();
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Unable to delete this prescription. Please try again.');
+    }
+  };
+
+  return (
+    <DashboardLayout>
+      <section className="prescriptions-page">
+        <div className="management-heading">
+          <h1>My prescriptions</h1>
+          <p>View prescriptions you have uploaded for pharmacy verification.</p>
+        </div>
+        {error && <div className="management-alert error">{error}<button type="button" onClick={load}>Retry</button></div>}
+        {loading ? <p>Loading prescriptions...</p> : prescriptions.length === 0 ? (
+          <div className="prescriptions-empty"><FileText size={34} /><h2>No prescriptions uploaded</h2><p>Your uploaded prescription records will appear here.</p></div>
+        ) : (
+          <div className="prescriptions-card">
+            <div className="prescriptions-table">
+              <div className="prescription-table-head"><span>Prescription</span><span>Medicine</span><span>Quantity</span><span>Status</span><span /></div>
+              {prescriptions.map((prescription) => (
+                <div className="prescription-table-row" key={prescription.id}>
+                  <span className="prescription-file"><FileText size={18} />{prescription.originalFileName}</span>
+                  <span>{prescription.medicineName}{prescription.decisionReason && <small>Pharmacy note: {prescription.decisionReason}</small>}</span>
+                  <span>{prescription.quantity}</span>
+                  <span className={`prescription-status-badge ${prescription.status === 'PendingVerification' ? 'pending' : ''}`}>{statusLabel(prescription.status)}</span>
+                  <span className="prescription-actions">
+                    <button type="button" onClick={() => openFile(prescription.id)} className="open-prescription"><FolderOpen size={17} />Open file</button>
+                    {prescription.status === 'PendingVerification' && <button type="button" aria-label="Delete prescription" onClick={() => removePrescription(prescription)} className="delete-prescription">Delete</button>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+    </DashboardLayout>
+  );
 }
