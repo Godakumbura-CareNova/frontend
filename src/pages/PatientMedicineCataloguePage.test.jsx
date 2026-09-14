@@ -38,4 +38,10 @@ describe('PatientMedicineCataloguePage', () => {
     const badge = await screen.findByText('No prescription required');
     expect(badge).toHaveClass('prescription-status', 'non-prescription');
   });
+
+  it('uses a compact search action in the filter bar', async () => {
+    renderPage();
+
+    expect(await screen.findByRole('button', { name: 'Search' })).toHaveClass('catalogue-search-action');
+  });
 });
