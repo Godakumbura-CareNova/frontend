@@ -15,5 +15,6 @@ describe('PharmacyPrescriptionReviewPage', () => {
     expect(await screen.findByText('doctor-note.pdf')).toBeInTheDocument();
     expect(screen.getByText('Amoxicillin 250mg × 2')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Verify prescription' })).toBeInTheDocument();
+    expect(screen.getByText('doctor-note.pdf').closest('article')).toHaveClass('staff-prescription-card');
   });
 });
