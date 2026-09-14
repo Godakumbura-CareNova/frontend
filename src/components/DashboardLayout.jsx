@@ -48,8 +48,8 @@ const NAV_BY_ROLE = {
   ],
   PharmacyStaff: [
     { to: '/pharmacy-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
-    { label: 'Medicine Orders', icon: ShoppingBag, enabled: false },
-    { label: 'Prescriptions', icon: FileCheck, enabled: false },
+    { to: '/pharmacy/orders', label: 'Medicine Orders', icon: ShoppingBag, enabled: true },
+    { to: '/pharmacy/prescriptions', label: 'Prescriptions', icon: FileCheck, enabled: true },
     { to: '/pharmacy/medicines', label: 'Medicines', icon: Pill, enabled: true },
     { to: '/pharmacy/categories', label: 'Categories', icon: PackageSearch, enabled: true },
     { to: '/pharmacy/inventory', label: 'Inventory', icon: PackageSearch, enabled: true },
