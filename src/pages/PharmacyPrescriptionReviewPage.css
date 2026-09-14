@@ -59,6 +59,25 @@
   max-width: 490px;
 }
 
+.staff-prescriptions-page button.staff-prescription-file,
+.staff-prescriptions-page button.staff-prescription-verify,
+.staff-prescriptions-page button.staff-prescription-reject,
+.staff-prescriptions-page button.staff-prescription-confirm,
+.staff-prescriptions-page button.staff-prescription-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
 .staff-prescription-status {
   padding: 7px 11px;
   border-radius: 999px;
@@ -71,6 +90,11 @@
 .staff-prescriptions-page button.staff-prescription-file {
   border-color: #cbd5e1;
   color: #374151;
+  background: #fff;
+}
+
+.staff-prescriptions-page button.staff-prescription-file:hover {
+  background: #f8fafc;
 }
 
 .staff-prescriptions-page button.staff-prescription-verify,
