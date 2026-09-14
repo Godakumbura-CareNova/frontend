@@ -88,13 +88,13 @@
 }
 
 .staff-prescriptions-page button.staff-prescription-file {
-  border-color: #cbd5e1;
-  color: #374151;
-  background: #fff;
+  border-color: #087443;
+  color: #087443;
+  background: #f3fbf6;
 }
 
 .staff-prescriptions-page button.staff-prescription-file:hover {
-  background: #f8fafc;
+  background: #e1f3e7;
 }
 
 .staff-prescriptions-page button.staff-prescription-verify,

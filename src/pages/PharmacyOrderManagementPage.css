@@ -74,14 +74,22 @@
   font-weight: 700;
 }
 
-.staff-orders-page button.staff-order-ready,
+.staff-orders-page button.staff-order-ready {
+  border-color: #087443;
+  background: #087443;
+  color: #fff;
+}
+
+.staff-orders-page button.staff-order-ready:hover {
+  background: #065e36;
+}
+
 .staff-orders-page button.staff-order-confirm-rejection {
   border-color: #d9231b;
   background: #d9231b;
   color: #fff;
 }
 
-.staff-orders-page button.staff-order-ready:hover,
 .staff-orders-page button.staff-order-confirm-rejection:hover {
   background: #b91c1c;
 }
