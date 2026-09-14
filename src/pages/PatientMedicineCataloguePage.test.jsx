@@ -28,7 +28,7 @@ describe('PatientMedicineCataloguePage', () => {
     renderPage();
 
     expect(await screen.findByText('Paracetamol')).toBeInTheDocument();
-    expect(screen.getByText('Out of stock')).toBeInTheDocument();
+    expect(screen.getByText('Out of stock', { selector: '.stock-status' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /view details/i })).toBeDisabled();
   });
 
