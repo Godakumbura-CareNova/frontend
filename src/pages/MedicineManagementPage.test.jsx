@@ -21,6 +21,7 @@ describe('MedicineManagementPage', () => {
   it('clears the selected image after the medicine is saved', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><MedicineManagementPage /></MemoryRouter>);
+    expect(screen.getByText('Medicine Management').closest('section')).toHaveClass('medicine-management-dashboard');
     await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Azithromycin 500mg');
     await user.type(screen.getByRole('textbox', { name: 'Description' }), 'Antibiotic tablets');
     await user.selectOptions(screen.getByLabelText('Category'), '1');
