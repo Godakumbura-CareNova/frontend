@@ -16,6 +16,7 @@ describe('PharmacyOrderManagementPage', () => {
     expect(await screen.findByText('CN-000003')).toBeInTheDocument();
     expect(screen.getByText('Amoxicillin × 2')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Mark ready for collection' })).toBeInTheDocument();
+    expect(screen.getByText('CN-000003').closest('article')).toHaveClass('staff-order-card');
   });
 
   it('requires a reason before rejecting an order', async () => {

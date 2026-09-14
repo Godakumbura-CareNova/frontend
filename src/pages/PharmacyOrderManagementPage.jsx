@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { staffOrderApi } from '../api/staffOrderApi';
+import './PharmacyOrderManagementPage.css';
 
 export default function PharmacyOrderManagementPage() {
   const [orders, setOrders] = useState(null);
@@ -48,25 +49,29 @@ export default function PharmacyOrderManagementPage() {
 
   return (
     <DashboardLayout>
-      <section className="orders-page">
-        <h1>Medicine orders</h1>
-        <p className="order-intro">Prepare pending pharmacy pickup orders and record collection.</p>
+      <section className="orders-page staff-orders-page">
+        <header className="staff-orders-header">
+          <p className="staff-orders-eyebrow">Pharmacy workspace</p>
+          <h1>Medicine orders</h1>
+          <p className="order-intro">Prepare pending pharmacy pickup orders and record collection.</p>
+        </header>
         {error && <div role="alert" className="order-error">{error}<button type="button" onClick={load}>Retry</button></div>}
         {!orders && !error && <p>Loading orders...</p>}
         {orders?.length === 0 && <p>No orders need pharmacy action.</p>}
         {orders?.map((order) => (
-          <article className="order-card" key={order.id}>
-            <div>
+          <article className="order-card staff-order-card" key={order.id}>
+            <div className="staff-order-details">
+              <p className="staff-order-label">Order</p>
               <h2>{order.orderNumber}</h2>
-              <p>{order.items.map((item) => `${item.medicineName} × ${item.quantity}`).join(', ')}</p>
-              <strong>LKR {Number(order.totalAmount).toFixed(2)}</strong>
+              <p className="staff-order-items">{order.items.map((item) => `${item.medicineName} × ${item.quantity}`).join(', ')}</p>
+              <p className="staff-order-total">LKR {Number(order.totalAmount).toFixed(2)}</p>
             </div>
-            <div>
-              <span className="prescription-status-badge">{order.status}</span>
+            <div className="staff-order-actions">
+              <span className="staff-order-status">{order.status}</span>
               {order.status === 'Pending' && (
                 <>
-                  <button type="button" onClick={() => change(order.id, 'ReadyForCollection')}>Mark ready for collection</button>
-                  <button type="button" onClick={() => startRejecting(order.id)}>Reject order</button>
+                  <button className="staff-order-ready" type="button" onClick={() => change(order.id, 'ReadyForCollection')}>Mark ready for collection</button>
+                  <button className="staff-order-reject" type="button" onClick={() => startRejecting(order.id)}>Reject order</button>
                   {rejectingId === order.id && (
                     <div className="order-rejection">
                       <label htmlFor={`rejection-reason-${order.id}`}>Rejection reason</label>
@@ -76,13 +81,15 @@ export default function PharmacyOrderManagementPage() {
                         onChange={(event) => setRejectionReason(event.target.value)}
                       />
                       {rejectionError && <p role="alert">{rejectionError}</p>}
-                      <button type="button" onClick={() => reject(order.id)}>Confirm rejection</button>
-                      <button type="button" onClick={() => setRejectingId(null)}>Cancel</button>
+                      <div className="order-rejection-actions">
+                        <button className="staff-order-confirm-rejection" type="button" onClick={() => reject(order.id)}>Confirm rejection</button>
+                        <button className="staff-order-cancel" type="button" onClick={() => setRejectingId(null)}>Cancel</button>
+                      </div>
                     </div>
                   )}
                 </>
               )}
-              {order.status === 'ReadyForCollection' && <button type="button" onClick={() => change(order.id, 'Collected')}>Mark collected</button>}
+              {order.status === 'ReadyForCollection' && <button className="staff-order-ready" type="button" onClick={() => change(order.id, 'Collected')}>Mark collected</button>}
             </div>
           </article>
         ))}
