@@ -5,9 +5,9 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import MedicineManagementPage from './MedicineManagementPage';
 
-const { listMedicines, listCategories, create, uploadImage } = vi.hoisted(() => ({ listMedicines: vi.fn(), listCategories: vi.fn(), create: vi.fn(), uploadImage: vi.fn() }));
+const { listMedicines, listCategories, create, uploadImage, activate } = vi.hoisted(() => ({ listMedicines: vi.fn(), listCategories: vi.fn(), create: vi.fn(), uploadImage: vi.fn(), activate: vi.fn() }));
 vi.mock('../components/DashboardLayout', () => ({ default: ({ children }) => <main>{children}</main> }));
-vi.mock('../api/medicineApi', () => ({ medicineApi: { list: listMedicines, create, uploadImage } }));
+vi.mock('../api/medicineApi', () => ({ medicineApi: { list: listMedicines, create, uploadImage, activate } }));
 vi.mock('../api/categoryApi', () => ({ categoryApi: { list: listCategories } }));
 
 describe('MedicineManagementPage', () => {
@@ -30,5 +30,11 @@ describe('MedicineManagementPage', () => {
     await user.upload(input, new File(['image'], 'azithromycin.jpg', { type: 'image/jpeg' }));
     await user.click(screen.getByRole('button', { name: 'Add medicine' }));
     await waitFor(() => expect(input.files).toHaveLength(0));
+  });
+
+  it('shows an Activate action for a deactivated medicine', async () => {
+    listMedicines.mockResolvedValueOnce({ data: [{ id: 4, name: 'Paracetamol 500mg', categoryName: 'Pain Relief', price: 175, prescriptionRequired: false, isActive: false }] });
+    render(<MemoryRouter><MedicineManagementPage /></MemoryRouter>);
+    expect(await screen.findByRole('button', { name: 'Activate' })).toBeInTheDocument();
   });
 });
