@@ -16,4 +16,6 @@
 .confirmation-card dt { color: var(--text-muted); font-size: 13px; }
 .confirmation-card dd { margin: 0; font-weight: 700; }
 .pending-status { color: #9a3412; }
+.confirmation-card .secondary-action { border: 1px solid #087443; background: #f3fbf6; color: #087443; }
+.confirmation-card .secondary-action:hover { background: #e1f3e7; }
 @media (max-width: 600px) { .prescription-card { padding: 24px; } .confirmation-card dl { grid-template-columns: 1fr; } }

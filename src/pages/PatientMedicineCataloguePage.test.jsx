@@ -1,6 +1,6 @@
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PatientMedicineCataloguePage from './PatientMedicineCataloguePage';
 
@@ -28,7 +28,7 @@ describe('PatientMedicineCataloguePage', () => {
     renderPage();
 
     expect(await screen.findByText('Paracetamol')).toBeInTheDocument();
-    expect(screen.getByText('Out of stock')).toBeInTheDocument();
+    expect(screen.getByText('Out of stock', { selector: '.stock-status' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /view details/i })).toBeDisabled();
   });
 
@@ -37,5 +37,26 @@ describe('PatientMedicineCataloguePage', () => {
 
     const badge = await screen.findByText('No prescription required');
     expect(badge).toHaveClass('prescription-status', 'non-prescription');
+  });
+
+  it('uses a compact search action in the filter bar', async () => {
+    renderPage();
+
+    expect(await screen.findByRole('button', { name: 'Search' })).toHaveClass('catalogue-search-action');
+  });
+
+  it('clears active filters from an empty search result', async () => {
+    listMedicines.mockResolvedValue({ data: { items: [], page: 1, totalPages: 1, totalCount: 0 } });
+    renderPage();
+
+    const searchInput = await screen.findByRole('textbox', { name: 'Search medicines' });
+    fireEvent.change(searchInput, { target: { value: 'missing' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+
+    expect(await screen.findByRole('button', { name: 'Show all medicines' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Show all medicines' }));
+
+    await waitFor(() => expect(listMedicines).toHaveBeenLastCalledWith({ search: '', categoryId: '', inStock: '', page: 1 }));
+    expect(searchInput).toHaveValue('');
   });
 });

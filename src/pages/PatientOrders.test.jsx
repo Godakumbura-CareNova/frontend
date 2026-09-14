@@ -17,6 +17,8 @@ it('reviews pickup items then confirms the saved order', async () => {
   api.place.mockResolvedValue({ data: order });
   render(<MemoryRouter><PatientCheckoutPage /></MemoryRouter>);
   expect(await screen.findByText('Ibuprofen')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Order summary' })).toBeInTheDocument();
+  expect(screen.getByText('1 medicine')).toBeInTheDocument();
   expect(screen.getByText('Pharmacy pickup')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Confirm and place order' }));
   expect(await screen.findByText('Order placed successfully')).toBeInTheDocument();
@@ -51,6 +53,7 @@ it('blocks a fresh request if persisted checkout cannot be recovered', async () 
 it('shows history with readable status and order links', async () => {
   api.list.mockResolvedValue({ data: [{ ...order, status: 'ReadyForCollection' }] });
   render(<MemoryRouter><PatientOrdersPage /></MemoryRouter>);
+  expect(await screen.findByText('Order history')).toBeInTheDocument();
   expect(await screen.findByText('Ready for Collection')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'CN-000012' })).toHaveAttribute('href', '/patient/orders/12');
 });
@@ -58,5 +61,6 @@ it('shows rejection reason and saved item quantity', async () => {
   api.get.mockResolvedValue({ data: { ...order, status: 'Rejected', rejectionReason: 'Unavailable' } });
   render(<MemoryRouter initialEntries={['/patient/orders/12']}><Routes><Route path='/patient/orders/:orderId' element={<PatientOrderDetailsPage />} /></Routes></MemoryRouter>);
   expect(await screen.findByText('Unavailable')).toBeInTheDocument();
+  expect(screen.getByText('PHARMACY PICKUP ORDER')).toBeInTheDocument();
   expect(screen.getByText('Quantity: 2')).toBeInTheDocument();
 });

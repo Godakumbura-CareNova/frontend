@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ShoppingCart } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
 import { catalogueApi } from '../api/catalogueApi';
 import { cartApi } from '../api/cartApi';
@@ -11,7 +12,8 @@ export default function PatientMedicineDetailsPage() {
   const { medicineId } = useParams();
   const navigate = useNavigate();
   const [medicine, setMedicine] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+  const [quantityInput, setQuantityInput] = useState('1');
+  const [quantityNotice, setQuantityNotice] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [adding, setAdding] = useState(false);
@@ -25,6 +27,41 @@ export default function PatientMedicineDetailsPage() {
   const backLink = <Link className="medicine-back-link" to="/patient/medicines"><span aria-hidden="true">←</span> Back to medicines</Link>;
   if (error) return <DashboardLayout><section className="medicine-details-page">{backLink}<div className="management-alert error">{error}</div></section></DashboardLayout>;
   if (!medicine) return <DashboardLayout><section className="medicine-details-page">{backLink}<p>Loading medicine...</p></section></DashboardLayout>;
+
+  const parsedQuantity = Number(quantityInput);
+  const quantityInputError = !/^\d+$/.test(quantityInput)
+    ? 'Enter a whole number.'
+    : parsedQuantity < 1
+      ? 'Enter a quantity of at least 1.'
+      : parsedQuantity > medicine.stockQuantity
+        ? `Only ${medicine.stockQuantity} units are available.`
+        : '';
+  const quantityError = quantityInputError || quantityNotice;
+  const isQuantityValid = !quantityInputError;
+  const quantity = isQuantityValid ? parsedQuantity : 0;
+
+  const updateQuantity = (value) => {
+    setQuantityInput(value);
+    setQuantityNotice('');
+  };
+
+  const changeQuantity = (change) => {
+    if (!isQuantityValid) {
+      setQuantityNotice(quantityInputError);
+      return;
+    }
+    const nextQuantity = quantity + change;
+    if (nextQuantity < 1) {
+      setQuantityNotice('Enter a quantity of at least 1.');
+      return;
+    }
+    if (nextQuantity > medicine.stockQuantity) {
+      setQuantityNotice(`Only ${medicine.stockQuantity} units are available.`);
+      return;
+    }
+    setQuantityInput(String(nextQuantity));
+    setQuantityNotice('');
+  };
 
   const imageUrl = medicine.imagePath
     ? `${pharmacyHost}${medicine.imagePath.startsWith('/') ? '' : '/'}${medicine.imagePath}`
@@ -75,15 +112,16 @@ export default function PatientMedicineDetailsPage() {
             <div className="quantity-section">
               <span>Quantity</span>
               <div className="quantity-control">
-                <button aria-label="Decrease quantity" onClick={() => setQuantity(Math.max(1, quantity - 1))}>−</button>
-                <strong>{quantity}</strong>
-                <button aria-label="Increase quantity" onClick={() => setQuantity(Math.min(medicine.stockQuantity, quantity + 1))}>+</button>
+                <button aria-label="Decrease quantity" onClick={() => changeQuantity(-1)}>−</button>
+                <input aria-label="Quantity" aria-invalid={!isQuantityValid} aria-describedby={quantityError ? 'quantity-error' : undefined} inputMode="numeric" value={quantityInput} onChange={(event) => updateQuantity(event.target.value)} />
+                <button aria-label="Increase quantity" onClick={() => changeQuantity(1)}>+</button>
               </div>
             </div>
-            <div className="total-box"><strong>Total: LKR {(medicine.price * quantity).toFixed(2)}</strong></div>
+            {quantityError && <p id="quantity-error" role="alert" className="quantity-error">{quantityError}</p>}
+            <div className="total-box"><strong className="total-price">{isQuantityValid ? `Total: LKR ${(medicine.price * quantity).toFixed(2)}` : 'Total: —'}</strong></div>
             {message && <div className="management-alert success">{message}</div>}
-            <button onClick={continueToNextStep} disabled={adding} className="primary-action details-action">
-              {medicine.prescriptionRequired ? 'Continue to prescription upload' : adding ? 'Adding to cart...' : 'Add to Cart'}
+            <button onClick={continueToNextStep} disabled={adding || !isQuantityValid} className={`primary-action details-action ${medicine.prescriptionRequired ? '' : 'details-add-to-cart'}`}>
+              {medicine.prescriptionRequired ? 'Continue to prescription upload' : <>{!adding && <ShoppingCart size={19} />} {adding ? 'Adding to cart...' : 'Add to Cart'}</>}
             </button>
           </div>
         </div>
