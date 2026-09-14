@@ -21,4 +21,10 @@ describe('PatientPrescriptionsPage', () => {
     expect(screen.getByText('Amoxicillin 250mg')).toBeInTheDocument();
     expect(screen.getByText('Pending verification')).toBeInTheDocument();
   });
+
+  it('shows the pharmacy rejection reason', async () => {
+    list.mockResolvedValue({ data: [{ id: 8, originalFileName: 'blurred.pdf', medicineName: 'Amoxicillin 250mg', quantity: 2, status: 'Rejected', decisionReason: 'Image is unreadable' }] });
+    render(<MemoryRouter><PatientPrescriptionsPage /></MemoryRouter>);
+    expect(await screen.findByText('Pharmacy note: Image is unreadable')).toBeInTheDocument();
+  });
 });
