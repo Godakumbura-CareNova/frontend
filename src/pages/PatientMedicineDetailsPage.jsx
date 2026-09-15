@@ -28,6 +28,8 @@ export default function PatientMedicineDetailsPage() {
   if (error) return <DashboardLayout><section className="medicine-details-page">{backLink}<div className="management-alert error">{error}</div></section></DashboardLayout>;
   if (!medicine) return <DashboardLayout><section className="medicine-details-page">{backLink}<p>Loading medicine...</p></section></DashboardLayout>;
 
+  const isOutOfStock = medicine.stockQuantity < 1;
+
   const parsedQuantity = Number(quantityInput);
   const quantityInputError = !/^\d+$/.test(quantityInput)
     ? 'Enter a whole number.'
@@ -107,20 +109,21 @@ export default function PatientMedicineDetailsPage() {
               <span className={medicine.prescriptionRequired ? 'prescription-badge required' : 'prescription-badge'}>
                 {medicine.prescriptionRequired ? 'Prescription required' : 'No prescription required'}
               </span>
-              <span className="stock-badge">{medicine.stockQuantity} units available</span>
+              <span className={`stock-badge${isOutOfStock ? ' out-of-stock' : ''}`}>{isOutOfStock ? 'Out of stock' : `${medicine.stockQuantity} units available`}</span>
             </div>
+            {isOutOfStock && <p className="out-of-stock-notice">This medicine is currently unavailable.</p>}
             <div className="quantity-section">
               <span>Quantity</span>
               <div className="quantity-control">
-                <button aria-label="Decrease quantity" onClick={() => changeQuantity(-1)}>−</button>
-                <input aria-label="Quantity" aria-invalid={!isQuantityValid} aria-describedby={quantityError ? 'quantity-error' : undefined} inputMode="numeric" value={quantityInput} onChange={(event) => updateQuantity(event.target.value)} />
-                <button aria-label="Increase quantity" onClick={() => changeQuantity(1)}>+</button>
+                <button aria-label="Decrease quantity" disabled={isOutOfStock} onClick={() => changeQuantity(-1)}>−</button>
+                <input aria-label="Quantity" disabled={isOutOfStock} aria-invalid={!isQuantityValid} aria-describedby={quantityError ? 'quantity-error' : undefined} inputMode="numeric" value={quantityInput} onChange={(event) => updateQuantity(event.target.value)} />
+                <button aria-label="Increase quantity" disabled={isOutOfStock} onClick={() => changeQuantity(1)}>+</button>
               </div>
             </div>
             {quantityError && <p id="quantity-error" role="alert" className="quantity-error">{quantityError}</p>}
             <div className="total-box"><strong className="total-price">{isQuantityValid ? `Total: LKR ${(medicine.price * quantity).toFixed(2)}` : 'Total: —'}</strong></div>
             {message && <div className="management-alert success">{message}</div>}
-            <button onClick={continueToNextStep} disabled={adding || !isQuantityValid} className={`primary-action details-action ${medicine.prescriptionRequired ? '' : 'details-add-to-cart'}`}>
+            <button onClick={continueToNextStep} disabled={isOutOfStock || adding || !isQuantityValid} className={`primary-action details-action ${medicine.prescriptionRequired ? '' : 'details-add-to-cart'}`}>
               {medicine.prescriptionRequired ? 'Continue to prescription upload' : <>{!adding && <ShoppingCart size={19} />} {adding ? 'Adding to cart...' : 'Add to Cart'}</>}
             </button>
           </div>

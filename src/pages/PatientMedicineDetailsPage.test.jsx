@@ -58,4 +58,15 @@ describe('PatientMedicineDetailsPage', () => {
     await user.type(quantityInput, 'abc');
     expect(screen.getByText('Enter a whole number.')).toBeInTheDocument();
   });
+
+  it('shows an out-of-stock medicine but disables quantity and purchase actions', async () => {
+    getMedicine.mockResolvedValue({ data: { id: 3, name: 'Unavailable medicine', categoryName: 'Medicine', description: 'Details', price: 100, stockQuantity: 0, prescriptionRequired: false } });
+    render(<MemoryRouter initialEntries={['/patient/medicines/3']}><Routes><Route path="/patient/medicines/:medicineId" element={<PatientMedicineDetailsPage />}/></Routes></MemoryRouter>);
+
+    expect(await screen.findByText('Out of stock')).toBeInTheDocument();
+    expect(screen.getByLabelText('Decrease quantity')).toBeDisabled();
+    expect(screen.getByLabelText('Quantity')).toBeDisabled();
+    expect(screen.getByLabelText('Increase quantity')).toBeDisabled();
+    expect(screen.getByRole('button', { name: /add to cart/i })).toBeDisabled();
+  });
 });

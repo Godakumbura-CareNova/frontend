@@ -1,8 +1,10 @@
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import PatientMedicineCataloguePage from './PatientMedicineCataloguePage';
+
+const CurrentPath = () => <output>{useLocation().pathname}</output>;
 
 const { listMedicines, listCategories } = vi.hoisted(() => ({ listMedicines: vi.fn(), listCategories: vi.fn() }));
 
@@ -22,14 +24,16 @@ describe('PatientMedicineCataloguePage', () => {
     });
   });
 
-  const renderPage = () => render(<MemoryRouter><PatientMedicineCataloguePage /></MemoryRouter>);
+  const renderPage = () => render(<MemoryRouter><PatientMedicineCataloguePage /><CurrentPath /></MemoryRouter>);
 
-  it('renders an out-of-stock medicine with disabled details action', async () => {
+  it('allows patients to view details for an out-of-stock medicine', async () => {
     renderPage();
 
     expect(await screen.findByText('Paracetamol')).toBeInTheDocument();
     expect(screen.getByText('Out of stock', { selector: '.stock-status' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /view details/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /view details/i })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: /view details/i }));
+    expect(screen.getByText('/patient/medicines/5')).toBeInTheDocument();
   });
 
   it('renders a highlighted non-prescription status badge', async () => {

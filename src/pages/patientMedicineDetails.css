@@ -15,11 +15,14 @@
 .prescription-badge { background: #ecfdf3; color: #166534; }
 .prescription-badge.required { background: #fff7ed; color: #c2410c; }
 .stock-badge { background: #eff6ff; color: #1d4ed8; }
+.stock-badge.out-of-stock { background: #fff1f2; color: #be123c; }
+.out-of-stock-notice { margin: -8px 0 0; color: #a21c35; font-weight: 600; }
 .quantity-section { display: flex; align-items: center; justify-content: space-between; padding-top: 18px; border-top: 1px solid var(--border-color); font-weight: 700; }
 .quantity-control { display: flex; align-items: center; gap: 16px; }
 .quantity-control button { width: 36px; height: 36px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--white); font-size: 20px; cursor: pointer; }
 .quantity-control input { width: 48px; height: 36px; padding: 0 6px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--white); font: inherit; font-weight: 700; text-align: center; }
 .quantity-control input[aria-invalid="true"] { color: #b42318; border-color: #f3a6a0; background: #fff8f7; }
+.quantity-control button:disabled, .quantity-control input:disabled { cursor: not-allowed; opacity: .55; }
 .quantity-error { margin: -8px 0 0; color: #b42318; font-size: 14px; font-weight: 600; }
 .total-box { display: flex; justify-content: space-between; padding: 16px; border: 1px solid #cbe8d6; border-radius: 10px; background: #eaf8ef; }
 .total-price { color: #087443; }
