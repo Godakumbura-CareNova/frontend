@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = 'http://localhost:5133';
+const DEFAULT_API_BASE_URL = 'http://localhost:5133/api';
 
 export const resolveApiBaseUrl = (configured) => {
   const raw = (configured || '').trim();
