@@ -1105,6 +1105,16 @@ a:hover {
   margin-left: auto;
 }
 
+.notification-button { position: relative; }
+.notification-count { position: absolute; top: -5px; right: -6px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: #d92d20; color: #fff; font-size: 11px; font-weight: 700; line-height: 17px; }
+.notification-menu { position: absolute; z-index: 20; top: 66px; right: 168px; width: min(360px, calc(100vw - 28px)); max-height: 430px; overflow: auto; background: #fff; border: 1px solid #dfe8e2; border-radius: 14px; box-shadow: 0 16px 36px rgba(20, 50, 35, .16); padding: 10px; }
+.notification-menu-heading { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 10px; color: #173b2a; }
+.notification-menu-heading button { border: 0; background: transparent; color: #087b48; font-weight: 700; cursor: pointer; }
+.notification-item { width: 100%; display: grid; gap: 4px; text-align: left; border: 0; border-radius: 10px; background: #fff; padding: 12px; cursor: pointer; color: #22312a; }
+.notification-item:hover, .notification-item.unread { background: #eefaf3; }
+.notification-item span { font-size: 13px; line-height: 1.4; color: #58665f; }
+.notification-empty { padding: 18px 8px; color: #68756e; }
+
 .user-menu {
   display: flex;
   align-items: center;

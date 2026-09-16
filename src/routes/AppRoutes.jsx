@@ -14,15 +14,19 @@ import DoctorDashboard from '../pages/DoctorDashboard';
 import PharmacyStaffDashboard from '../pages/PharmacyStaffDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
 import UserManagementPage from '../pages/UserManagementPage';
-import MedicineCataloguePage from '../pages/pharmacy/MedicineCataloguePage';
-import MedicineDetailPage from '../pages/pharmacy/MedicineDetailPage';
-import CartPage from '../pages/pharmacy/CartPage';
-import CheckoutPage from '../pages/pharmacy/CheckoutPage';
-import MyOrdersPage from '../pages/pharmacy/MyOrdersPage';
-import MedicineManagementPage from '../pages/staff/MedicineManagementPage';
-import CategoryManagementPage from '../pages/staff/CategoryManagementPage';
-import StockManagementPage from '../pages/staff/StockManagementPage';
-import OrderReviewPage from '../pages/staff/OrderReviewPage';
+import MedicineManagementPage from '../pages/MedicineManagementPage';
+import CategoryManagementPage from '../pages/CategoryManagementPage';
+import InventoryManagementPage from '../pages/InventoryManagementPage';
+import PatientMedicineCataloguePage from '../pages/PatientMedicineCataloguePage';
+import PatientMedicineDetailsPage from '../pages/PatientMedicineDetailsPage';
+import PatientPrescriptionUploadPage from '../pages/PatientPrescriptionUploadPage';
+import PatientPrescriptionsPage from '../pages/PatientPrescriptionsPage';
+import PatientCartPage from '../pages/PatientCartPage';
+import PatientCheckoutPage from '../pages/PatientCheckoutPage';
+import PatientOrdersPage from '../pages/PatientOrdersPage';
+import PatientOrderDetailsPage from '../pages/PatientOrderDetailsPage';
+import PharmacyOrderManagementPage from '../pages/PharmacyOrderManagementPage';
+import PharmacyPrescriptionReviewPage from '../pages/PharmacyPrescriptionReviewPage';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -74,21 +78,25 @@ const AppRoutes = () => (
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Patient']} />}>
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
-        <Route path="/medicines" element={<MedicineCataloguePage />} />
-        <Route path="/medicines/:id" element={<MedicineDetailPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/my-orders" element={<MyOrdersPage />} />
+        <Route path="/patient/medicines" element={<PatientMedicineCataloguePage />} />
+        <Route path="/patient/medicines/:medicineId" element={<PatientMedicineDetailsPage />} />
+        <Route path="/patient/prescriptions/upload" element={<PatientPrescriptionUploadPage />} />
+        <Route path="/patient/prescriptions" element={<PatientPrescriptionsPage />} />
+        <Route path="/patient/cart" element={<PatientCartPage />} />
+        <Route path="/patient/checkout" element={<PatientCheckoutPage />} />
+        <Route path="/patient/orders" element={<PatientOrdersPage />} />
+        <Route path="/patient/orders/:orderId" element={<PatientOrderDetailsPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Doctor']} />}>
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Pharmacy Staff', 'PharmacyStaff']} />}>
         <Route path="/pharmacy-dashboard" element={<PharmacyStaffDashboard />} />
-        <Route path="/staff/medicines" element={<MedicineManagementPage />} />
-        <Route path="/staff/categories" element={<CategoryManagementPage />} />
-        <Route path="/staff/stock" element={<StockManagementPage />} />
-        <Route path="/staff/orders" element={<OrderReviewPage />} />
+        <Route path="/pharmacy/medicines" element={<MedicineManagementPage />} />
+        <Route path="/pharmacy/categories" element={<CategoryManagementPage />} />
+        <Route path="/pharmacy/inventory" element={<InventoryManagementPage />} />
+        <Route path="/pharmacy/orders" element={<PharmacyOrderManagementPage />} />
+        <Route path="/pharmacy/prescriptions" element={<PharmacyPrescriptionReviewPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
         <Route path="/admin-dashboard" element={<AdminDashboard />} />

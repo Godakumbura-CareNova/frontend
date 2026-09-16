@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard,
   ShoppingBag,
+  ShoppingCart,
   Calendar,
   CreditCard,
   Pill,
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 import pharmacyLogo from '../assets/PHARMACY LOGO .jpeg';
 import { getFirstName } from '../utils/formatName';
+import { patientNotificationApi } from '../api/patientNotificationApi';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -37,17 +39,21 @@ const normalizeRole = (role) => {
 const NAV_BY_ROLE = {
   Patient: [
     { to: '/patient-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
-    { to: '/my-orders', label: 'Medicine Orders', icon: ShoppingBag, enabled: true },
+    { to: '/patient/orders', label: 'Medicine Orders', icon: ShoppingBag, enabled: true },
     { label: 'Appointments', icon: Calendar, enabled: false },
     { label: 'Payments', icon: CreditCard, enabled: false },
-    { to: '/medicines', label: 'Medicines', icon: Pill, enabled: true },
+    { to: '/patient/medicines', label: 'Medicines', icon: Pill, enabled: true },
+    { to: '/patient/cart', label: 'My cart', icon: ShoppingCart, enabled: true },
+    { to: '/patient/prescriptions', label: 'Prescriptions', icon: FileCheck, enabled: true },
     { label: 'Doctors', icon: Stethoscope, enabled: false },
   ],
   PharmacyStaff: [
     { to: '/pharmacy-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
-    { to: '/staff/orders', label: 'Medicine Orders', icon: ShoppingBag, enabled: true },
-    { label: 'Prescriptions', icon: FileCheck, enabled: false },
-    { to: '/staff/stock', label: 'Inventory', icon: PackageSearch, enabled: true },
+    { to: '/pharmacy/orders', label: 'Medicine Orders', icon: ShoppingBag, enabled: true },
+    { to: '/pharmacy/prescriptions', label: 'Prescriptions', icon: FileCheck, enabled: true },
+    { to: '/pharmacy/medicines', label: 'Medicines', icon: Pill, enabled: true },
+    { to: '/pharmacy/categories', label: 'Categories', icon: PackageSearch, enabled: true },
+    { to: '/pharmacy/inventory', label: 'Inventory', icon: PackageSearch, enabled: true },
     { label: 'Payments', icon: CreditCard, enabled: false },
   ],
   Doctor: [
@@ -71,6 +77,22 @@ const DashboardLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const patient = normalizeRole(role) === 'Patient';
+
+  const loadNotifications = async () => {
+    if (!patient) return;
+    try { setNotifications((await patientNotificationApi.list()).data); } catch { setNotifications([]); }
+  };
+  useEffect(() => { loadNotifications(); }, [role]);
+  const openNotifications = () => { setNotificationsOpen(open => !open); if (!notificationsOpen) loadNotifications(); };
+  const markRead = async (notification) => {
+    if (!notification.isRead) await patientNotificationApi.markRead(notification.id);
+    setNotifications(items => items.map(item => item.id === notification.id ? { ...item, isRead: true } : item));
+    setNotificationsOpen(false);
+    navigate(notification.relatedEntityType === 'Order' ? `/patient/orders/${notification.relatedEntityId}` : '/patient/prescriptions');
+  };
 
   const navItems = NAV_BY_ROLE[normalizeRole(role)] || [];
 
@@ -139,9 +161,24 @@ const DashboardLayout = ({ children }) => {
           </button>
 
           <div className="topbar-actions">
-            <button type="button" className="icon-button" aria-label="Notifications">
+            <button type="button" className="icon-button notification-button" aria-label="Notifications" onClick={openNotifications}>
               <Bell size={20} />
+              {patient && notifications.filter(item => !item.isRead).length > 0 && <span className="notification-count">{notifications.filter(item => !item.isRead).length}</span>}
             </button>
+            {patient && notificationsOpen && <section className="notification-menu" aria-label="Patient notifications">
+              <div className="notification-menu-heading"><strong>Notifications</strong>{notifications.some(item => !item.isRead) && <button onClick={async () => { await patientNotificationApi.markAllRead(); setNotifications(items => items.map(item => ({ ...item, isRead: true }))); }}>Mark all read</button>}</div>
+              {notifications.length === 0 ? <p className="notification-empty">No notifications yet.</p> : notifications.map(item => <button className={`notification-item${item.isRead ? '' : ' unread'}`} key={item.id} onClick={() => markRead(item)}><strong>{item.title}</strong><span>{item.message}</span></button>)}
+            </section>}
+            {normalizeRole(role) === 'Patient' && (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="My cart"
+                onClick={() => navigate('/patient/cart')}
+              >
+                <ShoppingCart size={20} />
+              </button>
+            )}
             <button
               type="button"
               className="user-menu"
