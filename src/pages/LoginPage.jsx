@@ -145,12 +145,11 @@ const LoginPage = () => {
 
         {location.state?.message && (
           <div
-            className="alert"
-            style={{
-              background: '#fff0f1',
-              border: '1px solid #e7a9ad',
-              color: 'var(--red-deep)',
-            }}
+            className={
+              location.state.type === 'error'
+                ? 'alert alert-error'
+                : 'alert alert-success'
+            }
           >
             {location.state.message}
           </div>
@@ -162,7 +161,7 @@ const LoginPage = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate autoComplete="off">
           <div className="form-group">
             <label
               className="form-label"
@@ -194,6 +193,7 @@ const LoginPage = () => {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="off"
               />
             </div>
 
@@ -258,6 +258,7 @@ const LoginPage = () => {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="new-password"
               />
 
               <button
@@ -312,7 +313,7 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            className="btn btn-primary login-submit-button"
+            className="btn btn-green login-submit-button"
             style={{
               width: '100%',
               marginTop: '1rem',

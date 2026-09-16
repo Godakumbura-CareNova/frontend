@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import pharmacyLogo from '../../assets/PHARMACY LOGO .jpeg';
 import { registerCustomer } from '../../services/authService';
 
@@ -123,6 +124,8 @@ const Register = () => {
   const [formError, setFormError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -263,31 +266,53 @@ const Register = () => {
 
             <div className="form-row form-row-single">
               <label className="field-label" htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                name="password"
-                className="field-input"
-                placeholder="Create a strong password"
-                value={formData.password}
-                onChange={handleChange}
-                aria-invalid={Boolean(errors.password)}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  className="field-input"
+                  style={{ paddingRight: '2.75rem' }}
+                  placeholder="Create a strong password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  aria-invalid={Boolean(errors.password)}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowPassword((current) => !current)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password && <span className="field-error">{errors.password}</span>}
             </div>
 
             <div className="form-row form-row-single">
               <label className="field-label" htmlFor="confirmPassword">Confirm password</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                name="confirmPassword"
-                className="field-input"
-                placeholder="Re-enter your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                aria-invalid={Boolean(errors.confirmPassword)}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  className="field-input"
+                  style={{ paddingRight: '2.75rem' }}
+                  placeholder="Re-enter your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  aria-invalid={Boolean(errors.confirmPassword)}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-button"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
             </div>
 

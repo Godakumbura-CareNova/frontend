@@ -3,6 +3,7 @@ import { Camera, Save, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import profileApi from '../api/profileApi';
 import { validateProfileForm, validateProfilePictureFile } from '../utils/validation';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const DEFAULT_AVATAR =
   'data:image/svg+xml;utf8,' +
@@ -72,6 +73,8 @@ const ProfilePage = ({ previewMode = false }) => {
   const [pictureError, setPictureError] = useState('');
   const [lastFile, setLastFile] = useState(null);
   const fileInputRef = useRef(null);
+
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,7 +178,7 @@ const ProfilePage = ({ previewMode = false }) => {
     if (errors[name]) setErrors((current) => ({ ...current, [name]: null }));
   };
 
-  const handleProfileUpdate = async (event) => {
+  const handleProfileUpdate = (event) => {
     event.preventDefault();
     setSuccessMessage('');
     setError('');
@@ -186,6 +189,11 @@ const ProfilePage = ({ previewMode = false }) => {
       return;
     }
 
+    setShowSaveConfirm(true);
+  };
+
+  const confirmProfileSave = async () => {
+    setShowSaveConfirm(false);
     setSaving(true);
     try {
       const updateRequest = {
@@ -309,11 +317,21 @@ const ProfilePage = ({ previewMode = false }) => {
             </select>
             {errors.gender && <span className="field-error">{errors.gender}</span>}
           </div>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
+          <button type="submit" className="btn btn-green" disabled={saving}>
             <Save size={18} /> {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
       </div>
+
+      <ConfirmDialog
+        open={showSaveConfirm}
+        title="Save profile changes?"
+        message="Are you sure you want to save these changes to your profile?"
+        confirmLabel="Save Changes"
+        busy={saving}
+        onConfirm={confirmProfileSave}
+        onCancel={() => setShowSaveConfirm(false)}
+      />
     </div>
   );
 };

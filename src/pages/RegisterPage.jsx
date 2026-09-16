@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { validateRegistrationForm } from '../utils/validation';
-import { User, Mail, Lock, Shield, UserPlus, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, Shield, UserPlus, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +15,8 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -38,7 +40,12 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       await register(formData);
-      navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+      navigate('/login', {
+        state: {
+          message: 'Registration successful! Please log in.',
+          type: 'success',
+        },
+      });
     } catch (err) {
       setServerError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -54,7 +61,8 @@ const RegisterPage = () => {
             display: 'inline-flex',
             padding: '0.75rem',
             borderRadius: '1rem',
-            background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(52, 211, 153, 0.2))',
+            background: 'rgba(21, 128, 61, 0.12)',
+            border: '1px solid rgba(21, 128, 61, 0.25)',
             marginBottom: '1rem'
           }}>
             <UserPlus size={32} color="var(--success)" />
@@ -125,14 +133,23 @@ const RegisterPage = () => {
               <div style={{ position: 'relative' }}>
                 <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   className="form-input"
-                  style={{ paddingLeft: '2.75rem' }}
+                  style={{ paddingLeft: '2.75rem', paddingRight: '2.75rem' }}
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
+                  autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="password-toggle-button"
+                  onClick={() => setShowPassword((current) => !current)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
               {errors.password && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{errors.password}</span>}
             </div>
@@ -142,14 +159,23 @@ const RegisterPage = () => {
               <div style={{ position: 'relative' }}>
                 <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   className="form-input"
-                  style={{ paddingLeft: '2.75rem' }}
+                  style={{ paddingLeft: '2.75rem', paddingRight: '2.75rem' }}
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  className="password-toggle-button"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
               {errors.confirmPassword && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{errors.confirmPassword}</span>}
             </div>
