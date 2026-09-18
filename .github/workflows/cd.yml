@@ -31,6 +31,7 @@ jobs:
           build-args: |
             VITE_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net
             VITE_PHARMACY_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net/pharmacy
+            VITE_DOCTOR_PAYMENT_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net/doctor-payment
           tags: |
             it24101493/carenova-frontend:latest
             it24101493/carenova-frontend:${{ github.sha }}

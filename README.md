@@ -96,3 +96,13 @@ Patient needs no promotion — register `test-patient@carenova.dev` and it stays
 - **Role-Based Access Control (RBAC)**: Support for `Patient`, `Doctor`, `PharmacyStaff`, and `Admin` roles.
 - **Glassmorphism UI Design**: Rich aesthetic palette, dynamic status indicators, and responsive grid layouts.
 - **Automated E2E Selenium Tests**: Comprehensive C# test suite covering complete user journeys.
+
+## Sprint 3 doctor and payment workspace
+
+`src/api/doctorPaymentApi.js` uses `VITE_DOCTOR_PAYMENT_API_BASE_URL` to reach
+the separate doctor-payment service. Use `.env.example` to configure the local
+URL; do not hard-code service addresses in components.
+
+The `components/doctors`, `components/payments`, `services`, `utils`, and
+`test` folders provide the agreed Sprint 3 boundaries. The feature pages and
+business UI are deliberately left for the Sprint 3 development team.
