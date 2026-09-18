@@ -30,4 +30,23 @@ describe('DashboardLayout', () => {
 
     expect(screen.getByText('/patient/cart')).toBeInTheDocument();
   });
+
+  it('opens the pharmacy notification menu for pharmacy staff', async () => {
+    useAuth.mockReturnValue({
+      user: { fullName: 'Pharmacy' },
+      role: 'PharmacyStaff',
+      logout: vi.fn(),
+    });
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/pharmacy/orders']}>
+        <DashboardLayout><CurrentPath /></DashboardLayout>
+      </MemoryRouter>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Notifications' }));
+
+    expect(screen.getByText('No notifications yet.')).toBeInTheDocument();
+  });
 });

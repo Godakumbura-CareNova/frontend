@@ -23,6 +23,7 @@ import {
 import pharmacyLogo from '../assets/PHARMACY LOGO .jpeg';
 import { getFirstName } from '../utils/formatName';
 import { patientNotificationApi } from '../api/patientNotificationApi';
+import { staffNotificationApi } from '../api/staffNotificationApi';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -80,18 +81,21 @@ const DashboardLayout = ({ children }) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const patient = normalizeRole(role) === 'Patient';
+  const pharmacyStaff = normalizeRole(role) === 'PharmacyStaff';
+  const notificationApi = patient ? patientNotificationApi : pharmacyStaff ? staffNotificationApi : null;
 
   const loadNotifications = async () => {
-    if (!patient) return;
-    try { setNotifications((await patientNotificationApi.list()).data); } catch { setNotifications([]); }
+    if (!notificationApi) return;
+    try { setNotifications((await notificationApi.list()).data); } catch { setNotifications([]); }
   };
   useEffect(() => { loadNotifications(); }, [role]);
   const openNotifications = () => { setNotificationsOpen(open => !open); if (!notificationsOpen) loadNotifications(); };
   const markRead = async (notification) => {
-    if (!notification.isRead) await patientNotificationApi.markRead(notification.id);
+    if (!notification.isRead) await notificationApi.markRead(notification.id);
     setNotifications(items => items.map(item => item.id === notification.id ? { ...item, isRead: true } : item));
     setNotificationsOpen(false);
-    navigate(notification.relatedEntityType === 'Order' ? `/patient/orders/${notification.relatedEntityId}` : '/patient/prescriptions');
+    if (pharmacyStaff) navigate('/pharmacy/orders');
+    else navigate(notification.relatedEntityType === 'Order' ? `/patient/orders/${notification.relatedEntityId}` : '/patient/prescriptions');
   };
 
   const navItems = NAV_BY_ROLE[normalizeRole(role)] || [];
@@ -163,10 +167,10 @@ const DashboardLayout = ({ children }) => {
           <div className="topbar-actions">
             <button type="button" className="icon-button notification-button" aria-label="Notifications" onClick={openNotifications}>
               <Bell size={20} />
-              {patient && notifications.filter(item => !item.isRead).length > 0 && <span className="notification-count">{notifications.filter(item => !item.isRead).length}</span>}
+              {notificationApi && notifications.filter(item => !item.isRead).length > 0 && <span className="notification-count">{notifications.filter(item => !item.isRead).length}</span>}
             </button>
-            {patient && notificationsOpen && <section className="notification-menu" aria-label="Patient notifications">
-              <div className="notification-menu-heading"><strong>Notifications</strong>{notifications.some(item => !item.isRead) && <button onClick={async () => { await patientNotificationApi.markAllRead(); setNotifications(items => items.map(item => ({ ...item, isRead: true }))); }}>Mark all read</button>}</div>
+            {notificationApi && notificationsOpen && <section className="notification-menu" aria-label="Notifications">
+              <div className="notification-menu-heading"><strong>Notifications</strong>{notifications.some(item => !item.isRead) && <button onClick={async () => { await notificationApi.markAllRead(); setNotifications(items => items.map(item => ({ ...item, isRead: true }))); }}>Mark all read</button>}</div>
               {notifications.length === 0 ? <p className="notification-empty">No notifications yet.</p> : notifications.map(item => <button className={`notification-item${item.isRead ? '' : ' unread'}`} key={item.id} onClick={() => markRead(item)}><strong>{item.title}</strong><span>{item.message}</span></button>)}
             </section>}
             {normalizeRole(role) === 'Patient' && (
