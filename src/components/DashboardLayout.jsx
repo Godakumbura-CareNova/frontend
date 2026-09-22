@@ -46,7 +46,7 @@ const NAV_BY_ROLE = {
     { to: '/patient/medicines', label: 'Medicines', icon: Pill, enabled: true },
     { to: '/patient/cart', label: 'My cart', icon: ShoppingCart, enabled: true },
     { to: '/patient/prescriptions', label: 'Prescriptions', icon: FileCheck, enabled: true },
-    { label: 'Doctors', icon: Stethoscope, enabled: false },
+    { to: '/patient/doctors', label: 'Doctors', icon: Stethoscope, enabled: true },
   ],
   PharmacyStaff: [
     { to: '/pharmacy-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },

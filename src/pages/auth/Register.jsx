@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import pharmacyLogo from '../../assets/PHARMACY LOGO .jpeg';
 import { registerCustomer } from '../../services/authService';
+import { isSriLankanLandLine, isSriLankanMobile, normalizePhoneNumber } from '../../utils/validation';
 
 const initialForm = {
   fullName: '',
@@ -107,6 +108,14 @@ const validateForm = (values) => {
     }
   }
 
+  if (!nextErrors.mobileNumber && !isSriLankanMobile(values.mobileNumber)) {
+    nextErrors.mobileNumber = 'Enter a valid Sri Lankan mobile number (e.g. 0771234567).';
+  }
+
+  if (!nextErrors.landPhoneNumber && !isSriLankanLandLine(values.landPhoneNumber)) {
+    nextErrors.landPhoneNumber = 'Enter a valid Sri Lankan land phone number (e.g. 0112345678).';
+  }
+
   if (!nextErrors.gender && !['Male', 'Female', 'Other'].includes(values.gender)) {
     nextErrors.gender = 'Please select a valid gender.';
   }
@@ -160,8 +169,8 @@ const Register = () => {
         email: formData.email.trim(),
         password: formData.password.trim(),
         confirmPassword: formData.confirmPassword.trim(),
-        mobileNumber: formData.mobileNumber.trim(),
-        landPhoneNumber: formData.landPhoneNumber.trim(),
+        mobileNumber: normalizePhoneNumber(formData.mobileNumber),
+        landPhoneNumber: normalizePhoneNumber(formData.landPhoneNumber),
         address: formData.address.trim(),
         dateOfBirth: formData.dateOfBirth,
         gender: formData.gender,

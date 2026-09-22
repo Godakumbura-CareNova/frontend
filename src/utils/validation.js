@@ -12,11 +12,16 @@ export const validatePassword = (password) => {
     && /[^A-Za-z0-9]/.test(password);
 };
 
+// People type phone numbers with spaces or hyphens ("076 533 4492"); the API accepts and stores the bare digits.
+export const normalizePhoneNumber = (value) => String(value ?? '').trim().replace(/[\s\-().]/g, '');
+export const isSriLankanMobile = (value) => /^(?:\+94|0)7[0-9]{8}$/.test(normalizePhoneNumber(value));
+export const isSriLankanLandLine = (value) => /^(?:\+94|0)[1-9][0-9]{8}$/.test(normalizePhoneNumber(value));
+
 export const validateProfileForm = (formData) => {
   const errors = {};
   if (!formData.fullName || formData.fullName.trim().length < 2) errors.fullName = 'Full name must be at least 2 characters.';
-  if (!/^(?:\+94|0)7[0-9]{8}$/.test(formData.mobileNumber || '')) errors.mobileNumber = 'Enter a valid Sri Lankan mobile number.';
-  if (formData.landPhoneNumber && !/^(?:\+94|0)[1-9][0-9]{8}$/.test(formData.landPhoneNumber)) errors.landPhoneNumber = 'Enter a valid Sri Lankan land phone number.';
+  if (!isSriLankanMobile(formData.mobileNumber)) errors.mobileNumber = 'Enter a valid Sri Lankan mobile number.';
+  if (normalizePhoneNumber(formData.landPhoneNumber) && !isSriLankanLandLine(formData.landPhoneNumber)) errors.landPhoneNumber = 'Enter a valid Sri Lankan land phone number.';
   if (!formData.address || !formData.address.trim()) errors.address = 'Address is required.';
   if (!formData.dateOfBirth || new Date(formData.dateOfBirth) >= new Date()) errors.dateOfBirth = 'Date of birth must be in the past.';
   if (!formData.gender || !['Male', 'Female', 'Other'].includes(formData.gender)) errors.gender = 'Please select a valid gender.';

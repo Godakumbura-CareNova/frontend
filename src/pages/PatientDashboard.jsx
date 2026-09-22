@@ -38,10 +38,10 @@ const PatientDashboard = () => {
               <Pill size={20} />
             </div>
           </Link>
-          <Link to="#" className="quicklink-card" onClick={(e) => e.preventDefault()}>
+          <Link to="/patient/doctors" className="quicklink-card">
             <div>
               <div className="quicklink-card-title">Doctors</div>
-              <div className="quicklink-card-subtitle">Find and book appointments</div>
+              <div className="quicklink-card-subtitle">Search doctors and check availability</div>
             </div>
             <div className="quicklink-card-icon" style={{ background: '#ecfdf3', color: 'var(--success)' }}>
               <Stethoscope size={20} />

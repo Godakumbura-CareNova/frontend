@@ -11,6 +11,7 @@ import ForbiddenPage from '../pages/ForbiddenPage';
 import ProfilePage from '../pages/ProfilePage';
 import PatientDashboard from '../pages/PatientDashboard';
 import DoctorDashboard from '../pages/DoctorDashboard';
+import DoctorProfilePage from '../pages/DoctorProfilePage';
 import PharmacyStaffDashboard from '../pages/PharmacyStaffDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
 import UserManagementPage from '../pages/UserManagementPage';
@@ -25,6 +26,8 @@ import PatientCartPage from '../pages/PatientCartPage';
 import PatientCheckoutPage from '../pages/PatientCheckoutPage';
 import PatientOrdersPage from '../pages/PatientOrdersPage';
 import PatientOrderDetailsPage from '../pages/PatientOrderDetailsPage';
+import PatientDoctorSearchPage from '../pages/PatientDoctorSearchPage';
+import PatientDoctorProfilePage from '../pages/PatientDoctorProfilePage';
 import PharmacyOrderManagementPage from '../pages/PharmacyOrderManagementPage';
 import PharmacyPrescriptionReviewPage from '../pages/PharmacyPrescriptionReviewPage';
 
@@ -48,6 +51,12 @@ const getDashboardRouteByRole = (role) => {
     case 'Admin': return '/admin-dashboard';
     default: return '/forbidden';
   }
+};
+
+// Doctors get the professional profile page at /profile; every other role keeps the account profile page.
+const ProfileRoute = () => {
+  const { role } = useAuth();
+  return normalizeRole(role) === 'Doctor' ? <DoctorProfilePage /> : <ProfilePage />;
 };
 
 const HomeRedirect = () => {
@@ -74,7 +83,7 @@ const AppRoutes = () => (
 
     <Route element={<ProtectedRoute />}>
       <Route element={<RoleProtectedRoute allowedRoles={['Patient', 'Pharmacy Staff', 'PharmacyStaff', 'Doctor', 'Admin']} />}>
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfileRoute />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Patient']} />}>
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
@@ -86,6 +95,8 @@ const AppRoutes = () => (
         <Route path="/patient/checkout" element={<PatientCheckoutPage />} />
         <Route path="/patient/orders" element={<PatientOrdersPage />} />
         <Route path="/patient/orders/:orderId" element={<PatientOrderDetailsPage />} />
+        <Route path="/patient/doctors" element={<PatientDoctorSearchPage />} />
+        <Route path="/patient/doctors/:doctorId" element={<PatientDoctorProfilePage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Doctor']} />}>
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />

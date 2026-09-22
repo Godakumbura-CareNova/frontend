@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Camera, Save, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import profileApi from '../api/profileApi';
-import { validateProfileForm, validateProfilePictureFile } from '../utils/validation';
+import { normalizePhoneNumber, validateProfileForm, validateProfilePictureFile } from '../utils/validation';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 const DEFAULT_AVATAR =
@@ -198,8 +198,8 @@ const ProfilePage = ({ previewMode = false }) => {
     try {
       const updateRequest = {
         fullName: editableProfile.fullName.trim(),
-        mobileNumber: editableProfile.mobileNumber.trim(),
-        landPhoneNumber: editableProfile.landPhoneNumber.trim() || null,
+        mobileNumber: normalizePhoneNumber(editableProfile.mobileNumber),
+        landPhoneNumber: normalizePhoneNumber(editableProfile.landPhoneNumber) || null,
         address: editableProfile.address.trim(),
         dateOfBirth: editableProfile.dateOfBirth,
         gender: editableProfile.gender,
