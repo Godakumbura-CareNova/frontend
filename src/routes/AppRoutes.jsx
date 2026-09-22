@@ -11,6 +11,7 @@ import ForbiddenPage from '../pages/ForbiddenPage';
 import ProfilePage from '../pages/ProfilePage';
 import PatientDashboard from '../pages/PatientDashboard';
 import DoctorDashboard from '../pages/DoctorDashboard';
+import DoctorProfilePage from '../pages/DoctorProfilePage';
 import PharmacyStaffDashboard from '../pages/PharmacyStaffDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
 import UserManagementPage from '../pages/UserManagementPage';
@@ -50,6 +51,12 @@ const getDashboardRouteByRole = (role) => {
   }
 };
 
+// Doctors get the professional profile page at /profile; every other role keeps the account profile page.
+const ProfileRoute = () => {
+  const { role } = useAuth();
+  return normalizeRole(role) === 'Doctor' ? <DoctorProfilePage /> : <ProfilePage />;
+};
+
 const HomeRedirect = () => {
   const { isAuthenticated, role, loading } = useAuth();
 
@@ -74,7 +81,7 @@ const AppRoutes = () => (
 
     <Route element={<ProtectedRoute />}>
       <Route element={<RoleProtectedRoute allowedRoles={['Patient', 'Pharmacy Staff', 'PharmacyStaff', 'Doctor', 'Admin']} />}>
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfileRoute />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Patient']} />}>
         <Route path="/patient-dashboard" element={<PatientDashboard />} />

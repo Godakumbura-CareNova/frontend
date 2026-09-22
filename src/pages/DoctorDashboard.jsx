@@ -1,8 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DashboardLayout from '../components/DashboardLayout';
 import StatCard from '../components/StatCard';
-import { Calendar, CalendarClock, Users, CheckCircle2 } from 'lucide-react';
+import { Calendar, CalendarClock, Users, CheckCircle2, Stethoscope, ChevronRight } from 'lucide-react';
 import { getFirstName } from '../utils/formatName';
 
 const DoctorDashboard = () => {
@@ -22,6 +23,21 @@ const DoctorDashboard = () => {
         <StatCard icon={CalendarClock} title="Upcoming Appointments" />
         <StatCard icon={Users} title="Patient Count" />
         <StatCard icon={CheckCircle2} title="Completed Appointments" />
+      </div>
+
+      <div className="quicklink-row" style={{ marginBottom: '1.5rem' }}>
+        <Link to="/profile" className="quicklink-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span className="quicklink-card-icon" style={{ background: 'var(--red-soft)', color: 'var(--red-strong)' }}>
+              <Stethoscope size={20} />
+            </span>
+            <div>
+              <div className="quicklink-card-title">Professional Profile</div>
+              <div className="quicklink-card-subtitle">Specialization, qualifications and experience</div>
+            </div>
+          </div>
+          <ChevronRight size={18} color="var(--text-muted)" />
+        </Link>
       </div>
 
       <div className="dashboard-section">
