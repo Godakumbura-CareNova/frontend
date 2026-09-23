@@ -1,40 +1,84 @@
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import MedicineManagementPage from './MedicineManagementPage';
+import { medicineApi } from '../api/medicineApi';
+import { categoryApi } from '../api/categoryApi';
 
-const { listMedicines, listCategories, create, uploadImage, activate } = vi.hoisted(() => ({ listMedicines: vi.fn(), listCategories: vi.fn(), create: vi.fn(), uploadImage: vi.fn(), activate: vi.fn() }));
-vi.mock('../components/DashboardLayout', () => ({ default: ({ children }) => <main>{children}</main> }));
-vi.mock('../api/medicineApi', () => ({ medicineApi: { list: listMedicines, create, uploadImage, activate } }));
-vi.mock('../api/categoryApi', () => ({ categoryApi: { list: listCategories } }));
+vi.mock('../api/medicineApi', () => ({
+  medicineApi: { list: vi.fn(), create: vi.fn(), update: vi.fn(), deactivate: vi.fn(), uploadImage: vi.fn() },
+}));
+vi.mock('../api/categoryApi', () => ({ categoryApi: { list: vi.fn() } }));
+vi.mock('../context/AuthContext', () => ({
+  useAuth: () => ({ user: { fullName: 'Staff Member' }, role: 'PharmacyStaff', logout: vi.fn() }),
+}));
+
+const renderPage = () => render(<BrowserRouter><MedicineManagementPage /></BrowserRouter>);
 
 describe('MedicineManagementPage', () => {
   beforeEach(() => {
-    listMedicines.mockResolvedValue({ data: [] });
-    listCategories.mockResolvedValue({ data: [{ id: 1, name: 'Antibiotics' }] });
-    create.mockResolvedValue({ data: { id: 9 } });
-    uploadImage.mockResolvedValue({ data: {} });
+    vi.clearAllMocks();
+    medicineApi.list.mockResolvedValue({ data: [] });
+    categoryApi.list.mockResolvedValue({ data: [{ id: 1, name: 'Pain Relief' }] });
   });
 
-  it('clears the selected image after the medicine is saved', async () => {
+  it('loads categories into the dropdown and medicines into the list', async () => {
+    medicineApi.list.mockResolvedValue({
+      data: [{ id: 1, name: 'Paracetamol', categoryName: 'Pain Relief', price: 25, prescriptionRequired: false, isActive: true }],
+    });
+    renderPage();
+    expect(await screen.findByText('Paracetamol')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Pain Relief' })).toBeInTheDocument();
+  });
+
+  it('submits a valid new medicine', async () => {
     const user = userEvent.setup();
-    render(<MemoryRouter><MedicineManagementPage /></MemoryRouter>);
-    expect(screen.getByText('Medicine Management').closest('section')).toHaveClass('medicine-management-dashboard');
-    await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Azithromycin 500mg');
-    await user.type(screen.getByRole('textbox', { name: 'Description' }), 'Antibiotic tablets');
+    medicineApi.create.mockResolvedValue({ data: { id: 5, name: 'Ibuprofen' } });
+    renderPage();
+    await screen.findByText('No medicines yet.');
+
+    await user.type(screen.getByLabelText('Name'), 'Ibuprofen');
+    await user.type(screen.getByLabelText('Description'), 'Pain relief tablets');
     await user.selectOptions(screen.getByLabelText('Category'), '1');
-    await user.type(screen.getByRole('spinbutton', { name: 'Price (LKR)' }), '450');
-    const input = screen.getByLabelText('Medicine image');
-    await user.upload(input, new File(['image'], 'azithromycin.jpg', { type: 'image/jpeg' }));
-    await user.click(screen.getByRole('button', { name: 'Add medicine' }));
-    await waitFor(() => expect(input.files).toHaveLength(0));
+    await user.type(screen.getByLabelText(/Price/i), '25');
+    await user.click(screen.getByRole('button', { name: /add medicine/i }));
+
+    await waitFor(() => expect(medicineApi.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'Ibuprofen', categoryId: 1, price: 25 })));
+    expect(await screen.findByText('Medicine saved successfully.')).toBeInTheDocument();
   });
 
-  it('shows an Activate action for a deactivated medicine', async () => {
-    listMedicines.mockResolvedValueOnce({ data: [{ id: 4, name: 'Paracetamol 500mg', categoryName: 'Pain Relief', price: 175, prescriptionRequired: false, isActive: false }] });
-    render(<MemoryRouter><MedicineManagementPage /></MemoryRouter>);
-    expect(await screen.findByRole('button', { name: 'Activate' })).toBeInTheDocument();
+  it('shows a warning for a duplicate medicine name', async () => {
+    const user = userEvent.setup();
+    medicineApi.create.mockRejectedValue({ response: { data: { message: 'An active medicine with this name already exists in the category.' } } });
+    renderPage();
+    await screen.findByText('No medicines yet.');
+
+    await user.type(screen.getByLabelText('Name'), 'Paracetamol');
+    await user.type(screen.getByLabelText('Description'), 'Pain relief tablets');
+    await user.selectOptions(screen.getByLabelText('Category'), '1');
+    await user.type(screen.getByLabelText(/Price/i), '25');
+    await user.click(screen.getByRole('button', { name: /add medicine/i }));
+
+    expect(await screen.findByText('An active medicine with this name already exists in the category.')).toBeInTheDocument();
+  });
+
+  it('edit populates the form, deactivate asks for confirmation', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    medicineApi.list.mockResolvedValue({
+      data: [{ id: 1, name: 'Paracetamol', categoryName: 'Pain Relief', price: 25, prescriptionRequired: false, isActive: true }],
+    });
+    medicineApi.deactivate.mockResolvedValue({});
+    renderPage();
+    await screen.findByText('Paracetamol');
+
+    await user.click(screen.getByRole('button', { name: /edit/i }));
+    expect(screen.getByDisplayValue('Paracetamol')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /deactivate/i }));
+    expect(window.confirm).toHaveBeenCalledWith('Deactivate Paracetamol?');
+    await waitFor(() => expect(medicineApi.deactivate).toHaveBeenCalledWith(1));
   });
 });
