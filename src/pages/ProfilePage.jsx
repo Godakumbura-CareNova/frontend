@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Camera, Save, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import profileApi from '../api/profileApi';
 import { normalizePhoneNumber, validateProfileForm, validateProfilePictureFile } from '../utils/validation';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -61,12 +62,12 @@ const toEditableProfile = (data) => ({
 
 const ProfilePage = ({ previewMode = false }) => {
   const { user, role, setUser } = useAuth();
+  const { showToast } = useToast();
   const [profile, setProfile] = useState(null);
   const [editableProfile, setEditableProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [errors, setErrors] = useState({});
 
   const [uploading, setUploading] = useState(false);
@@ -180,7 +181,6 @@ const ProfilePage = ({ previewMode = false }) => {
 
   const handleProfileUpdate = (event) => {
     event.preventDefault();
-    setSuccessMessage('');
     setError('');
 
     const validation = validateProfileForm(editableProfile);
@@ -208,7 +208,7 @@ const ProfilePage = ({ previewMode = false }) => {
       setProfile(updatedProfile);
       setEditableProfile(toEditableProfile(updatedProfile));
       setUser({ ...user, fullName: updateRequest.fullName });
-      setSuccessMessage('Profile updated successfully!');
+      showToast('Profile updated successfully!');
     } catch (requestError) {
       setError(requestError?.response?.data?.message || 'Failed to update profile.');
     } finally {
@@ -276,7 +276,6 @@ const ProfilePage = ({ previewMode = false }) => {
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
-        {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
         <div className="grid grid-2">
           <div className="profile-field"><span className="profile-field-label">Full Name</span><span className="profile-field-value">{fullName}</span></div>

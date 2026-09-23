@@ -376,6 +376,14 @@
 }
 
 .pd-slots .dp-hint { margin-top: 2px; }
+.pd-slot-end { font-weight: 500; opacity: 0.85; }
+
+/* Consultation fee */
+.pd-fee { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.pd-fee-amount { font-size: 18px; font-weight: 800; color: var(--dp-green-dark); letter-spacing: -0.01em; }
+.pd-fee-note { font-size: 12.5px; color: var(--text-muted); }
+.pd-fee-chip { gap: 5px; }
+.pd-card-fee strong { color: var(--dp-green-dark); }
 
 @media (max-width: 900px) {
   .pd-search-grid { grid-template-columns: 1fr 1fr; }

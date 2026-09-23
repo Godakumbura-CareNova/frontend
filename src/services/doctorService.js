@@ -56,3 +56,28 @@ export const saveMyDoctorProfile = async (profile) => {
   const response = await doctorPaymentApi.put("/api/doctors/me/profile", profile);
   return response.data;
 };
+
+/** The signed-in doctor's upcoming consultation slots (booked ones included), soonest first. */
+export const getMyAvailability = async () => {
+  const response = await doctorPaymentApi.get("/api/doctors/me/availability");
+  return response.data;
+};
+
+/**
+ * Publishes an availability window: { startUtc, endUtc, slotDurationMinutes }.
+ * Resolves to the slots created. Overlaps and a missing profile surface as a 409 with { message }.
+ */
+export const addMyAvailability = async (request) => {
+  const response = await doctorPaymentApi.post("/api/doctors/me/availability", request);
+  return response.data;
+};
+
+/** Withdraws one open slot. A 404 (already gone) resolves quietly; a booked slot rejects with a 409. */
+export const deleteMyAvailabilitySlot = async (slotId) => {
+  try {
+    await doctorPaymentApi.delete(`/api/doctors/me/availability/${encodeURIComponent(slotId)}`);
+  } catch (error) {
+    if (error?.response?.status === 404) return;
+    throw error;
+  }
+};

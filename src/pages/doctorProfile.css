@@ -422,6 +422,9 @@
 
 .dp-add-btn:hover { background: var(--dp-green-soft); }
 
+/* Two actions side by side in a section header (Edit / Delete) */
+.dp-section-actions { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+
 .dp-add-btn.dp-danger-btn { border-color: var(--red-deep); color: var(--red-deep); }
 .dp-add-btn.dp-danger-btn:hover { background: var(--dp-red-soft); }
 .dp-add-btn:disabled { cursor: not-allowed; opacity: 0.6; }
@@ -496,6 +499,70 @@
   gap: 10px;
   padding-top: 4px;
 }
+
+/* Consultation availability (doctor side) */
+.dp-availability { display: flex; flex-direction: column; gap: 14px; }
+.dp-availability-summary { margin: 0; font-size: 13.5px; color: #374151; }
+.dp-availability-summary strong { color: var(--dp-green-dark); }
+.dp-availability-hint { margin: 0 0 10px; }
+
+.dp-availability-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--dp-green-border);
+  background: var(--dp-surface);
+}
+
+.dp-availability-actions { padding-top: 0; }
+
+/* Hour / minute / AM-PM group */
+.dp-time-field { display: block; border: 0; margin: 0; padding: 0; min-width: 0; }
+.dp-time-field > .form-label { display: block; padding: 0; margin-bottom: 4px; }
+.dp-time-inputs { display: flex; align-items: center; gap: 6px; }
+.dp-time-inputs .form-select { flex: 1 1 0; min-width: 0; padding-left: 8px; padding-right: 4px; }
+.dp-time-separator { font-weight: 700; color: var(--text-muted); }
+
+/* Consultation fee (doctor side) */
+.dp-fee-form { display: flex; flex-direction: column; gap: 12px; max-width: 340px; }
+.dp-fee { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.dp-fee-amount { font-size: 18px; font-weight: 800; color: var(--dp-green-dark); letter-spacing: -0.01em; }
+.dp-fee-note { font-size: 12.5px; color: var(--text-muted); }
+
+.dp-availability-day { display: flex; flex-direction: column; gap: 8px; }
+
+.dp-availability-day-title {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--dp-green-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.dp-slot-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+
+.dp-slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 12px;
+  border-radius: 8px;
+  background: var(--dp-green-soft);
+  border: 1px solid var(--dp-green-border);
+  color: var(--dp-green-dark);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.dp-slot-booked { background: #f3f4f6; border-color: #e5e7eb; color: var(--text-muted); padding-right: 12px; }
+
+.dp-slot-status { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; }
+
+.dp-remove-btn.dp-slot-remove { margin-top: 0; width: 28px; height: 28px; border-radius: 6px; }
 
 @media (max-width: 900px) {
   .dp-hero-pulse { display: none; }

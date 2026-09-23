@@ -1,12 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockGet, mockPut, mockDelete } = vi.hoisted(() => ({ mockGet: vi.fn(), mockPut: vi.fn(), mockDelete: vi.fn() }));
+const { mockGet, mockPut, mockPost, mockDelete } = vi.hoisted(() => ({ mockGet: vi.fn(), mockPut: vi.fn(), mockPost: vi.fn(), mockDelete: vi.fn() }));
 
 vi.mock('../api/doctorPaymentApi.js', () => ({
-  doctorPaymentApi: { get: mockGet, put: mockPut, delete: mockDelete },
+  doctorPaymentApi: { get: mockGet, put: mockPut, post: mockPost, delete: mockDelete },
 }));
 
-const { deleteMyDoctorProfile, getDoctorPublicProfile, getDoctorSpecializations, getMyDoctorProfile, saveMyDoctorProfile, searchDoctors } = await import('./doctorService.js');
+const {
+  addMyAvailability,
+  deleteMyAvailabilitySlot,
+  deleteMyDoctorProfile,
+  getDoctorPublicProfile,
+  getDoctorSpecializations,
+  getMyAvailability,
+  getMyDoctorProfile,
+  saveMyDoctorProfile,
+  searchDoctors,
+} = await import('./doctorService.js');
 
 describe('doctorService profile calls', () => {
   beforeEach(() => {
@@ -98,5 +108,49 @@ describe('doctorService search calls', () => {
     const error = { response: { status: 500 } };
     mockGet.mockRejectedValueOnce(error);
     await expect(getDoctorPublicProfile('abc')).rejects.toBe(error);
+  });
+});
+
+describe('doctorService availability calls', () => {
+  beforeEach(() => {
+    mockGet.mockReset();
+    mockPost.mockReset();
+    mockDelete.mockReset();
+  });
+
+  it('GETs the signed-in doctor slots', async () => {
+    const slots = [{ id: 1, startUtc: '2026-10-01T09:00:00Z', endUtc: '2026-10-01T09:20:00Z', isBooked: false }];
+    mockGet.mockResolvedValue({ data: slots });
+
+    await expect(getMyAvailability()).resolves.toEqual(slots);
+    expect(mockGet).toHaveBeenCalledWith('/api/doctors/me/availability');
+  });
+
+  it('POSTs an availability window and returns the created slots', async () => {
+    const request = { startUtc: '2026-10-01T09:00:00Z', endUtc: '2026-10-01T10:00:00Z', slotDurationMinutes: 20 };
+    mockPost.mockResolvedValue({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] });
+
+    await expect(addMyAvailability(request)).resolves.toHaveLength(3);
+    expect(mockPost).toHaveBeenCalledWith('/api/doctors/me/availability', request);
+  });
+
+  it('rethrows a 409 conflict from POST so the page can show the message', async () => {
+    const error = { response: { status: 409, data: { message: 'overlap' } } };
+    mockPost.mockRejectedValue(error);
+
+    await expect(addMyAvailability({})).rejects.toBe(error);
+  });
+
+  it('DELETEs a slot, treats 404 as already gone and rethrows other errors', async () => {
+    mockDelete.mockResolvedValueOnce({ status: 204 });
+    await expect(deleteMyAvailabilitySlot(7)).resolves.toBeUndefined();
+    expect(mockDelete).toHaveBeenCalledWith('/api/doctors/me/availability/7');
+
+    mockDelete.mockRejectedValueOnce({ response: { status: 404 } });
+    await expect(deleteMyAvailabilitySlot(7)).resolves.toBeUndefined();
+
+    const booked = { response: { status: 409 } };
+    mockDelete.mockRejectedValueOnce(booked);
+    await expect(deleteMyAvailabilitySlot(7)).rejects.toBe(booked);
   });
 });

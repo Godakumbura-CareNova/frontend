@@ -18,6 +18,8 @@ const profile = {
   specialization: 'Cardiologist',
   registrationNumber: 'SLMC-1001',
   biography: 'Heart specialist with a focus on preventive care.',
+  consultationFee: 4500,
+  profilePicturePath: '/uploads/profile-pictures/nimal.jpg',
   yearsOfExperience: 14,
   qualifications: [
     { id: 1, degree: 'MBBS', institution: 'University of Colombo', startYear: 2006, endYear: 2011 },
@@ -64,6 +66,9 @@ describe('PatientDoctorProfilePage', () => {
     expect(screen.getByText('2020 - Present')).toBeInTheDocument();
     expect(screen.getByText('Fellow, Sri Lanka Heart Association')).toBeInTheDocument();
     expect(screen.getByText('Elected 2021')).toBeInTheDocument();
+    expect(screen.getByTestId('consultation-fee')).toHaveTextContent('LKR 4,500.00');
+    expect(screen.getByText('per person, per consultation')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Dr. Nimal Perera' })).toHaveAttribute('src', expect.stringContaining('/uploads/profile-pictures/nimal.jpg'));
     expect(screen.getByText(/open consultation slots/)).toHaveTextContent('2 open consultation slots.');
     expect(screen.getByRole('list', { name: 'Upcoming consultation slots' }).children).toHaveLength(2);
     expect(screen.getByTestId('availability-badge')).toHaveTextContent('2 open slots');
@@ -76,6 +81,7 @@ describe('PatientDoctorProfilePage', () => {
   it('shows a clear message when the doctor has no open slots', async () => {
     mockGetDoctorPublicProfile.mockResolvedValue({
       ...profile,
+      consultationFee: null,
       biography: null,
       qualifications: [],
       experiences: [],
@@ -88,10 +94,30 @@ describe('PatientDoctorProfilePage', () => {
 
     expect(await screen.findByText('This doctor has no open consultation slots at the moment.')).toBeInTheDocument();
     expect(screen.getByTestId('availability-badge')).toHaveTextContent('No open slots');
+    expect(screen.getByText('This doctor has not specified a consultation fee yet.')).toBeInTheDocument();
+    expect(screen.queryByTestId('consultation-fee')).not.toBeInTheDocument();
     expect(screen.getByText('No professional summary provided.')).toBeInTheDocument();
     expect(screen.getByText('No qualifications listed.')).toBeInTheDocument();
     expect(screen.getByText('No experience listed.')).toBeInTheDocument();
     expect(screen.getByText('No other details listed.')).toBeInTheDocument();
+  });
+
+  it('renders the available information when optional sections are missing from the response', async () => {
+    mockGetDoctorPublicProfile.mockResolvedValue({
+      doctorId,
+      fullName: 'Nimal Perera',
+      specialization: 'Cardiologist',
+      registrationNumber: 'SLMC-1001',
+    });
+    renderPage();
+
+    expect(await screen.findByRole('heading', { name: 'Dr. Nimal Perera' })).toBeInTheDocument();
+    expect(screen.getByText('This doctor has not specified a consultation fee yet.')).toBeInTheDocument();
+    expect(screen.getByText('This doctor has no open consultation slots at the moment.')).toBeInTheDocument();
+    // No picture recorded: the initials tile stands in, the page still renders.
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByText('NP')).toBeInTheDocument();
+    expect(screen.getByText('No qualifications listed.')).toBeInTheDocument();
   });
 
   it('explains when the doctor has not published a profile', async () => {

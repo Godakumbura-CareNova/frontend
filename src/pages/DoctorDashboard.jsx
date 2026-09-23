@@ -33,7 +33,7 @@ const DoctorDashboard = () => {
             </span>
             <div>
               <div className="quicklink-card-title">Professional Profile</div>
-              <div className="quicklink-card-subtitle">Specialization, qualifications and experience</div>
+              <div className="quicklink-card-subtitle">Specialization, fee, availability, qualifications and experience</div>
             </div>
           </div>
           <ChevronRight size={18} color="var(--text-muted)" />

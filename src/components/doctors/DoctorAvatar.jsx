@@ -7,18 +7,25 @@ export const doctorInitials = (fullName) => {
   return parts.slice(0, 2).map((part) => part[0].toUpperCase()).join('');
 };
 
-// Pictures are served by the user-auth service (the same host as VITE_API_BASE_URL, minus the /api suffix),
-// the same way medicine images come from the pharmacy host.
+// Pictures are static files on the user-auth service (the same host as VITE_API_BASE_URL, minus the /api
+// suffix), the same way medicine images come from the pharmacy host. The doctor-payment service only
+// stores which file belongs to which doctor, so no doctor-payment endpoint serves image bytes.
 const authHost = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL).replace(/\/api$/, '');
 
-export const doctorPictureUrl = (doctorId) => (doctorId ? `${authHost}/api/doctors/${encodeURIComponent(doctorId)}/picture` : null);
+/** Absolute URL for a stored picture path ("/uploads/profile-pictures/x.jpg"), or null when there is none. */
+export const doctorPictureUrl = (picturePath) => {
+  const path = (picturePath || '').trim();
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${authHost}${path.startsWith('/') ? '' : '/'}${path}`;
+};
 
 /**
- * Doctor picture used wherever a doctor is shown to patients. Loads the picture by doctor id and
- * falls back to an initials tile when the doctor has not uploaded one (the endpoint answers 404).
+ * Doctor picture used wherever a doctor is shown to patients. `picturePath` is the path the doctor-payment
+ * service snapshotted from user-auth; an initials tile is shown when there is none or the file cannot load.
  */
-const DoctorAvatar = ({ doctorId, fullName, size = 'md' }) => {
-  const src = doctorPictureUrl(doctorId);
+const DoctorAvatar = ({ picturePath, fullName, size = 'md' }) => {
+  const src = doctorPictureUrl(picturePath);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => { setFailed(false); }, [src]);

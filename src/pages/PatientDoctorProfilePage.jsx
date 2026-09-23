@@ -8,6 +8,7 @@ import {
   ClipboardList,
   FileText,
   GraduationCap,
+  HandCoins,
   RefreshCw,
   Stethoscope,
   UserRoundX,
@@ -15,10 +16,11 @@ import {
 import DashboardLayout from '../components/DashboardLayout';
 import ProfileSection from '../components/doctors/ProfileSection';
 import CredentialList from '../components/doctors/CredentialList';
-import AvailabilityBadge, { formatSlotTime } from '../components/doctors/AvailabilityBadge';
+import AvailabilityBadge, { formatSlotTime, parseUtcDate } from '../components/doctors/AvailabilityBadge';
 import DoctorAvatar from '../components/doctors/DoctorAvatar';
 import { displayDoctorName } from '../components/doctors/DoctorCard';
 import { getDoctorPublicProfile } from '../services/doctorService';
+import { formatConsultationFee } from '../utils/consultationFee';
 import './doctorProfile.css';
 import './patientDoctors.css';
 
@@ -27,6 +29,11 @@ const describeLoadError = (error) => {
   if (status === 401 || status === 403) return { message: 'You are not authorized to view doctor profiles.', retryable: false };
   if (!error?.response) return { message: 'We could not reach the doctor directory. Check your connection and try again.', retryable: true };
   return { message: error?.response?.data?.message || "This doctor's profile could not be loaded right now.", retryable: true };
+};
+
+const formatSlotEndTime = (value) => {
+  const date = parseUtcDate(value);
+  return date ? date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
 };
 
 const experienceLabel = (years) => {
@@ -119,6 +126,7 @@ const PatientDoctorProfilePage = () => {
   const availability = profile.availability || {};
   const upcoming = profile.upcomingSlots || [];
   const experience = experienceLabel(profile.yearsOfExperience);
+  const fee = formatConsultationFee(profile.consultationFee);
 
   return (
     <DashboardLayout>
@@ -127,7 +135,7 @@ const PatientDoctorProfilePage = () => {
 
         <header className="dp-hero">
           <div className="dp-avatar-wrap pd-avatar-wrap">
-            <DoctorAvatar doctorId={profile.doctorId} fullName={profile.fullName} size="lg" />
+            <DoctorAvatar picturePath={profile.profilePicturePath} fullName={profile.fullName} size="lg" />
           </div>
 
           <div className="dp-hero-text">
@@ -137,6 +145,7 @@ const PatientDoctorProfilePage = () => {
             <div className="dp-hero-chips">
               <span className="dp-chip dp-chip-green"><BadgeCheck size={12} /> Doctor</span>
               {profile.specialization && <span className="dp-chip">{profile.specialization}</span>}
+              {fee && <span className="dp-chip pd-fee-chip"><HandCoins size={12} aria-hidden="true" /> {fee}</span>}
               <AvailabilityBadge availability={availability} className="pd-availability-hero" />
             </div>
           </div>
@@ -148,6 +157,17 @@ const PatientDoctorProfilePage = () => {
         </header>
 
         <div className="dp-card">
+          <ProfileSection icon={HandCoins} title="Consultation Fee">
+            {fee ? (
+              <div className="pd-fee">
+                <span className="pd-fee-amount" data-testid="consultation-fee">{fee}</span>
+                <span className="pd-fee-note">per person, per consultation</span>
+              </div>
+            ) : (
+              <p className="dp-empty">This doctor has not specified a consultation fee yet.</p>
+            )}
+          </ProfileSection>
+
           <ProfileSection icon={CalendarClock} title="Consultation Availability">
             {availability.hasAvailableSlots ? (
               <div className="pd-slots">
@@ -161,6 +181,7 @@ const PatientDoctorProfilePage = () => {
                       <li key={slot.id} className="pd-slot">
                         <CalendarClock size={13} aria-hidden="true" />
                         {formatSlotTime(slot.startUtc)}
+                        {slot.endUtc && <span className="pd-slot-end"> – {formatSlotEndTime(slot.endUtc)}</span>}
                       </li>
                     ))}
                   </ul>

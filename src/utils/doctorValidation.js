@@ -4,6 +4,7 @@
 
 export const DOCTOR_PROFILE_MIN_YEAR = 1950;
 export const DOCTOR_PROFILE_MAX_ENTRIES = 20;
+export const CONSULTATION_FEE_MAX = 1000000;
 
 const REGISTRATION_NUMBER_PATTERN = /^[A-Za-z0-9/-]{3,50}$/;
 
@@ -38,6 +39,16 @@ const validateYears = (entry, errors, prefix) => {
   }
 };
 
+// Optional; blank means "not set". Otherwise a non-negative amount with at most two decimals.
+export const validateConsultationFee = (value) => {
+  const text = trimmed(value);
+  if (text === '') return null;
+  if (!/^\d+(\.\d{1,2})?$/.test(text)) return 'Enter the fee as a number with at most 2 decimal places, e.g. 2500 or 2500.50.';
+  const amount = Number(text);
+  if (amount > CONSULTATION_FEE_MAX) return `Consultation fee must not exceed ${CONSULTATION_FEE_MAX.toLocaleString('en-US')}.`;
+  return null;
+};
+
 const validateText = (value, errors, key, label, min, max) => {
   const text = trimmed(value);
   if (text.length === 0) errors[key] = `${label} is required.`;
@@ -60,6 +71,9 @@ export const validateDoctorProfileForm = (form) => {
   if (trimmed(form.biography).length > 2000) {
     errors.biography = 'Biography must not exceed 2000 characters.';
   }
+
+  const feeError = validateConsultationFee(form.consultationFee);
+  if (feeError) errors.consultationFee = feeError;
 
   const qualifications = Array.isArray(form.qualifications) ? form.qualifications : [];
   if (qualifications.length > DOCTOR_PROFILE_MAX_ENTRIES) {
@@ -106,6 +120,8 @@ export const toDoctorProfileRequest = (form) => ({
   specialization: trimmed(form.specialization),
   registrationNumber: trimmed(form.registrationNumber).toUpperCase(),
   biography: trimmed(form.biography) || null,
+  consultationFee: trimmed(form.consultationFee) === '' ? null : Number(trimmed(form.consultationFee)),
+  profilePicturePath: trimmed(form.profilePicturePath) || null,
   qualifications: (form.qualifications || []).map((item) => ({
     degree: trimmed(item.degree),
     institution: trimmed(item.institution),
@@ -174,4 +190,112 @@ export const validateDoctorSearchCriteria = (criteria) => {
   }
 
   return { isValid: Object.keys(errors).length === 0, errors };
+};
+
+// Client-side rules for publishing consultation availability. Mirrors CreateAvailabilityValidator plus the
+// service's "must be in the future / at most 90 days ahead" checks so doctors get instant feedback.
+export const AVAILABILITY_MIN_SLOT_MINUTES = 10;
+export const AVAILABILITY_MAX_SLOT_MINUTES = 240;
+export const AVAILABILITY_MAX_WINDOW_HOURS = 12;
+export const AVAILABILITY_MAX_DAYS_AHEAD = 90;
+export const AVAILABILITY_SLOT_OPTIONS = [10, 15, 20, 30, 45, 60];
+
+// Doctors pick the time as hour / minute / AM-PM rather than typing a 24-hour value.
+export const AVAILABILITY_HOUR_OPTIONS = ['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+export const AVAILABILITY_MINUTE_OPTIONS = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+export const AVAILABILITY_MERIDIEM_OPTIONS = ['AM', 'PM'];
+
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Turns a 12-hour selection into the "HH:mm" value the rest of the validation works with.
+ * Returns '' when the selection is incomplete or out of range, which reads as "no time chosen".
+ */
+export const to24HourTime = (hour, minute, meridiem) => {
+  const hours12 = Number(trimmed(hour));
+  const minutes = Number(trimmed(minute));
+  const period = trimmed(meridiem).toUpperCase();
+
+  if (!Number.isInteger(hours12) || hours12 < 1 || hours12 > 12) return '';
+  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 59) return '';
+  if (period !== 'AM' && period !== 'PM') return '';
+
+  const hours24 = (hours12 % 12) + (period === 'PM' ? 12 : 0);
+  return `${String(hours24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
+/** Combines the date and time inputs (which are in the doctor's local zone) into a Date, or null when incomplete/invalid. */
+export const combineLocalDateTime = (date, time) => {
+  if (!DATE_PATTERN.test(trimmed(date)) || !TIME_PATTERN.test(trimmed(time))) return null;
+  const [year, month, day] = trimmed(date).split('-').map(Number);
+  const [hours, minutes] = trimmed(time).split(':').map(Number);
+  const value = new Date(year, month - 1, day, hours, minutes, 0, 0);
+  return Number.isNaN(value.getTime()) ? null : value;
+};
+
+/**
+ * Validates { date, startTime, endTime, slotDurationMinutes }. Returns { isValid, errors } keyed by field.
+ * `now` is injectable for tests.
+ */
+export const validateAvailabilityForm = (form, now = new Date()) => {
+  const errors = {};
+  const date = trimmed(form?.date);
+  const startTime = trimmed(form?.startTime);
+  const endTime = trimmed(form?.endTime);
+  const duration = Number(trimmed(form?.slotDurationMinutes));
+
+  if (date === '') errors.date = 'Date is required.';
+  else if (!DATE_PATTERN.test(date)) errors.date = 'Enter a valid date.';
+
+  if (startTime === '') errors.startTime = 'Start time is required.';
+  else if (!TIME_PATTERN.test(startTime)) errors.startTime = 'Enter a valid start time.';
+
+  if (endTime === '') errors.endTime = 'End time is required.';
+  else if (!TIME_PATTERN.test(endTime)) errors.endTime = 'Enter a valid end time.';
+
+  if (!Number.isInteger(duration) || duration < AVAILABILITY_MIN_SLOT_MINUTES || duration > AVAILABILITY_MAX_SLOT_MINUTES) {
+    errors.slotDurationMinutes = `Slot length must be between ${AVAILABILITY_MIN_SLOT_MINUTES} and ${AVAILABILITY_MAX_SLOT_MINUTES} minutes.`;
+  }
+
+  const start = combineLocalDateTime(date, startTime);
+  const end = combineLocalDateTime(date, endTime);
+  if (start && end) {
+    const windowMinutes = (end - start) / 60000;
+    if (windowMinutes <= 0) {
+      errors.endTime = 'End time must be after the start time.';
+    } else if (windowMinutes > AVAILABILITY_MAX_WINDOW_HOURS * 60) {
+      errors.endTime = `An availability window cannot be longer than ${AVAILABILITY_MAX_WINDOW_HOURS} hours.`;
+    } else if (!errors.slotDurationMinutes && duration > windowMinutes) {
+      errors.slotDurationMinutes = 'Slot length must fit inside the availability window.';
+    }
+  }
+
+  if (start && !errors.date && !errors.startTime) {
+    if (start <= now) {
+      errors.startTime = 'Availability must start in the future.';
+    } else if (start - now > AVAILABILITY_MAX_DAYS_AHEAD * 24 * 60 * 60 * 1000) {
+      errors.date = `Availability can be published at most ${AVAILABILITY_MAX_DAYS_AHEAD} days ahead.`;
+    }
+  }
+
+  return { isValid: Object.keys(errors).length === 0, errors };
+};
+
+/** Converts the local date/time inputs into the UTC request body the API expects. */
+export const toAvailabilityRequest = (form) => ({
+  startUtc: combineLocalDateTime(form.date, form.startTime).toISOString(),
+  endUtc: combineLocalDateTime(form.date, form.endTime).toISOString(),
+  slotDurationMinutes: Number(trimmed(form.slotDurationMinutes)),
+});
+
+/** How many slots the window will produce, so the confirmation can say what is about to be published. */
+export const countAvailabilitySlots = (form) => {
+  const start = combineLocalDateTime(form?.date, form?.startTime);
+  const end = combineLocalDateTime(form?.date, form?.endTime);
+  const duration = Number(trimmed(form?.slotDurationMinutes));
+
+  if (!start || !end || !Number.isInteger(duration) || duration <= 0) return 0;
+  const windowMinutes = (end - start) / 60000;
+  return windowMinutes <= 0 ? 0 : Math.floor(windowMinutes / duration);
 };

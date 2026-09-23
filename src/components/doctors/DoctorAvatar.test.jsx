@@ -3,22 +3,31 @@ import { describe, expect, it } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import DoctorAvatar, { doctorInitials, doctorPictureUrl } from './DoctorAvatar';
 
+const path = '/uploads/profile-pictures/nimal.jpg';
+
 describe('DoctorAvatar', () => {
-  it('builds the picture URL on the user-auth host', () => {
-    expect(doctorPictureUrl('abc-123')).toMatch(/\/api\/doctors\/abc-123\/picture$/);
-    expect(doctorPictureUrl('abc-123')).not.toContain('/api/api/');
-    expect(doctorPictureUrl(undefined)).toBeNull();
+  it('resolves a stored path against the user-auth host', () => {
+    expect(doctorPictureUrl(path)).toMatch(/\/uploads\/profile-pictures\/nimal\.jpg$/);
+    expect(doctorPictureUrl(path)).not.toContain('/api/uploads');
+    expect(doctorPictureUrl(null)).toBeNull();
+    expect(doctorPictureUrl('  ')).toBeNull();
   });
 
-  it('shows the doctor picture when a doctor id is known', () => {
-    render(<DoctorAvatar doctorId="abc-123" fullName="Nimal Perera" />);
+  it('shows the doctor picture when one has been recorded', () => {
+    render(<DoctorAvatar picturePath={path} fullName="Nimal Perera" />);
 
-    const image = screen.getByRole('img', { name: 'Dr. Nimal Perera' });
-    expect(image).toHaveAttribute('src', doctorPictureUrl('abc-123'));
+    expect(screen.getByRole('img', { name: 'Dr. Nimal Perera' })).toHaveAttribute('src', doctorPictureUrl(path));
+  });
+
+  it('shows initials when the doctor has no picture', () => {
+    render(<DoctorAvatar picturePath={null} fullName="Nimal Perera" />);
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByText('NP')).toBeInTheDocument();
   });
 
   it('falls back to initials when the picture cannot be loaded', () => {
-    render(<DoctorAvatar doctorId="abc-123" fullName="Nimal Perera" />);
+    render(<DoctorAvatar picturePath={path} fullName="Nimal Perera" />);
 
     fireEvent.error(screen.getByRole('img', { name: 'Dr. Nimal Perera' }));
 

@@ -1,7 +1,8 @@
 import React from 'react';
-import { BadgeCheck, Briefcase, ChevronRight, GraduationCap } from 'lucide-react';
+import { BadgeCheck, Briefcase, ChevronRight, GraduationCap, HandCoins } from 'lucide-react';
 import AvailabilityBadge from './AvailabilityBadge';
 import DoctorAvatar from './DoctorAvatar';
+import { formatConsultationFee } from '../../utils/consultationFee';
 
 export const displayDoctorName = (fullName) => {
   const name = (fullName || '').trim();
@@ -19,11 +20,12 @@ const DoctorCard = ({ doctor, onSelect }) => {
   const name = displayDoctorName(doctor.fullName);
   const experience = yearsLabel(doctor.yearsOfExperience);
   const degrees = doctor.qualifications ?? [];
+  const fee = formatConsultationFee(doctor.consultationFee);
 
   return (
     <article className="pd-card" aria-label={name}>
       <header className="pd-card-head">
-        <DoctorAvatar doctorId={doctor.doctorId} fullName={doctor.fullName} />
+        <DoctorAvatar picturePath={doctor.profilePicturePath} fullName={doctor.fullName} />
         <div className="pd-card-identity">
           <h2 className="pd-card-name">{name}</h2>
           <span className="pd-card-spec">{doctor.specialization}</span>
@@ -39,6 +41,9 @@ const DoctorCard = ({ doctor, onSelect }) => {
             <Briefcase size={14} aria-hidden="true" /> {experience}
           </span>
         )}
+        <span className="pd-card-meta pd-card-fee">
+          <HandCoins size={14} aria-hidden="true" /> {fee ? <>Fee: <strong>{fee}</strong></> : 'Fee not specified'}
+        </span>
         {degrees.length > 0 && (
           <span className="pd-card-meta pd-card-degrees">
             <GraduationCap size={14} aria-hidden="true" />

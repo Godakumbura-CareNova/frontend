@@ -24,6 +24,8 @@ const nimal = {
   specialization: 'Cardiologist',
   registrationNumber: 'SLMC-1001',
   biography: 'Heart specialist.',
+  consultationFee: 4500,
+  profilePicturePath: '/uploads/profile-pictures/nimal.jpg',
   qualifications: ['MBBS', 'MD Cardiology'],
   yearsOfExperience: 14,
   availability: { hasAvailableSlots: true, availableSlotCount: 2, nextAvailableSlotUtc: '2026-09-23T09:00:00Z' },
@@ -35,6 +37,7 @@ const kamala = {
   specialization: 'General Practitioner',
   registrationNumber: 'SLMC-1002',
   biography: null,
+  consultationFee: null,
   qualifications: ['MBBS'],
   yearsOfExperience: 0,
   availability: { hasAvailableSlots: false, availableSlotCount: 0, nextAvailableSlotUtc: null },
@@ -58,6 +61,11 @@ describe('PatientDoctorSearchPage', () => {
     expect(screen.getByRole('heading', { name: 'Dr. Kamala Silva' })).toBeInTheDocument();
     expect(screen.getByText('2 doctors available to consult')).toBeInTheDocument();
     expect(screen.getByText('Cardiologist', { selector: '.pd-card-spec' })).toBeInTheDocument();
+    expect(screen.getByText('LKR 4,500.00')).toBeInTheDocument();
+    expect(screen.getByText('Fee not specified')).toBeInTheDocument();
+    // Nimal has a picture, Kamala does not and falls back to initials.
+    expect(screen.getByRole('img', { name: 'Dr. Nimal Perera' })).toHaveAttribute('src', expect.stringContaining('/uploads/profile-pictures/nimal.jpg'));
+    expect(screen.getByText('KS')).toBeInTheDocument();
     expect(screen.getByText('Reg. No. SLMC-1001')).toBeInTheDocument();
     expect(screen.getByText('14 years of experience')).toBeInTheDocument();
     expect(screen.getByText('MD Cardiology')).toBeInTheDocument();

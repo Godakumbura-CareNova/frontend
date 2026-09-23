@@ -23,11 +23,14 @@ import {
   UserRound,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ProfileSection from '../components/doctors/ProfileSection';
 import ProfileInfoField from '../components/doctors/ProfileInfoField';
 import CredentialList from '../components/doctors/CredentialList';
 import CredentialListEditor from '../components/doctors/CredentialListEditor';
+import AvailabilityManager from '../components/doctors/AvailabilityManager';
+import ConsultationFeeSection from '../components/doctors/ConsultationFeeSection';
 import profileApi from '../api/profileApi';
 import { deleteMyDoctorProfile, getMyDoctorProfile, saveMyDoctorProfile } from '../services/doctorService';
 import {
@@ -37,6 +40,7 @@ import {
   validateDoctorProfileForm,
 } from '../utils/doctorValidation';
 import { validateProfileForm, validateProfilePictureFile } from '../utils/validation';
+import { accountPicturePath } from '../utils/doctorPicture';
 import './doctorProfile.css';
 
 const DEFAULT_AVATAR =
@@ -85,8 +89,10 @@ const emptyOtherDetail = () => ({ key: nextRowKey(), title: '', details: '', sta
 
 const toProfessionalForm = (profile) => ({
   specialization: profile?.specialization ?? '',
+  profilePicturePath: profile?.profilePicturePath ?? '',
   registrationNumber: profile?.registrationNumber ?? '',
   biography: profile?.biography ?? '',
+  consultationFee: profile?.consultationFee === null || profile?.consultationFee === undefined ? '' : String(profile.consultationFee),
   qualifications: (profile?.qualifications ?? []).map((item) => ({
     key: nextRowKey(),
     degree: item.degree ?? '',
@@ -129,6 +135,7 @@ const describeSaveError = (error, fallbackMessage) => {
 
 const DoctorProfilePage = () => {
   const { user, setUser } = useAuth();
+  const { showToast } = useToast();
 
   const [account, setAccount] = useState(null);
   const [accountError, setAccountError] = useState('');
@@ -142,9 +149,9 @@ const DoctorProfilePage = () => {
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showEditConfirm, setShowEditConfirm] = useState(false);
+  const [pendingAdd, setPendingAdd] = useState(null);
   const [pendingRemoval, setPendingRemoval] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -174,6 +181,26 @@ const DoctorProfilePage = () => {
     }
 
     setLoading(false);
+
+    // The picture lives in user-auth; this profile only records which file it is. A picture uploaded
+    // before that was recorded (or changed since) is synced once here, so patients see the current one
+    // without the doctor having to save anything. Silent: nothing the doctor asked for has failed.
+    const loadedAccount = accountResult.status === 'fulfilled' ? accountResult.value : null;
+    const loadedProfile = profileResult.status === 'fulfilled' ? profileResult.value : null;
+    if (loadedAccount && loadedProfile) {
+      const livePath = accountPicturePath(loadedAccount) ?? '';
+      if (livePath !== (loadedProfile.profilePicturePath ?? '')) {
+        try {
+          const next = toProfessionalForm(loadedProfile);
+          next.profilePicturePath = livePath;
+          const saved = await saveMyDoctorProfile(toDoctorProfileRequest(next));
+          setProfile(saved);
+          setForm(toProfessionalForm(saved));
+        } catch {
+          // Patients keep seeing the previous picture until the next successful save.
+        }
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -204,6 +231,15 @@ const DoctorProfilePage = () => {
       if (updated) {
         setAccount(updated);
         setAccountForm(toAccountForm(updated));
+        // The picture itself lives in user-auth; the doctor-payment profile only records which file it is,
+        // so patients keep seeing the latest one. Nothing to record until a professional profile exists.
+        if (profile) {
+          try {
+            await saveProfilePicturePath(accountPicturePath(updated));
+          } catch {
+            setPictureError('Your picture was uploaded, but patients will keep seeing the previous one until you save your profile.');
+          }
+        }
       }
     } catch (error) {
       setPictureError(error?.response?.data?.message || 'Failed to upload the profile picture. Please try again.');
@@ -217,10 +253,11 @@ const DoctorProfilePage = () => {
   const startEditing = () => {
     setShowEditConfirm(false);
     setAccountForm(toAccountForm(account));
-    setForm(toProfessionalForm(profile));
+    const base = toProfessionalForm(profile);
+    setForm(pendingAdd ? withExtraRow(base, pendingAdd.listName, pendingAdd.factory) : base);
+    setPendingAdd(null);
     setErrors({});
     setSaveError(null);
-    setSuccessMessage('');
     setEditing(true);
   };
 
@@ -267,19 +304,23 @@ const DoctorProfilePage = () => {
     setErrors((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !key.startsWith(`${listName}[`))));
   };
 
+  const withExtraRow = (formState, listName, factory) => {
+    if (formState[listName].length >= DOCTOR_PROFILE_MAX_ENTRIES) return formState;
+    return { ...formState, [listName]: [...formState[listName], factory()] };
+  };
+
+  // From read mode this has to wait for the edit confirmation, so the row is remembered and
+  // added once the editor opens; otherwise "Add Other" would leave an empty section behind.
   const addListItem = (listName, factory) => {
     if (!editing) {
+      setPendingAdd({ listName, factory });
       requestEditing();
       return;
     }
-    setForm((current) => {
-      if (current[listName].length >= DOCTOR_PROFILE_MAX_ENTRIES) return current;
-      return { ...current, [listName]: [...current[listName], factory()] };
-    });
+    setForm((current) => withExtraRow(current, listName, factory));
   };
 
   const requestRemoval = (listName, label) => (index) => {
-    setSuccessMessage('');
     setSaveError(null);
     setPendingRemoval({ listName, label, index });
   };
@@ -297,7 +338,7 @@ const DoctorProfilePage = () => {
       const saved = await saveMyDoctorProfile(toDoctorProfileRequest(next));
       setProfile(saved);
       setForm(toProfessionalForm(saved));
-      setSuccessMessage(`${label} removed.`);
+      showToast(`${label} removed.`, 'danger');
     } catch (error) {
       const described = describeSaveError(error, `Failed to remove the ${label.toLowerCase()}.`);
       setSaveError({ ...described, retry: () => { setPendingRemoval({ listName, label, index }); } });
@@ -306,11 +347,32 @@ const DoctorProfilePage = () => {
     }
   };
 
+  // Records which user-auth picture belongs to this doctor. Like the fee, the API replaces the whole
+  // profile, so everything else is resent unchanged.
+  const saveProfilePicturePath = async (picturePath) => {
+    const next = toProfessionalForm(profile);
+    next.profilePicturePath = picturePath ?? '';
+    const saved = await saveMyDoctorProfile(toDoctorProfileRequest(next));
+    setProfile(saved);
+    setForm(toProfessionalForm(saved));
+    return saved;
+  };
+
+  // The fee lives in its own section, but the API saves the profile as a whole, so the rest of the
+  // stored profile is resent unchanged alongside the new fee.
+  const saveConsultationFee = async (feeText) => {
+    const next = toProfessionalForm(profile);
+    next.consultationFee = feeText;
+    const saved = await saveMyDoctorProfile(toDoctorProfileRequest(next));
+    setProfile(saved);
+    setForm(toProfessionalForm(saved));
+    return saved;
+  };
+
   // Specialization is mandatory, so removing it means removing the whole professional profile.
   const deleteProfessionalProfile = async () => {
     setShowDeleteConfirm(false);
     setSaveError(null);
-    setSuccessMessage('');
     setSaving(true);
 
     try {
@@ -319,7 +381,7 @@ const DoctorProfilePage = () => {
       setForm(toProfessionalForm(null));
       setErrors({});
       setEditing(false);
-      setSuccessMessage('Your professional profile has been deleted. Your account details are unchanged.');
+      showToast('Your professional profile has been deleted. Your account details are unchanged.', 'danger');
     } catch (error) {
       const described = describeSaveError(error, 'Failed to delete your professional profile.');
       setSaveError({ ...described, retry: () => setShowDeleteConfirm(true) });
@@ -330,7 +392,6 @@ const DoctorProfilePage = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setSuccessMessage('');
     setSaveError(null);
 
     const basic = validateProfileForm(accountForm);
@@ -362,9 +423,13 @@ const DoctorProfilePage = () => {
       gender: accountForm.gender,
     };
 
+    // Every save re-syncs which user-auth picture belongs to this doctor, so the snapshot patients see
+    // is refreshed even when the picture was uploaded before the professional profile existed.
+    const professionalRequest = toDoctorProfileRequest({ ...form, profilePicturePath: accountPicturePath(account) ?? '' });
+
     const [accountResult, professionalResult] = await Promise.allSettled([
       profileApi.updateProfile(accountRequest),
-      saveMyDoctorProfile(toDoctorProfileRequest(form)),
+      saveMyDoctorProfile(professionalRequest),
     ]);
 
     if (accountResult.status === 'fulfilled') {
@@ -380,7 +445,7 @@ const DoctorProfilePage = () => {
 
     if (accountResult.status === 'fulfilled' && professionalResult.status === 'fulfilled') {
       setEditing(false);
-      setSuccessMessage('Your profile has been saved.');
+      showToast('Your profile has been saved.');
     } else {
       const failures = [];
       if (accountResult.status === 'rejected') failures.push(describeSaveError(accountResult.reason, 'Failed to save your account details.'));
@@ -517,7 +582,6 @@ const DoctorProfilePage = () => {
         </header>
 
         <form className="dp-card" onSubmit={handleSubmit} noValidate>
-          {successMessage && <div className="alert alert-success" role="status">{successMessage}</div>}
           {saveError && (
             <div className="alert alert-error" role="alert">
               <span>{saveError.message}</span>
@@ -777,6 +841,10 @@ const DoctorProfilePage = () => {
             </div>
           )}
         </form>
+
+        <ConsultationFeeSection profile={profile} onSave={saveConsultationFee} disabled={saving} />
+
+        <AvailabilityManager hasProfile={hasProfile} disabled={saving} />
       </div>
 
       <ConfirmDialog
@@ -785,7 +853,7 @@ const DoctorProfilePage = () => {
         message="You will be able to update your account details, specialization, qualifications and experience. Nothing is saved until you confirm your changes."
         confirmLabel={hasProfile ? 'Yes, Edit' : 'Yes, Create'}
         onConfirm={startEditing}
-        onCancel={() => setShowEditConfirm(false)}
+        onCancel={() => { setShowEditConfirm(false); setPendingAdd(null); }}
       />
 
       <ConfirmDialog
