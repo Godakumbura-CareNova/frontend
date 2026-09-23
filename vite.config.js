@@ -14,5 +14,7 @@ export default defineConfig({
     setupFiles: './src/test/setupTests.js',
     globals: true,
     clearMocks: true,
+    // GCN-37 keeps its unit tests in doctor-payment-service; CI's `npm run test:run` must not fail on an empty suite.
+    passWithNoTests: true,
   }
 });

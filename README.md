@@ -41,12 +41,6 @@ carenova-frontend/
 │   ├── App.jsx                # Main Application Shell
 │   ├── main.jsx               # Entry Point
 │   └── index.css              # Premium Glassmorphism & Responsive CSS
-├── tests/
-│   └── selenium/              # End-to-End Browser Automation Tests
-│       ├── RegistrationTests.cs
-│       ├── LoginTests.cs
-│       ├── ProfileTests.cs
-│       └── RoleAccessTests.cs
 ├── Dockerfile                 # Multi-stage Containerization Setup
 └── vite.config.js             # Vite Development Config
 ```
@@ -95,7 +89,6 @@ Patient needs no promotion — register `test-patient@carenova.dev` and it stays
 ## Key Features
 - **Role-Based Access Control (RBAC)**: Support for `Patient`, `Doctor`, `PharmacyStaff`, and `Admin` roles.
 - **Glassmorphism UI Design**: Rich aesthetic palette, dynamic status indicators, and responsive grid layouts.
-- **Automated E2E Selenium Tests**: Comprehensive C# test suite covering complete user journeys.
 
 ## Sprint 3 doctor and payment workspace
 

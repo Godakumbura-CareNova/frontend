@@ -72,6 +72,15 @@ export const addMyAvailability = async (request) => {
   return response.data;
 };
 
+/**
+ * Moves or resizes one open slot: { startUtc, endUtc }. Resolves to the updated slot. A booked slot or an
+ * overlap rejects with a 409, a slot that no longer exists with a 404, invalid times with a 400.
+ */
+export const updateMyAvailabilitySlot = async (slotId, request) => {
+  const response = await doctorPaymentApi.put(`/api/doctors/me/availability/${encodeURIComponent(slotId)}`, request);
+  return response.data;
+};
+
 /** Withdraws one open slot. A 404 (already gone) resolves quietly; a booked slot rejects with a 409. */
 export const deleteMyAvailabilitySlot = async (slotId) => {
   try {
