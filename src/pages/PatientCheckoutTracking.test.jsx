@@ -12,6 +12,9 @@ const api = vi.hoisted(() => ({ review: vi.fn(), place: vi.fn(), list: vi.fn(), 
 vi.mock('../api/orderApi', () => ({ orderApi: api }));
 vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { userId: 'patient-qa' } }) }));
 vi.mock('../components/DashboardLayout', () => ({ default: ({ children }) => <main>{children}</main> }));
+const payments = vi.hoisted(() => ({ getMedicinePaymentMethods: vi.fn(), getMedicinePaymentOptions: vi.fn(), selectMedicinePaymentMethod: vi.fn(), getMedicinePayment: vi.fn() }));
+vi.mock('../services/paymentService', () => payments);
+const paymentMethods = ['Online', 'BankTransfer', 'Cash'].map((method) => ({ method, label: method === 'BankTransfer' ? 'Bank transfer' : method === 'Online' ? 'Online payment' : 'Cash', description: '', available: true, unavailableReason: null }));
 
 const ibuprofen = { cartItemId: 1, medicineName: 'Ibuprofen', quantity: 2, unitPrice: 200, lineTotal: 400 };
 const paracetamol = { cartItemId: 2, medicineName: 'Paracetamol', quantity: 5, unitPrice: 20, lineTotal: 100 };
@@ -55,10 +58,15 @@ describe('checkout and order tracking pages', () => {
       response: { status: 409, data: { message: 'Insufficient stock for Ibuprofen. Please update your cart.' } },
     });
 
+    payments.getMedicinePaymentMethods.mockResolvedValue({ data: paymentMethods });
+
     render(<MemoryRouter><PatientCheckoutPage /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: 'Confirm and place order' }));
+    fireEvent.click(await screen.findByLabelText(/^Cash/));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm and place order' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
     expect(await screen.findByText(/Insufficient stock for Ibuprofen/)).toBeInTheDocument();
+    expect(payments.selectMedicinePaymentMethod).not.toHaveBeenCalled();
     expect(screen.queryByText('Order placed successfully')).not.toBeInTheDocument();
     expect(api.place).toHaveBeenCalledTimes(1);
   });

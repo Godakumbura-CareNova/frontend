@@ -27,6 +27,8 @@ import PatientCartPage from '../pages/PatientCartPage';
 import PatientCheckoutPage from '../pages/PatientCheckoutPage';
 import PatientOrdersPage from '../pages/PatientOrdersPage';
 import PatientOrderDetailsPage from '../pages/PatientOrderDetailsPage';
+import PatientOrderPaymentPage from '../pages/PatientOrderPaymentPage';
+import PatientOnlinePaymentPage from '../pages/PatientOnlinePaymentPage';
 import PatientDoctorSearchPage from '../pages/PatientDoctorSearchPage';
 import PatientDoctorProfilePage from '../pages/PatientDoctorProfilePage';
 import PharmacyOrderManagementPage from '../pages/PharmacyOrderManagementPage';
@@ -96,6 +98,8 @@ const AppRoutes = () => (
         <Route path="/patient/checkout" element={<PatientCheckoutPage />} />
         <Route path="/patient/orders" element={<PatientOrdersPage />} />
         <Route path="/patient/orders/:orderId" element={<PatientOrderDetailsPage />} />
+        <Route path="/patient/orders/:orderId/payment" element={<PatientOrderPaymentPage />} />
+        <Route path="/patient/orders/:orderId/payment/online" element={<PatientOnlinePaymentPage />} />
         <Route path="/patient/doctors" element={<PatientDoctorSearchPage />} />
         <Route path="/patient/doctors/:doctorId" element={<PatientDoctorProfilePage />} />
       </Route>
