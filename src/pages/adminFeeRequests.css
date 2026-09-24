@@ -88,6 +88,9 @@
 .afr-filter:hover { background: #f9fafb; }
 .afr-filter.active { background: #d3271f; border-color: #d3271f; color: #fff; box-shadow: 0 6px 14px rgba(211, 39, 31, 0.25); }
 .afr-filter.active svg { color: #fff; }
+.afr-filter-pending.active { background: #fbbf24; border-color: #fbbf24; color: #422006; box-shadow: 0 6px 14px rgba(251, 191, 36, 0.3); }
+.afr-filter-pending.active svg { color: #422006; }
+.afr-filter-approved.active { background: #1f7a47; border-color: #1f7a47; box-shadow: 0 6px 14px rgba(31, 122, 71, 0.25); }
 
 .afr-alert { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
