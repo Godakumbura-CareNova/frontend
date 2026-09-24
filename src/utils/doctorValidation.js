@@ -49,6 +49,25 @@ export const validateConsultationFee = (value) => {
   return null;
 };
 
+/**
+ * A requested new fee (GCN-38). Unlike validateConsultationFee it is required, must be above 0 and must differ
+ * from the doctor's current fee. Mirrors CreateFeeChangeRequestValidator. Returns a message or null.
+ */
+export const validateRequestedFee = (value, currentFee) => {
+  const text = trimmed(value);
+  if (text === '') return 'Enter the new consultation fee.';
+  // Checked before the format rule so "-2000" gets a clear reason rather than a generic format message.
+  if (/^-\s*\d/.test(text)) return 'Consultation fee cannot be negative. Enter an amount greater than 0.';
+  if (!/^\d+(\.\d{1,2})?$/.test(text)) return 'Enter the fee as a number with at most 2 decimal places, e.g. 2500 or 2500.50.';
+  const amount = Number(text);
+  if (amount <= 0) return 'Consultation fee must be greater than 0.';
+  if (amount > CONSULTATION_FEE_MAX) return `Consultation fee must not exceed ${CONSULTATION_FEE_MAX.toLocaleString('en-US')}.`;
+  if (currentFee !== null && currentFee !== undefined && Number(currentFee) === amount) {
+    return 'This is already your consultation fee. Enter a different amount.';
+  }
+  return null;
+};
+
 const validateText = (value, errors, key, label, min, max) => {
   const text = trimmed(value);
   if (text.length === 0) errors[key] = `${label} is required.`;

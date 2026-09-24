@@ -28,11 +28,7 @@ vi.mock('../components/doctors/AvailabilityManager', () => ({
   default: ({ hasProfile }) => <div data-testid="availability-manager" data-has-profile={String(hasProfile)} />,
 }));
 vi.mock('../components/doctors/ConsultationFeeSection', () => ({
-  default: ({ profile, onSave }) => (
-    <div data-testid="consultation-fee-section" data-fee={String(profile?.consultationFee ?? '')}>
-      <button type="button" onClick={() => onSave('3500.50')}>Stub save fee</button>
-    </div>
-  ),
+  default: ({ hasProfile }) => <div data-testid="consultation-fee-section" data-has-profile={String(hasProfile)} />,
 }));
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ user: { fullName: 'Minadi Pathirana', role: 'Doctor' }, role: 'Doctor', setUser: mockSetUser, logout: vi.fn() }),
@@ -90,7 +86,7 @@ describe('DoctorProfilePage', () => {
     expect(screen.getByText('minadipathirana2003@gmail.com')).toBeInTheDocument();
     expect(screen.getByText('July 3, 2003')).toBeInTheDocument();
     expect(screen.getByText('Reg. No. SLMC-12345')).toBeInTheDocument();
-    expect(screen.getByTestId('consultation-fee-section')).toHaveAttribute('data-fee', '2500');
+    expect(screen.getByTestId('consultation-fee-section')).toHaveAttribute('data-has-profile', 'true');
     expect(screen.getByTestId('availability-manager')).toHaveAttribute('data-has-profile', 'true');
     expect(screen.getByText('MBBS')).toBeInTheDocument();
     expect(screen.getByText('2010 - 2015')).toBeInTheDocument();
@@ -101,25 +97,6 @@ describe('DoctorProfilePage', () => {
     expect(screen.queryByRole('button', { name: /edit profile/i })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /edit details/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /back to dashboard/i })).toHaveAttribute('href', '/doctor-dashboard');
-  });
-
-  it('saves a fee change from the fee section without losing the rest of the profile', async () => {
-    const user = userEvent.setup();
-    mockSaveMyDoctorProfile.mockImplementation(async (request) => ({ ...existingProfile, ...request }));
-    renderPage();
-    await screen.findByTestId('consultation-fee-section');
-
-    await user.click(screen.getByRole('button', { name: 'Stub save fee' }));
-
-    await waitFor(() => expect(mockSaveMyDoctorProfile).toHaveBeenCalledTimes(1));
-    const sent = mockSaveMyDoctorProfile.mock.calls[0][0];
-    expect(sent.consultationFee).toBe(3500.5);
-    expect(sent.specialization).toBe('General Practitioner');
-    expect(sent.qualifications).toHaveLength(1);
-    expect(sent.experiences).toHaveLength(1);
-    expect(sent.otherDetails).toHaveLength(1);
-    // The account details are not touched by a fee change.
-    expect(mockUpdateProfile).not.toHaveBeenCalled();
   });
 
   it('adds the row that Add Other asked for once the edit is confirmed', async () => {

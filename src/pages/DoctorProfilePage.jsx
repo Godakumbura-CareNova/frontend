@@ -347,22 +347,11 @@ const DoctorProfilePage = () => {
     }
   };
 
-  // Records which user-auth picture belongs to this doctor. Like the fee, the API replaces the whole
-  // profile, so everything else is resent unchanged.
+  // Records which user-auth picture belongs to this doctor. The API replaces the whole profile,
+  // so everything else is resent unchanged.
   const saveProfilePicturePath = async (picturePath) => {
     const next = toProfessionalForm(profile);
     next.profilePicturePath = picturePath ?? '';
-    const saved = await saveMyDoctorProfile(toDoctorProfileRequest(next));
-    setProfile(saved);
-    setForm(toProfessionalForm(saved));
-    return saved;
-  };
-
-  // The fee lives in its own section, but the API saves the profile as a whole, so the rest of the
-  // stored profile is resent unchanged alongside the new fee.
-  const saveConsultationFee = async (feeText) => {
-    const next = toProfessionalForm(profile);
-    next.consultationFee = feeText;
     const saved = await saveMyDoctorProfile(toDoctorProfileRequest(next));
     setProfile(saved);
     setForm(toProfessionalForm(saved));
@@ -842,7 +831,7 @@ const DoctorProfilePage = () => {
           )}
         </form>
 
-        <ConsultationFeeSection profile={profile} onSave={saveConsultationFee} disabled={saving} />
+        <ConsultationFeeSection hasProfile={hasProfile} disabled={saving} />
 
         <AvailabilityManager hasProfile={hasProfile} disabled={saving} />
       </div>

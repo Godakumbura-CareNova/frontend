@@ -81,3 +81,21 @@ export const deleteMyAvailabilitySlot = async (slotId) => {
     throw error;
   }
 };
+
+/**
+ * The doctor's consultation fee and fee-change requests:
+ * { currentFee, pendingRequest, requests } with requests newest first.
+ */
+export const getMyFeeChangeRequests = async () => {
+  const response = await doctorPaymentApi.get("/api/doctors/me/fee-change-requests");
+  return response.data;
+};
+
+/**
+ * Asks an admin to approve a new consultation fee: { requestedFee }. Resolves to the pending request.
+ * Invalid fees reject with a 400, an existing pending request (or no profile) with a 409.
+ */
+export const submitFeeChangeRequest = async (requestedFee) => {
+  const response = await doctorPaymentApi.post("/api/doctors/me/fee-change-requests", { requestedFee });
+  return response.data;
+};

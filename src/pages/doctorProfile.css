@@ -583,3 +583,58 @@
   .dp-actions { flex-direction: column-reverse; }
   .dp-actions .btn { width: 100%; }
 }
+
+/* Consultation fee-change requests (GCN-38) */
+.dp-fee-panel { display: flex; flex-direction: column; gap: 12px; }
+
+.dp-fee-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dp-fee-status-pending { background: #fff8e6; color: #8a5300; }
+.dp-fee-status-approved { background: var(--dp-green-soft); color: var(--dp-green-dark); }
+.dp-fee-status-rejected { background: var(--dp-red-soft); color: #7f1d1d; }
+
+.dp-fee-request {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--dp-line);
+  background: var(--dp-surface);
+  font-size: 13px;
+}
+.dp-fee-request p { margin: 0; line-height: 1.5; }
+.dp-fee-request-pending { border-color: #f5c26b; background: #fffcf3; }
+
+
+
+.dp-fee-history { display: flex; flex-direction: column; gap: 8px; overflow-x: auto; }
+.dp-fee-history table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.dp-fee-history th,
+.dp-fee-history td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--dp-line); vertical-align: top; }
+.dp-fee-history th { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.02em; }
+
+.dp-history-toggle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--dp-green-border);
+  background: var(--white);
+  color: var(--dp-green-dark);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dp-history-toggle:hover { background: var(--dp-green-soft); }

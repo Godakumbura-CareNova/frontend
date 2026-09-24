@@ -1113,6 +1113,10 @@ a:hover {
 .notification-item { width: 100%; display: grid; gap: 4px; text-align: left; border: 0; border-radius: 10px; background: #fff; padding: 12px; cursor: pointer; color: #22312a; }
 .notification-item:hover, .notification-item.unread { background: #eefaf3; }
 .notification-item span { font-size: 13px; line-height: 1.4; color: #58665f; }
+.notification-item strong { font-size: 14px; line-height: 1.35; font-weight: 700; }
+.notification-menu-actions { display: inline-flex; align-items: center; gap: 6px; }
+.notification-menu-heading .notification-close { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border-radius: 50%; color: #58665f; }
+.notification-menu-heading .notification-close:hover { background: #eefaf3; color: #173b2a; }
 .notification-empty { padding: 18px 8px; color: #68756e; }
 
 .user-menu {

@@ -12,6 +12,7 @@ import {
   DollarSign,
   CreditCard,
   AlertTriangle,
+  HandCoins,
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -46,6 +47,15 @@ const AdminDashboard = () => {
             </div>
             <div className="quicklink-card-icon" style={{ background: 'var(--red-soft)', color: 'var(--red-strong)' }}>
               <Users size={20} />
+            </div>
+          </Link>
+          <Link to="/admin/fee-requests" className="quicklink-card">
+            <div>
+              <div className="quicklink-card-title">Consultation Fee Requests</div>
+              <div className="quicklink-card-subtitle">Approve or reject doctors' requested consultation fee changes</div>
+            </div>
+            <div className="quicklink-card-icon" style={{ background: 'var(--red-soft)', color: 'var(--red-strong)' }}>
+              <HandCoins size={20} />
             </div>
           </Link>
         </div>

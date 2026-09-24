@@ -15,6 +15,7 @@ import DoctorProfilePage from '../pages/DoctorProfilePage';
 import PharmacyStaffDashboard from '../pages/PharmacyStaffDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
 import UserManagementPage from '../pages/UserManagementPage';
+import AdminFeeChangeRequestsPage from '../pages/AdminFeeChangeRequestsPage';
 import MedicineManagementPage from '../pages/MedicineManagementPage';
 import CategoryManagementPage from '../pages/CategoryManagementPage';
 import InventoryManagementPage from '../pages/InventoryManagementPage';
@@ -112,6 +113,7 @@ const AppRoutes = () => (
       <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<UserManagementPage />} />
+        <Route path="/admin/fee-requests" element={<AdminFeeChangeRequestsPage />} />
       </Route>
     </Route>
 

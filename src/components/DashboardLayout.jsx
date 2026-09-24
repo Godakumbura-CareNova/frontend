@@ -24,6 +24,7 @@ import pharmacyLogo from '../assets/PHARMACY LOGO .jpeg';
 import { getFirstName } from '../utils/formatName';
 import { patientNotificationApi } from '../api/patientNotificationApi';
 import { staffNotificationApi } from '../api/staffNotificationApi';
+import { doctorNotificationApi } from '../api/doctorNotificationApi';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -65,6 +66,7 @@ const NAV_BY_ROLE = {
   Admin: [
     { to: '/admin-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
     { to: '/admin/users', label: 'Users', icon: UsersIcon, enabled: true },
+    { to: '/admin/fee-requests', label: 'Fee Requests', icon: CreditCard, enabled: true },
     { label: 'Doctors', icon: Stethoscope, enabled: false },
     { label: 'Medicines', icon: Pill, enabled: false },
     { label: 'Appointments', icon: Calendar, enabled: false },
@@ -82,7 +84,8 @@ const DashboardLayout = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const patient = normalizeRole(role) === 'Patient';
   const pharmacyStaff = normalizeRole(role) === 'PharmacyStaff';
-  const notificationApi = patient ? patientNotificationApi : pharmacyStaff ? staffNotificationApi : null;
+  const doctor = normalizeRole(role) === 'Doctor';
+  const notificationApi = patient ? patientNotificationApi : pharmacyStaff ? staffNotificationApi : doctor ? doctorNotificationApi : null;
 
   const loadNotifications = async () => {
     if (!notificationApi) return;
@@ -95,6 +98,8 @@ const DashboardLayout = ({ children }) => {
     setNotifications(items => items.map(item => item.id === notification.id ? { ...item, isRead: true } : item));
     setNotificationsOpen(false);
     if (pharmacyStaff) navigate('/pharmacy/orders');
+    // Doctor notifications are about fee-change requests, which live on the professional profile.
+    else if (doctor) navigate('/profile');
     else navigate(notification.relatedEntityType === 'Order' ? `/patient/orders/${notification.relatedEntityId}` : '/patient/prescriptions');
   };
 
@@ -170,7 +175,13 @@ const DashboardLayout = ({ children }) => {
               {notificationApi && notifications.filter(item => !item.isRead).length > 0 && <span className="notification-count">{notifications.filter(item => !item.isRead).length}</span>}
             </button>
             {notificationApi && notificationsOpen && <section className="notification-menu" aria-label="Notifications">
-              <div className="notification-menu-heading"><strong>Notifications</strong>{notifications.some(item => !item.isRead) && <button onClick={async () => { await notificationApi.markAllRead(); setNotifications(items => items.map(item => ({ ...item, isRead: true }))); }}>Mark all read</button>}</div>
+              <div className="notification-menu-heading">
+                <strong>Notifications</strong>
+                <div className="notification-menu-actions">
+                  {notifications.some(item => !item.isRead) && <button type="button" onClick={async () => { await notificationApi.markAllRead(); setNotifications(items => items.map(item => ({ ...item, isRead: true }))); }}>Mark all read</button>}
+                  <button type="button" className="notification-close" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)}><X size={18} /></button>
+                </div>
+              </div>
               {notifications.length === 0 ? <p className="notification-empty">No notifications yet.</p> : notifications.map(item => <button className={`notification-item${item.isRead ? '' : ' unread'}`} key={item.id} onClick={() => markRead(item)}><strong>{item.title}</strong><span>{item.message}</span></button>)}
             </section>}
             {normalizeRole(role) === 'Patient' && (
