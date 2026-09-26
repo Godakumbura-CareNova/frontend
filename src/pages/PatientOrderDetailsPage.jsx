@@ -11,6 +11,9 @@ const PAYMENT_STATUS_TEXT = {
   AwaitingOnlinePayment: 'Waiting for online payment',
   AwaitingBankTransfer: 'Waiting for your bank transfer',
   PayOnCollection: 'Pay at the counter when you collect',
+  ReceiptUnderVerification: 'Receipt uploaded, waiting for pharmacy verification',
+  ReceiptRejected: 'Receipt rejected, please upload a new one',
+  Paid: 'Payment verified',
 };
 
 const paymentSummary = (payment) => {
@@ -46,7 +49,10 @@ export default function PatientOrderDetailsPage() {
       <section className="order-card order-details-summary">
         <div className="order-summary-top"><div><span className="order-summary-label">Current status</span><OrderStatus status={order.status} /></div><button className="order-refresh-button" onClick={load}><RefreshCw size={16} /> Refresh status</button></div>
         <div className="order-meta-grid"><div><PackageCheck size={19} /><div><span>Collection</span><strong>Pharmacy pickup</strong></div></div><div><CalendarDays size={19} /><div><span>Placed</span><strong>{order.orderDate ? new Date(order.orderDate).toLocaleString() : 'Date unavailable'}</strong></div></div></div>
-        <div className="order-payment-method"><Wallet size={19} /><div><span>Payment method</span>{paymentSummary(payment)}</div></div>
+        <div className="order-payment-method"><Wallet size={19} /><div><span>Payment method</span>{paymentSummary(payment)}
+          {['AwaitingBankTransfer', 'ReceiptRejected'].includes(payment?.status) && order.status === 'Pending'
+            && <Link className="order-receipt-link" to={`/patient/orders/${encodeURIComponent(orderId)}/payment`}>Upload bank transfer receipt</Link>}
+        </div></div>
         {order.rejectionReason && <div role="note" className="order-rejection-note"><CircleX size={21} /><div><strong>Order rejected</strong><p>{order.rejectionReason}</p></div></div>}
       </section>
       <OrderItems {...order} heading="Order items" />

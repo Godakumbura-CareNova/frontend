@@ -116,7 +116,7 @@ export default function PatientCheckoutPage() {
   const orderPaymentPath = order ? `/patient/orders/${order.id}/payment` : '';
 
   return <DashboardLayout><section className="orders-page checkout-page">
-    {order ? <><h1>Order placed successfully</h1><div className="order-card order-summary"><h2>{order.orderNumber}</h2><OrderStatus status={order.status} /><p>Total: {money(order.totalAmount)}</p><p>Collection: Pharmacy pickup</p><Link className="checkout-back" to={`/patient/orders/${order.id}`}>View my order</Link></div>
+    {order ? <><h1>Order placed successfully</h1><div className="order-card order-summary"><h2>{order.orderNumber}</h2><OrderStatus status={order.status} /><p>Total: {money(order.totalAmount)}</p><p>Collection: Pharmacy pickup</p></div>
       <section className="pay-card" aria-labelledby="pay-heading">
         {paymentBusy && <p className="pay-muted">Saving your payment method...</p>}
         {payment && <PaymentResult payment={payment} orderId={order.id} />}

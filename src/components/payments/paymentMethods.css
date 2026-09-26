@@ -60,3 +60,56 @@
 /* Checkout's generic ".orders-page button" rule would otherwise paint the dialog's confirm button white on white. */
 .orders-page .confirm-dialog-panel .btn-green { background: #087443; border-color: #087443; color: #fff; font-weight: 700; }
 .orders-page .confirm-dialog-panel .btn-green:hover:not(:disabled) { background: #065e36; border-color: #065e36; }
+
+/* GCN-40: bank transfer receipt upload and verification states. */
+.pay-receipt-state { display: flex; gap: 12px; align-items: flex-start; margin-top: 16px; padding: 16px 18px; border-radius: 14px; }
+.pay-receipt-state strong { display: block; margin-bottom: 4px; color: #15271d; }
+.pay-receipt-state p { margin: 0 0 4px; line-height: 1.5; }
+.pay-receipt-pending { color: #9a5b00; background: #fff8e8; border: 1px solid #f3dfb2; }
+.pay-receipt-pending p { color: #4a3a17; }
+.pay-receipt-file { font-size: 13px; color: var(--text-muted) !important; overflow-wrap: anywhere; }
+.pay-receipt-order-status { font-size: 14px; }
+.pay-status-pill { display: inline-block; padding: 2px 10px; color: #9a5b00; background: #fdefc8; border-radius: 999px; font-weight: 700; font-size: 13px; }
+.pay-receipt-rejected { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0 4px; padding: 10px 12px; color: #a1291c; background: #fdecea; border: 1px solid #f5c6c0; border-radius: 10px; font-size: 14px; }
+.pay-receipt-hint { margin-top: 10px !important; font-size: 13px; }
+
+/* Compact, consistent buttons for the payment card (scoped to beat the generic ".orders-page button" rule). */
+.orders-page .pay-card .pay-btn,
+.orders-page .pay-card .pay-actions .order-primary,
+.orders-page .pay-card .pay-actions .pay-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 14px; font-size: 13.5px; font-weight: 600; line-height: 1.2; letter-spacing: .01em;
+  border-radius: 8px; box-shadow: none; text-decoration: none; cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.orders-page .pay-card .pay-actions .order-primary,
+.orders-page .pay-card .pay-btn-primary { color: #fff; background: #087443; border: 1px solid #087443; }
+.orders-page .pay-card .pay-actions .order-primary:hover,
+.orders-page .pay-card .pay-btn-primary:hover:not(:disabled) { background: #065e36; border-color: #065e36; }
+.orders-page .pay-card .pay-actions .pay-secondary,
+.orders-page .pay-card .pay-btn-outline { color: #087443; background: #fff; border: 1px solid #b9dfc8; }
+.orders-page .pay-card .pay-actions .pay-secondary:hover,
+.orders-page .pay-card .pay-btn-outline:hover { background: #f1faf4; border-color: #087443; }
+.orders-page .pay-card .pay-btn-danger { color: #b42318; background: #fff; border: 1px solid #f1b8b2; }
+.orders-page .pay-card .pay-btn-danger:hover:not(:disabled) { color: #fff; background: #b42318; border-color: #b42318; }
+.orders-page .pay-card .pay-btn:disabled, .pay-receipt-choose.disabled { opacity: .55; cursor: not-allowed; pointer-events: none; }
+
+/* Receipt chooser and preview. */
+.pay-receipt-body { flex: 1; min-width: 0; }
+.pay-receipt-input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.pay-receipt-input:focus-visible + .pay-receipt-choose { outline: 2px solid #087443; outline-offset: 2px; }
+.pay-card .pay-receipt-choose { margin-top: 12px; }
+.pay-receipt-preview { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 10px 12px; background: #f7fbf8; border: 1px solid #dce7df; border-radius: 12px; }
+.pay-receipt-preview img, .pay-receipt-thumb { flex: 0 0 auto; width: 64px; height: 64px; border-radius: 8px; border: 1px solid #dce7df; background: #fff; }
+/* "contain" shows the whole receipt, letterboxed, instead of cropping it to fill the square. */
+.pay-receipt-preview img { object-fit: contain; padding: 2px; }
+.pay-receipt-thumb { display: grid; place-items: center; color: #087443; }
+.pay-receipt-preview-info { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.pay-receipt-preview-info strong { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pay-receipt-preview-info span { color: var(--text-muted); font-size: 12.5px; }
+
+@media (max-width: 600px) {
+  .pay-receipt-preview { flex-wrap: wrap; }
+  .orders-page .pay-card .pay-actions .order-primary,
+  .orders-page .pay-card .pay-actions .pay-secondary { width: 100%; }
+}

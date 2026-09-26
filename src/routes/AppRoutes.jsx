@@ -33,6 +33,7 @@ import PatientDoctorSearchPage from '../pages/PatientDoctorSearchPage';
 import PatientDoctorProfilePage from '../pages/PatientDoctorProfilePage';
 import PharmacyOrderManagementPage from '../pages/PharmacyOrderManagementPage';
 import PharmacyPrescriptionReviewPage from '../pages/PharmacyPrescriptionReviewPage';
+import PharmacyPaymentVerificationPage from '../pages/PharmacyPaymentVerificationPage';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -113,6 +114,7 @@ const AppRoutes = () => (
         <Route path="/pharmacy/inventory" element={<InventoryManagementPage />} />
         <Route path="/pharmacy/orders" element={<PharmacyOrderManagementPage />} />
         <Route path="/pharmacy/prescriptions" element={<PharmacyPrescriptionReviewPage />} />
+        <Route path="/pharmacy/payments" element={<PharmacyPaymentVerificationPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
         <Route path="/admin-dashboard" element={<AdminDashboard />} />

@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Banknote, Building2, CheckCircle2, CreditCard, FileUp, RefreshCw } from 'lucide-react';
+import { Banknote, Building2, CheckCircle2, CreditCard, RefreshCw } from 'lucide-react';
 import ConfirmDialog from '../ConfirmDialog';
+import BankTransferReceiptUpload from './BankTransferReceiptUpload';
 import { getMedicinePaymentOptions, selectMedicinePaymentMethod } from '../../services/paymentService';
 import { PAYMENT_METHOD_LABELS, describePaymentError, validatePaymentSelection } from '../../utils/paymentValidation';
 import { money } from '../../pages/orderPresentation';
@@ -19,6 +20,9 @@ export const CONFIRM_PAYMENT_DETAILS = {
 export const choosePaymentPath = (orderId) => `/patient/orders/${encodeURIComponent(orderId)}/payment`;
 
 export const onlinePaymentPath = (orderId) => `/patient/orders/${encodeURIComponent(orderId)}/payment/online`;
+
+// A receipt under verification or a verified payment locks the method, so the page shows its status instead of the choices.
+export const isPaymentLocked = (payment) => ['ReceiptUnderVerification', 'Paid'].includes(payment?.status);
 
 // Lets a patient choose how to pay for one pharmacy order, confirm it, and continue with that method.
 export default function MedicinePaymentMethodSelector({ orderId }) {
@@ -39,7 +43,7 @@ export default function MedicinePaymentMethodSelector({ orderId }) {
       const data = (await getMedicinePaymentOptions(orderId)).data;
       // This page is where the method is chosen or changed, so it opens on the choices with the current one preselected.
       setOptions(data);
-      setPayment(null);
+      setPayment(isPaymentLocked(data.selectedPayment) ? data.selectedPayment : null);
       const previous = data.selectedPayment?.method;
       setSelected(data.methods.some((item) => item.method === previous && item.available) ? previous : '');
     } catch (failure) {
@@ -142,14 +146,21 @@ export function PaymentMethodOptions({ methods, selected, onChange, disabled = f
 
 // What the patient does next for the method saved on an order. "Change payment method" goes to the order's payment
 // page; pass onChange only when already on that page, to return to the choices without navigating.
-export function PaymentResult({ payment, orderId, onChange }) {
+export function PaymentResult({ payment: initialPayment, orderId, onChange }) {
+  // Kept here so a receipt upload can move the bank transfer on to "under verification" without reloading the page.
+  const [payment, setPayment] = useState(initialPayment);
+  useEffect(() => { setPayment(initialPayment); }, [initialPayment]);
   const label = PAYMENT_METHOD_LABELS[payment.method] || payment.method;
+  const locked = isPaymentLocked(payment);
   return <>
     <div className="pay-card-heading">
       <div><h2 id="pay-heading">Payment method: {label}</h2><p>Order {payment.orderNumber}</p></div>
       <strong>{money(payment.amount)}</strong>
     </div>
-    {payment.nextStep === 'BankTransferInstructions' && payment.bankTransfer && <BankTransferInstructions details={payment.bankTransfer} />}
+    {payment.nextStep === 'BankTransferInstructions' && payment.bankTransfer && <BankTransferInstructions details={payment.bankTransfer}>
+      <BankTransferReceiptUpload orderId={orderId} paymentStatus={payment.status} receipt={payment.receipt}
+        onUploaded={(result) => setPayment(result.payment)} />
+    </BankTransferInstructions>}
     {payment.nextStep === 'PayOnCollection' && <div className="pay-confirmed" role="status">
       <CheckCircle2 size={22} aria-hidden="true" />
       <div><strong>Cash payment confirmed</strong><p>Pay {money(payment.amount)} in cash at the pharmacy counter when you collect your order. No online payment is needed.</p></div>
@@ -159,7 +170,7 @@ export function PaymentResult({ payment, orderId, onChange }) {
       <div><strong>Online payment selected</strong><p>Your order is waiting for online payment.</p></div>
     </div>}
     <div className="pay-actions">
-      {onChange
+      {locked ? null : onChange
         ? <button type="button" className="pay-secondary" onClick={onChange}>Change payment method</button>
         : <Link className="pay-secondary" to={choosePaymentPath(orderId)}>Change payment method</Link>}
       {payment.nextStep === 'OnlinePayment'
@@ -169,7 +180,7 @@ export function PaymentResult({ payment, orderId, onChange }) {
   </>;
 }
 
-function BankTransferInstructions({ details }) {
+function BankTransferInstructions({ details, children }) {
   return <div className="pay-bank">
     <h3>Transfer to this account</h3>
     <dl>
@@ -181,17 +192,6 @@ function BankTransferInstructions({ details }) {
       <div><dt>Reference</dt><dd>{details.reference}</dd></div>
     </dl>
     <p className="pay-muted">Use your order number as the payment reference so the pharmacy can match your transfer.</p>
-    <div className="pay-receipt">
-      <span className="pay-method-icon"><FileUp size={20} aria-hidden="true" /></span>
-      <div>
-        <strong>Upload your payment receipt</strong>
-        <p>After transferring, upload a photo or PDF of your bank slip.</p>
-        <div className="pay-receipt-controls">
-          <input type="file" accept="image/*,application/pdf" aria-label="Payment receipt" disabled />
-          <button type="button" className="pay-secondary" disabled>Upload receipt</button>
-        </div>
-        <p className="pay-note">Receipt upload opens soon. Keep your bank slip until then.</p>
-      </div>
-    </div>
+    {children}
   </div>;
 }

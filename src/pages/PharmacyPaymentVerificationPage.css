@@ -1,0 +1,53 @@
+.payment-verification-page { max-width: 1040px; padding: 40px 24px 56px; }
+.payment-verification-header { margin-bottom: 24px; }
+.payment-verification-eyebrow, .payment-receipt-label { margin: 0 0 6px; color: #a71919; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.payment-verification-header h1 { margin: 0 0 8px; font-size: 2rem; }
+.payment-verification-header > p:last-child { margin: 0; color: var(--text-muted); }
+
+.payment-notifications { display: grid; gap: 10px; margin-bottom: 20px; }
+.payment-notification { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; color: #9a5b00; background: #fff8e8; border: 1px solid #f3dfb2; border-radius: 12px; }
+.payment-notification div { flex: 1; }
+.payment-notification strong { color: #3d2e0d; }
+.payment-notification p { margin: 3px 0 0; color: #4a3a17; font-size: 14px; }
+.payment-notification button { padding: 6px 12px; color: #9a5b00; background: #fff; border: 1px solid #f3dfb2; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+.payment-verification-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.payment-verification-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.payment-verification-filters button, .payment-verification-refresh { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; color: #3d4650; background: #fff; border: 1px solid #d9dde2; border-radius: 999px; cursor: pointer; font-weight: 600; }
+.payment-verification-filters button.active { color: #fff; background: #a71919; border-color: #a71919; }
+
+.payment-verification-alert { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 16px; border-radius: 10px; }
+.payment-verification-alert.error { color: #991b1b; background: #fee2e2; }
+.payment-verification-alert.success { color: #166534; background: #dcfce7; }
+.payment-verification-alert button { padding: 6px 12px; border: 0; border-radius: 8px; color: #991b1b; background: #fff; cursor: pointer; }
+.payment-verification-empty { color: var(--text-muted); }
+
+.payment-receipt-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, auto); gap: 24px; margin: 16px 0; padding: 22px 24px; background: #fff; border: 1px solid #e1e4e8; border-radius: 16px; box-shadow: 0 8px 22px rgba(26, 35, 45, 0.06); }
+.payment-receipt-details h2 { margin: 0 0 12px; font-size: 1.2rem; }
+.payment-receipt-details dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 18px; margin: 0 0 10px; }
+.payment-receipt-details dt { color: var(--text-muted); font-size: 12.5px; }
+.payment-receipt-details dd { margin: 2px 0 0; font-weight: 700; overflow-wrap: anywhere; }
+.payment-receipt-event { margin: 0 0 8px; font-size: 13px; color: var(--text-muted); }
+.payment-receipt-event.failed { color: #a1291c; font-weight: 600; }
+.payment-receipt-reason { margin: 0 0 8px; color: #a1291c; font-size: 14px; }
+.payment-receipt-file { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; color: #a71919; background: #fdf1f1; border: 1px solid #f3cccc; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+.payment-receipt-actions { display: grid; align-content: start; gap: 10px; }
+.payment-receipt-status { justify-self: start; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.payment-receipt-status.pendingverification { color: #9a5b00; background: #fdefc8; }
+.payment-receipt-status.verified { color: #166534; background: #dcfce7; }
+.payment-receipt-status.rejected { color: #991b1b; background: #fee2e2; }
+.payment-receipt-actions button { padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+.payment-receipt-actions button:disabled { opacity: .55; cursor: not-allowed; }
+.payment-receipt-verify, .payment-receipt-confirm { color: #fff; background: #087443; border: 1px solid #087443; }
+.payment-receipt-reject, .payment-receipt-cancel { color: #a71919; background: #fff; border: 1px solid #e7b3b3; }
+.payment-receipt-rejection { display: grid; gap: 6px; }
+.payment-receipt-rejection label { font-size: 13px; font-weight: 600; }
+.payment-receipt-rejection input { padding: 9px 10px; border: 1px solid #d9dde2; border-radius: 8px; }
+.payment-receipt-rejection div { display: flex; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 760px) {
+  .payment-verification-page { padding: 24px 16px 40px; }
+  .payment-receipt-card { grid-template-columns: 1fr; }
+  .payment-receipt-details dl { grid-template-columns: 1fr; }
+}
