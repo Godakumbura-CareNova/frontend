@@ -28,8 +28,9 @@ export default function PharmacyOrderManagementPage() {
       setRejectionReason('');
       setRejectionError('');
       await load();
-    } catch {
-      setError('Unable to update this order. Please try again.');
+    } catch (failure) {
+      // e.g. "The bank transfer for this order must be verified before the order is ready for collection."
+      setError(failure?.response?.data?.message || 'Unable to update this order. Please try again.');
     }
   };
 

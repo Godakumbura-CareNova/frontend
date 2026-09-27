@@ -34,6 +34,8 @@ import PatientDoctorProfilePage from '../pages/PatientDoctorProfilePage';
 import PharmacyOrderManagementPage from '../pages/PharmacyOrderManagementPage';
 import PharmacyPrescriptionReviewPage from '../pages/PharmacyPrescriptionReviewPage';
 import PharmacyPaymentVerificationPage from '../pages/PharmacyPaymentVerificationPage';
+import PaymentTransactionsPage from '../pages/PaymentTransactionsPage';
+import PaymentTransactionDetailPage from '../pages/PaymentTransactionDetailPage';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -115,11 +117,15 @@ const AppRoutes = () => (
         <Route path="/pharmacy/orders" element={<PharmacyOrderManagementPage />} />
         <Route path="/pharmacy/prescriptions" element={<PharmacyPrescriptionReviewPage />} />
         <Route path="/pharmacy/payments" element={<PharmacyPaymentVerificationPage />} />
+        <Route path="/pharmacy/payment-transactions" element={<PaymentTransactionsPage />} />
+        <Route path="/pharmacy/payment-transactions/:paymentId" element={<PaymentTransactionDetailPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<UserManagementPage />} />
         <Route path="/admin/fee-requests" element={<AdminFeeChangeRequestsPage />} />
+        <Route path="/admin/payments" element={<PaymentTransactionsPage />} />
+        <Route path="/admin/payments/:paymentId" element={<PaymentTransactionDetailPage />} />
       </Route>
     </Route>
 

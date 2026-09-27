@@ -14,6 +14,7 @@ const PAYMENT_STATUS_TEXT = {
   ReceiptUnderVerification: 'Receipt uploaded, waiting for pharmacy verification',
   ReceiptRejected: 'Receipt rejected, please upload a new one',
   Paid: 'Payment verified',
+  Failed: 'Payment failed, please choose a payment method again',
 };
 
 const paymentSummary = (payment) => {
@@ -52,6 +53,8 @@ export default function PatientOrderDetailsPage() {
         <div className="order-payment-method"><Wallet size={19} /><div><span>Payment method</span>{paymentSummary(payment)}
           {['AwaitingBankTransfer', 'ReceiptRejected'].includes(payment?.status) && order.status === 'Pending'
             && <Link className="order-receipt-link" to={`/patient/orders/${encodeURIComponent(orderId)}/payment`}>Upload bank transfer receipt</Link>}
+          {payment?.status === 'Failed' && order.status === 'Pending'
+            && <Link className="order-receipt-link" to={`/patient/orders/${encodeURIComponent(orderId)}/payment`}>Choose a payment method again</Link>}
         </div></div>
         {order.rejectionReason && <div role="note" className="order-rejection-note"><CircleX size={21} /><div><strong>Order rejected</strong><p>{order.rejectionReason}</p></div></div>}
       </section>

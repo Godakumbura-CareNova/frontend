@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import pharmacyLogo from '../assets/PHARMACY LOGO .jpeg';
 import { getFirstName } from '../utils/formatName';
-import { patientNotificationApi } from '../api/patientNotificationApi';
+import { combinedPatientNotificationApi } from '../api/combinedPatientNotificationApi';
 import { staffNotificationApi } from '../api/staffNotificationApi';
 import { doctorNotificationApi } from '../api/doctorNotificationApi';
 
@@ -56,7 +56,8 @@ const NAV_BY_ROLE = {
     { to: '/pharmacy/medicines', label: 'Medicines', icon: Pill, enabled: true },
     { to: '/pharmacy/categories', label: 'Categories', icon: PackageSearch, enabled: true },
     { to: '/pharmacy/inventory', label: 'Inventory', icon: PackageSearch, enabled: true },
-    { to: '/pharmacy/payments', label: 'Payments', icon: CreditCard, enabled: true },
+    { to: '/pharmacy/payment-transactions', label: 'Payments', icon: CreditCard, enabled: true },
+    { to: '/pharmacy/payments', label: 'Bank Receipts', icon: FileCheck, enabled: true },
   ],
   Doctor: [
     { to: '/doctor-dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
@@ -70,7 +71,7 @@ const NAV_BY_ROLE = {
     { label: 'Doctors', icon: Stethoscope, enabled: false },
     { label: 'Medicines', icon: Pill, enabled: false },
     { label: 'Appointments', icon: Calendar, enabled: false },
-    { label: 'Payments', icon: CreditCard, enabled: false },
+    { to: '/admin/payments', label: 'Payments', icon: CreditCard, enabled: true },
     { label: 'Reports', icon: BarChart3, enabled: false },
   ],
 };
@@ -85,7 +86,7 @@ const DashboardLayout = ({ children }) => {
   const patient = normalizeRole(role) === 'Patient';
   const pharmacyStaff = normalizeRole(role) === 'PharmacyStaff';
   const doctor = normalizeRole(role) === 'Doctor';
-  const notificationApi = patient ? patientNotificationApi : pharmacyStaff ? staffNotificationApi : doctor ? doctorNotificationApi : null;
+  const notificationApi = patient ? combinedPatientNotificationApi : pharmacyStaff ? staffNotificationApi : doctor ? doctorNotificationApi : null;
 
   const loadNotifications = async () => {
     if (!notificationApi) return;

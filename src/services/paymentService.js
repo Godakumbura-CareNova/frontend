@@ -43,3 +43,33 @@ export const listPaymentNotifications = () => doctorPaymentApi.get("/api/staff/p
 
 export const markPaymentNotificationRead = (notificationId) =>
   doctorPaymentApi.put(`/api/staff/payment-notifications/${encodeURIComponent(notificationId)}/read`);
+
+// Pharmacy staff and admins: medicine payment transactions. Status is Pending, Successful, Failed, Rejected or All.
+export const listMedicinePaymentTransactions = ({ status, method, search } = {}) =>
+  doctorPaymentApi.get("/api/staff/medicine-payments", {
+    params: { status: status || undefined, method: method || undefined, search: search?.trim() || undefined },
+  });
+
+export const getMedicinePaymentTransaction = (paymentId) =>
+  doctorPaymentApi.get(`/api/staff/medicine-payments/${encodeURIComponent(paymentId)}`);
+
+// Marks a payment "Paid" or "Failed" (a note is required for Failed).
+export const updateMedicinePaymentStatus = (paymentId, status, note) =>
+  doctorPaymentApi.put(`/api/staff/medicine-payments/${encodeURIComponent(paymentId)}/status`, { status, note });
+
+// Pharmacy staff: marks the order ReadyForCollection, Rejected (reason required) or Collected. A Kafka event is
+// published and the patient notified.
+export const updateMedicineOrderStatus = (paymentId, status, reason) =>
+  doctorPaymentApi.put(`/api/staff/medicine-payments/${encodeURIComponent(paymentId)}/order-status`, { status, reason });
+
+// The signed-in patient's order-status notifications from the doctor-payment service.
+export const listPaymentPatientNotifications = () => doctorPaymentApi.get("/api/patient/notifications");
+
+export const markPaymentPatientNotificationRead = (notificationId) =>
+  doctorPaymentApi.put(`/api/patient/notifications/${encodeURIComponent(notificationId)}/read`);
+
+export const markAllPaymentPatientNotificationsRead = () => doctorPaymentApi.put("/api/patient/notifications/read-all");
+
+// Pharmacy staff and admins: orders that have been collected (completed), with their payments.
+export const listCompletedMedicineOrders = (search) =>
+  doctorPaymentApi.get("/api/staff/medicine-payments/completed", { params: { search: search?.trim() || undefined } });
