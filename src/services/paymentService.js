@@ -35,6 +35,11 @@ export const getBankTransferReceiptFile = (receiptId) =>
 export const verifyBankTransferReceipt = (receiptId) =>
   doctorPaymentApi.post(`/api/staff/bank-transfer-receipts/${encodeURIComponent(receiptId)}/verify`);
 
+// GCN-42: approves a bank transfer. The server checks it against the order in the pharmacy; a transaction that does not
+// match is refused (422) and flagged, and the response then carries the flagged receipt.
+export const approveBankTransfer = (receiptId) =>
+  doctorPaymentApi.post(`/api/staff/bank-transfer-receipts/${encodeURIComponent(receiptId)}/approve`, {});
+
 export const rejectBankTransferReceipt = (receiptId, reason) =>
   doctorPaymentApi.post(`/api/staff/bank-transfer-receipts/${encodeURIComponent(receiptId)}/reject`, { reason });
 

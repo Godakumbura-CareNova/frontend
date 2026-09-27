@@ -23,7 +23,7 @@ import {
 import pharmacyLogo from '../assets/PHARMACY LOGO .jpeg';
 import { getFirstName } from '../utils/formatName';
 import { combinedPatientNotificationApi } from '../api/combinedPatientNotificationApi';
-import { staffNotificationApi } from '../api/staffNotificationApi';
+import { combinedStaffNotificationApi } from '../api/combinedStaffNotificationApi';
 import { doctorNotificationApi } from '../api/doctorNotificationApi';
 
 const normalizeRole = (role) => {
@@ -86,7 +86,7 @@ const DashboardLayout = ({ children }) => {
   const patient = normalizeRole(role) === 'Patient';
   const pharmacyStaff = normalizeRole(role) === 'PharmacyStaff';
   const doctor = normalizeRole(role) === 'Doctor';
-  const notificationApi = patient ? combinedPatientNotificationApi : pharmacyStaff ? staffNotificationApi : doctor ? doctorNotificationApi : null;
+  const notificationApi = patient ? combinedPatientNotificationApi : pharmacyStaff ? combinedStaffNotificationApi : doctor ? doctorNotificationApi : null;
 
   const loadNotifications = async () => {
     if (!notificationApi) return;
@@ -98,7 +98,8 @@ const DashboardLayout = ({ children }) => {
     if (!notification.isRead) await notificationApi.markRead(notification.id);
     setNotifications(items => items.map(item => item.id === notification.id ? { ...item, isRead: true } : item));
     setNotificationsOpen(false);
-    if (pharmacyStaff) navigate('/pharmacy/orders');
+    // Bank transfer notifications open the verification page; the rest are about orders.
+    if (pharmacyStaff) navigate(notification.source === 'payment' ? '/pharmacy/payments' : '/pharmacy/orders');
     // Doctor notifications are about fee-change requests, which live on the professional profile.
     else if (doctor) navigate('/profile');
     else navigate(notification.relatedEntityType === 'Order' ? `/patient/orders/${notification.relatedEntityId}` : '/patient/prescriptions');
@@ -183,7 +184,7 @@ const DashboardLayout = ({ children }) => {
                   <button type="button" className="notification-close" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)}><X size={18} /></button>
                 </div>
               </div>
-              {notifications.length === 0 ? <p className="notification-empty">No notifications yet.</p> : notifications.map(item => <button className={`notification-item${item.isRead ? '' : ' unread'}`} key={item.id} onClick={() => markRead(item)}><strong>{item.title}</strong><span>{item.message}</span></button>)}
+              {notifications.length === 0 ? <p className="notification-empty">No notifications yet.</p> : notifications.map(item => <button className={`notification-item${item.isRead ? '' : ' unread'}${item.orderStatus === 'PaymentRejected' ? ' rejected' : ''}`} key={item.id} onClick={() => markRead(item)}><strong>{item.title}</strong><span>{item.message}</span></button>)}
             </section>}
             {normalizeRole(role) === 'Patient' && (
               <button

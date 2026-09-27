@@ -1114,6 +1114,11 @@ a:hover {
 .notification-item:hover, .notification-item.unread { background: #eefaf3; }
 .notification-item span { font-size: 13px; line-height: 1.4; color: #58665f; }
 .notification-item strong { font-size: 14px; line-height: 1.35; font-weight: 700; }
+/* GCN-42: a rejected bank transfer is shown in a light red box. */
+.notification-item.rejected, .notification-item.rejected:hover { margin-bottom: 6px; background: #fef6f5; }
+.notification-item.rejected.unread { background: #fdefee; }
+.notification-item.rejected strong { color: #7f1d1d; }
+.notification-item.rejected span { color: #8a3a35; }
 .notification-menu-actions { display: inline-flex; align-items: center; gap: 6px; }
 .notification-menu-heading .notification-close { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border-radius: 50%; color: #58665f; }
 .notification-menu-heading .notification-close:hover { background: #eefaf3; color: #173b2a; }
