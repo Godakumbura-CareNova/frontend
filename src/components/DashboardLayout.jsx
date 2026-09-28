@@ -98,8 +98,11 @@ const DashboardLayout = ({ children }) => {
     if (!notification.isRead) await notificationApi.markRead(notification.id);
     setNotifications(items => items.map(item => item.id === notification.id ? { ...item, isRead: true } : item));
     setNotificationsOpen(false);
-    // Bank transfer notifications open the verification page; the rest are about orders.
-    if (pharmacyStaff) navigate(notification.source === 'payment' ? '/pharmacy/payments' : '/pharmacy/orders');
+    // Online payments open the payment transactions, bank transfer notifications the verification page, the rest orders.
+    if (pharmacyStaff) {
+      navigate(notification.notificationType === 'OnlinePaymentSucceeded' ? '/pharmacy/payment-transactions'
+        : notification.source === 'payment' ? '/pharmacy/payments' : '/pharmacy/orders');
+    }
     // Doctor notifications are about fee-change requests, which live on the professional profile.
     else if (doctor) navigate('/profile');
     else navigate(notification.relatedEntityType === 'Order' ? `/patient/orders/${notification.relatedEntityId}` : '/patient/prescriptions');
@@ -184,7 +187,7 @@ const DashboardLayout = ({ children }) => {
                   <button type="button" className="notification-close" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)}><X size={18} /></button>
                 </div>
               </div>
-              {notifications.length === 0 ? <p className="notification-empty">No notifications yet.</p> : notifications.map(item => <button className={`notification-item${item.isRead ? '' : ' unread'}${item.orderStatus === 'PaymentRejected' ? ' rejected' : ''}`} key={item.id} onClick={() => markRead(item)}><strong>{item.title}</strong><span>{item.message}</span></button>)}
+              {notifications.length === 0 ? <p className="notification-empty">No notifications yet.</p> : notifications.map(item => <button className={`notification-item${item.isRead ? '' : ' unread'}${['PaymentRejected', 'OnlinePaymentFailed'].includes(item.orderStatus) ? ' rejected' : ''}`} key={item.id} onClick={() => markRead(item)}><strong>{item.title}</strong><span>{item.message}</span></button>)}
             </section>}
             {normalizeRole(role) === 'Patient' && (
               <button

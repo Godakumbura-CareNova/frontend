@@ -78,3 +78,17 @@ export const markAllPaymentPatientNotificationsRead = () => doctorPaymentApi.put
 // Pharmacy staff and admins: orders that have been collected (completed), with their payments.
 export const listCompletedMedicineOrders = (search) =>
   doctorPaymentApi.get("/api/staff/medicine-payments/completed", { params: { search: search?.trim() || undefined } });
+
+// GCN-41: online card payment. The status says whether the order can be paid (or retried) now, with every attempt.
+export const getOnlinePaymentStatus = (orderId) => doctorPaymentApi.get(`${orderPath(orderId)}/payment/online`);
+
+// Starts a payment try with the billing details; the response is the signed PayHere checkout for this try.
+export const startOnlinePayment = (orderId, billing) => doctorPaymentApi.post(`${orderPath(orderId)}/payment/online/start`, billing);
+
+// The try's result as recorded from PayHere's own notification. The browser's view of the result is never trusted.
+export const completeOnlinePayment = (orderId, attemptId) =>
+  doctorPaymentApi.post(`${orderPath(orderId)}/payment/online/${encodeURIComponent(attemptId)}/complete`);
+
+// The patient closed PayHere's window without paying.
+export const cancelOnlinePayment = (orderId, attemptId) =>
+  doctorPaymentApi.post(`${orderPath(orderId)}/payment/online/${encodeURIComponent(attemptId)}/cancel`);
