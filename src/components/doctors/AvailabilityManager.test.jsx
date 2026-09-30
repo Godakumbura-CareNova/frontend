@@ -1,5 +1,5 @@
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   fireEvent,
   render,
@@ -163,7 +163,15 @@ describe('AvailabilityManager - GCN-37', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    // The fixtures use fixed dates in late September 2026; keep "now" before them so they stay in the future.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-09-20T00:00:00Z'));
+
     getMyAvailability.mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('loads and displays the current consultation schedule', async () => {
@@ -234,7 +242,13 @@ describe('AvailabilityManager - GCN-37', () => {
   });
 
   it('prevents a conflicting availability window', async () => {
-    getMyAvailability.mockResolvedValue([slot1]);
+    // Built from local time so the overlap holds in any timezone (CI runs in UTC).
+    const localSlot = {
+      ...slot1,
+      startUtc: new Date(2026, 8, 26, 9, 20).toISOString(),
+      endUtc: new Date(2026, 8, 26, 9, 40).toISOString(),
+    };
+    getMyAvailability.mockResolvedValue([localSlot]);
 
     renderManager();
 
@@ -245,8 +259,7 @@ describe('AvailabilityManager - GCN-37', () => {
     await openAddForm();
 
     /*
-      slot1:
-      03:50 UTC -> 09:20 Sri Lanka time
+      Existing slot: 09:20 -> 09:40 local time
 
       Proposed:
       09:30 -> 09:50
