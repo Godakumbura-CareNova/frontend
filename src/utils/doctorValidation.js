@@ -219,29 +219,42 @@ export const AVAILABILITY_MAX_WINDOW_HOURS = 12;
 export const AVAILABILITY_MAX_DAYS_AHEAD = 90;
 export const AVAILABILITY_SLOT_OPTIONS = [10, 15, 20, 30, 45, 60];
 
-// Doctors pick the time as hour / minute / AM-PM rather than typing a 24-hour value.
-export const AVAILABILITY_HOUR_OPTIONS = ['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-export const AVAILABILITY_MINUTE_OPTIONS = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+// Doctors type the hour and minutes and choose AM / PM from a list.
 export const AVAILABILITY_MERIDIEM_OPTIONS = ['AM', 'PM'];
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const TWO_DIGITS = /^\d{1,2}$/;
 
 /**
- * Turns a 12-hour selection into the "HH:mm" value the rest of the validation works with.
- * Returns '' when the selection is incomplete or out of range, which reads as "no time chosen".
+ * Explains what is wrong with a typed hour / minutes, or null when both are fine or both are blank
+ * (blank is reported by the form validator as "time is required").
+ */
+export const typedTimeError = (hour, minute) => {
+  const hourText = trimmed(hour);
+  const minuteText = trimmed(minute);
+  if (hourText === '' && minuteText === '') return null;
+
+  if (hourText === '') return 'Enter the hour (1 to 12).';
+  if (!TWO_DIGITS.test(hourText) || Number(hourText) < 1 || Number(hourText) > 12) return 'Hour must be a number from 1 to 12.';
+  if (minuteText === '') return 'Enter the minutes (00 to 59).';
+  if (!TWO_DIGITS.test(minuteText) || Number(minuteText) > 59) return 'Minutes must be a number from 00 to 59.';
+  return null;
+};
+
+/**
+ * Turns the typed hour / minutes and chosen AM-PM into the "HH:mm" value the rest of the validation works with.
+ * Blank stays '' (reads as "required"); anything invalid becomes 'invalid' so the validator rejects it.
  */
 export const to24HourTime = (hour, minute, meridiem) => {
-  const hours12 = Number(trimmed(hour));
-  const minutes = Number(trimmed(minute));
+  if (trimmed(hour) === '' && trimmed(minute) === '') return '';
+  if (typedTimeError(hour, minute)) return 'invalid';
+
   const period = trimmed(meridiem).toUpperCase();
+  if (period !== 'AM' && period !== 'PM') return 'invalid';
 
-  if (!Number.isInteger(hours12) || hours12 < 1 || hours12 > 12) return '';
-  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 59) return '';
-  if (period !== 'AM' && period !== 'PM') return '';
-
-  const hours24 = (hours12 % 12) + (period === 'PM' ? 12 : 0);
-  return `${String(hours24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  const hours24 = (Number(trimmed(hour)) % 12) + (period === 'PM' ? 12 : 0);
+  return `${String(hours24).padStart(2, '0')}:${String(Number(trimmed(minute))).padStart(2, '0')}`;
 };
 
 /** Combines the date and time inputs (which are in the doctor's local zone) into a Date, or null when incomplete/invalid. */
@@ -268,10 +281,10 @@ export const validateAvailabilityForm = (form, now = new Date()) => {
   else if (!DATE_PATTERN.test(date)) errors.date = 'Enter a valid date.';
 
   if (startTime === '') errors.startTime = 'Start time is required.';
-  else if (!TIME_PATTERN.test(startTime)) errors.startTime = 'Enter a valid start time.';
+  else if (!TIME_PATTERN.test(startTime)) errors.startTime = 'Enter a valid start time, for example 9:30 AM.';
 
   if (endTime === '') errors.endTime = 'End time is required.';
-  else if (!TIME_PATTERN.test(endTime)) errors.endTime = 'Enter a valid end time.';
+  else if (!TIME_PATTERN.test(endTime)) errors.endTime = 'Enter a valid end time, for example 10:00 AM.';
 
   if (!Number.isInteger(duration) || duration < AVAILABILITY_MIN_SLOT_MINUTES || duration > AVAILABILITY_MAX_SLOT_MINUTES) {
     errors.slotDurationMinutes = `Slot length must be between ${AVAILABILITY_MIN_SLOT_MINUTES} and ${AVAILABILITY_MAX_SLOT_MINUTES} minutes.`;
@@ -317,4 +330,62 @@ export const countAvailabilitySlots = (form) => {
   if (!start || !end || !Number.isInteger(duration) || duration <= 0) return 0;
   const windowMinutes = (end - start) / 60000;
   return windowMinutes <= 0 ? 0 : Math.floor(windowMinutes / duration);
+};
+
+/**
+ * Validates editing one slot: { date, startTime, endTime }. Same time rules as publishing a window, except the
+ * slot's own length must be between the minimum and maximum slot length. `now` is injectable for tests.
+ */
+export const validateAvailabilitySlotEdit = (form, now = new Date()) => {
+  const errors = {};
+  const date = trimmed(form?.date);
+  const startTime = trimmed(form?.startTime);
+  const endTime = trimmed(form?.endTime);
+
+  if (date === '') errors.date = 'Date is required.';
+  else if (!DATE_PATTERN.test(date)) errors.date = 'Enter a valid date.';
+
+  if (startTime === '') errors.startTime = 'Start time is required.';
+  else if (!TIME_PATTERN.test(startTime)) errors.startTime = 'Enter a valid start time, for example 9:30 AM.';
+
+  if (endTime === '') errors.endTime = 'End time is required.';
+  else if (!TIME_PATTERN.test(endTime)) errors.endTime = 'Enter a valid end time, for example 10:00 AM.';
+
+  const start = combineLocalDateTime(date, startTime);
+  const end = combineLocalDateTime(date, endTime);
+  if (start && end) {
+    const slotMinutes = (end - start) / 60000;
+    if (slotMinutes <= 0) errors.endTime = 'End time must be after the start time.';
+    else if (slotMinutes < AVAILABILITY_MIN_SLOT_MINUTES) errors.endTime = `A slot must be at least ${AVAILABILITY_MIN_SLOT_MINUTES} minutes long.`;
+    else if (slotMinutes > AVAILABILITY_MAX_SLOT_MINUTES) errors.endTime = `A slot cannot be longer than ${AVAILABILITY_MAX_SLOT_MINUTES} minutes.`;
+  }
+
+  if (start && !errors.date && !errors.startTime) {
+    if (start <= now) {
+      errors.startTime = 'Availability must start in the future.';
+    } else if (start - now > AVAILABILITY_MAX_DAYS_AHEAD * 24 * 60 * 60 * 1000) {
+      errors.date = `Availability can be published at most ${AVAILABILITY_MAX_DAYS_AHEAD} days ahead.`;
+    }
+  }
+
+  return { isValid: Object.keys(errors).length === 0, errors };
+};
+
+/** Converts an edited slot's local date/time inputs into the UTC body for PUT /availability/{id}. */
+export const toAvailabilitySlotUpdateRequest = (form) => ({
+  startUtc: combineLocalDateTime(form.date, form.startTime).toISOString(),
+  endUtc: combineLocalDateTime(form.date, form.endTime).toISOString(),
+});
+
+/**
+ * The first existing slot that overlaps [start, end), ignoring `ignoreSlotId` (the slot being edited).
+ * Touching edges do not count, matching the service. Lets the form warn before the request is sent.
+ */
+export const findConflictingSlot = (start, end, slots, ignoreSlotId = null) => {
+  if (!(start instanceof Date) || !(end instanceof Date) || !Array.isArray(slots)) return null;
+  // API times are UTC; a value without a zone suffix is still UTC.
+  const parseUtc = (value) => new Date(/[zZ]|[+-]\d{2}:\d{2}$/.test(String(value)) ? value : `${value}Z`);
+  return slots.find((slot) => (
+    slot.id !== ignoreSlotId && parseUtc(slot.startUtc) < end && parseUtc(slot.endUtc) > start
+  )) ?? null;
 };

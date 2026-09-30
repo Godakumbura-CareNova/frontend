@@ -564,6 +564,42 @@
 
 .dp-remove-btn.dp-slot-remove { margin-top: 0; width: 28px; height: 28px; border-radius: 6px; }
 
+.dp-slot-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--dp-green-border);
+  background: var(--white);
+  color: var(--dp-green-dark);
+  cursor: pointer;
+}
+.dp-slot-edit:hover { background: var(--dp-green-soft); }
+.dp-slot-edit:disabled { cursor: not-allowed; opacity: 0.6; }
+
+.dp-slot-editing { outline: 2px solid var(--dp-green-dark); outline-offset: 1px; }
+
+.dp-edit-title { margin: 0; font-size: 13px; color: var(--text-muted); }
+.dp-edit-title strong { color: var(--dp-green-dark); }
+
+/* Shown before a request is sent when the chosen time overlaps a slot already on the schedule */
+.dp-conflict-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #f5c26b;
+  background: #fff8e6;
+  color: #8a5300;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.dp-conflict-warning svg { flex-shrink: 0; margin-top: 1px; }
+
 @media (max-width: 900px) {
   .dp-hero-pulse { display: none; }
   .dp-editor-grid { grid-template-columns: 1fr 1fr; }
@@ -638,3 +674,6 @@
   cursor: pointer;
 }
 .dp-history-toggle:hover { background: var(--dp-green-soft); }
+
+/* Typed hour / minute boxes beside the AM-PM list */
+.dp-time-inputs .dp-time-number { flex: 0 0 56px; width: 56px; text-align: center; padding-left: 6px; padding-right: 6px; }

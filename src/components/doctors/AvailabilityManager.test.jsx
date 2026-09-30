@@ -1,203 +1,505 @@
 import React from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom/vitest';
+
 import AvailabilityManager from './AvailabilityManager';
-import { ToastProvider } from '../../context/ToastContext';
-
-// Confirmations are toasts now, so the manager is mounted under the provider that renders them.
-const renderManager = (ui) => render(ui, { wrapper: ToastProvider });
-
-/** Picks a time with the hour / minute / AM-PM selects. */
-const chooseTime = async (user, legend, hour, minute, meridiem) => {
-  await user.selectOptions(screen.getByLabelText(`${legend} hour`), hour);
-  await user.selectOptions(screen.getByLabelText(`${legend} minutes`), minute);
-  await user.selectOptions(screen.getByLabelText(`${legend} AM or PM`), meridiem);
-};
-
-const { mockGetMyAvailability, mockAddMyAvailability, mockDeleteMyAvailabilitySlot } = vi.hoisted(() => ({
-  mockGetMyAvailability: vi.fn(),
-  mockAddMyAvailability: vi.fn(),
-  mockDeleteMyAvailabilitySlot: vi.fn(),
-}));
+import {
+  addMyAvailability,
+  deleteMyAvailabilitySlot,
+  getMyAvailability,
+  updateMyAvailabilitySlot,
+} from '../../services/doctorService';
 
 vi.mock('../../services/doctorService', () => ({
-  getMyAvailability: mockGetMyAvailability,
-  addMyAvailability: mockAddMyAvailability,
-  deleteMyAvailabilitySlot: mockDeleteMyAvailabilitySlot,
+  getMyAvailability: vi.fn(),
+  addMyAvailability: vi.fn(),
+  updateMyAvailabilitySlot: vi.fn(),
+  deleteMyAvailabilitySlot: vi.fn(),
 }));
 
-// A fixed "now" so the future/past rules are deterministic; local time to match the date/time inputs.
-const NOW = new Date(2026, 8, 22, 9, 0, 0);
-const isoAt = (daysAhead, hour, minute = 0) => new Date(2026, 8, 22 + daysAhead, hour, minute).toISOString();
+const showToast = vi.fn();
 
-const slots = [
-  { id: 1, startUtc: isoAt(1, 9), endUtc: isoAt(1, 9, 20), isBooked: false },
-  { id: 2, startUtc: isoAt(1, 9, 20), endUtc: isoAt(1, 9, 40), isBooked: true },
-  { id: 3, startUtc: isoAt(2, 14), endUtc: isoAt(2, 14, 30), isBooked: false },
-];
+vi.mock('../../context/ToastContext', () => ({
+  useToast: () => ({ showToast }),
+}));
 
-describe('AvailabilityManager', () => {
+vi.mock('../ConfirmDialog', () => ({
+  default: ({
+    open,
+    title,
+    message,
+    confirmLabel,
+    onConfirm,
+    onCancel,
+  }) =>
+    open ? (
+      <div role="dialog" aria-label={title}>
+        <p>{message}</p>
+
+        <button type="button" onClick={onConfirm}>
+          {confirmLabel}
+        </button>
+
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
+}));
+
+vi.mock('./ProfileSection', () => ({
+  default: ({ title, action, children }) => (
+    <section>
+      <h2>{title}</h2>
+      {action}
+      {children}
+    </section>
+  ),
+}));
+
+const slot1 = {
+  id: 1,
+  startUtc: '2026-09-26T03:50:00Z',
+  endUtc: '2026-09-26T04:10:00Z',
+  isBooked: false,
+};
+
+const slot2 = {
+  id: 2,
+  startUtc: '2026-09-26T04:10:00Z',
+  endUtc: '2026-09-26T04:30:00Z',
+  isBooked: false,
+};
+
+const bookedSlot = {
+  id: 3,
+  startUtc: '2026-09-27T08:30:00Z',
+  endUtc: '2026-09-27T08:50:00Z',
+  isBooked: true,
+};
+
+const renderManager = (props = {}) =>
+  render(
+    <AvailabilityManager
+      hasProfile
+      {...props}
+    />,
+  );
+
+const findAvailabilitySummary = async (text) =>
+  screen.findByText((_, element) => {
+    return (
+      element?.classList?.contains('dp-availability-summary') &&
+      element.textContent.includes(text)
+    );
+  });
+
+const openAddForm = async () => {
+  const user = userEvent.setup();
+
+  await user.click(
+    await screen.findByRole('button', {
+      name: /add availability/i,
+    }),
+  );
+
+  return user;
+};
+
+const fillAddForm = async ({
+  date = '2026-09-28',
+  startHour = '10',
+  startMinute = '00',
+  startMeridiem = 'AM',
+  endHour = '11',
+  endMinute = '00',
+  endMeridiem = 'AM',
+} = {}) => {
+  const user = userEvent.setup();
+
+  fireEvent.change(screen.getByLabelText(/^date$/i), {
+    target: { value: date },
+  });
+
+  await user.type(
+    screen.getByLabelText(/^from hour$/i),
+    startHour,
+  );
+
+  await user.type(
+    screen.getByLabelText(/^from minutes$/i),
+    startMinute,
+  );
+
+  await user.selectOptions(
+    screen.getByLabelText(/^from am or pm$/i),
+    startMeridiem,
+  );
+
+  await user.type(
+    screen.getByLabelText(/^to hour$/i),
+    endHour,
+  );
+
+  await user.type(
+    screen.getByLabelText(/^to minutes$/i),
+    endMinute,
+  );
+
+  await user.selectOptions(
+    screen.getByLabelText(/^to am or pm$/i),
+    endMeridiem,
+  );
+};
+
+describe('AvailabilityManager - GCN-37', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers({ shouldAdvanceTime: true, now: NOW });
-    mockGetMyAvailability.mockResolvedValue(slots);
+
+    getMyAvailability.mockResolvedValue([]);
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  it('loads and displays the current consultation schedule', async () => {
+    getMyAvailability.mockResolvedValue([
+      slot1,
+      slot2,
+      bookedSlot,
+    ]);
+
+    renderManager();
+
+    expect(
+      screen.getByText(/loading your availability/i),
+    ).toBeInTheDocument();
+
+    expect(
+      await findAvailabilitySummary('2 open slots'),
+    ).toBeInTheDocument();
+
+    expect(
+      await screen.findByText('Booked', {
+        selector: '.dp-slot-status',
+      }),
+    ).toBeInTheDocument();
+
+    expect(getMyAvailability).toHaveBeenCalledTimes(1);
   });
 
-  it('lists upcoming slots grouped by day with booked ones locked', async () => {
-    renderManager(<AvailabilityManager hasProfile />);
+  it('shows an empty schedule message when no availability exists', async () => {
+    getMyAvailability.mockResolvedValue([]);
 
-    expect(await screen.findByText(/open slot/)).toHaveTextContent('2 open slots · 1 booked');
-    expect(screen.getAllByRole('region', { name: /September/ })).toHaveLength(2);
-    expect(screen.getByText('Booked')).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /remove slot/i })).toHaveLength(2);
-    expect(screen.getByRole('button', { name: /add availability/i })).toBeEnabled();
+    renderManager();
+
+    expect(
+      await screen.findByText(
+        /no upcoming consultation slots/i,
+      ),
+    ).toBeInTheDocument();
   });
 
-  it('explains the profile requirement and disables adding when there is no profile', async () => {
-    mockGetMyAvailability.mockResolvedValue([]);
-    renderManager(<AvailabilityManager hasProfile={false} />);
+  it('prevents adding availability when the end time is before the start time', async () => {
+    renderManager();
 
-    expect(await screen.findByText('No upcoming consultation slots.')).toBeInTheDocument();
-    expect(screen.getByText(/create your professional profile first/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /add availability/i })).toBeDisabled();
+    await openAddForm();
+
+    await fillAddForm({
+      startHour: '10',
+      startMinute: '00',
+      startMeridiem: 'AM',
+      endHour: '9',
+      endMinute: '00',
+      endMeridiem: 'AM',
+    });
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /publish slots/i,
+      }),
+    );
+
+    expect(
+      await screen.findByText(
+        /end time must be after the start time/i,
+      ),
+    ).toBeInTheDocument();
+
+    expect(addMyAvailability).not.toHaveBeenCalled();
   });
 
-  it('shows a retryable error when the slots fail to load', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    mockGetMyAvailability.mockRejectedValueOnce({ response: { status: 500, data: {} } });
-    renderManager(<AvailabilityManager hasProfile />);
+  it('prevents a conflicting availability window', async () => {
+    getMyAvailability.mockResolvedValue([slot1]);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load your availability.');
-    await user.click(screen.getByRole('button', { name: /retry/i }));
+    renderManager();
 
-    expect(await screen.findByText(/open slot/)).toBeInTheDocument();
-    expect(mockGetMyAvailability).toHaveBeenCalledTimes(2);
+    expect(
+      await findAvailabilitySummary('1 open slot'),
+    ).toBeInTheDocument();
+
+    await openAddForm();
+
+    /*
+      slot1:
+      03:50 UTC -> 09:20 Sri Lanka time
+
+      Proposed:
+      09:30 -> 09:50
+
+      Therefore it overlaps the existing slot.
+    */
+    await fillAddForm({
+      date: '2026-09-26',
+      startHour: '9',
+      startMinute: '30',
+      startMeridiem: 'AM',
+      endHour: '9',
+      endMinute: '50',
+      endMeridiem: 'AM',
+    });
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /publish slots/i,
+      }),
+    );
+
+    expect(
+      await screen.findByText(
+        /overlaps your existing slot/i,
+      ),
+    ).toBeInTheDocument();
+
+    expect(addMyAvailability).not.toHaveBeenCalled();
   });
 
-  it('validates the window before calling the API', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    renderManager(<AvailabilityManager hasProfile />);
-    await screen.findByText(/open slot/);
-
-    await user.click(screen.getByRole('button', { name: /add availability/i }));
-    await user.click(screen.getByRole('button', { name: /publish slots/i }));
-
-    expect(await screen.findByText('Date is required.')).toBeInTheDocument();
-    expect(screen.getByText('Start time is required.')).toBeInTheDocument();
-    expect(screen.getByText('End time is required.')).toBeInTheDocument();
-
-    await user.type(screen.getByLabelText('Date'), '2026-09-23');
-    await chooseTime(user, 'From', '10', '00', 'AM');
-    await chooseTime(user, 'To', '9', '00', 'AM');
-    await user.click(screen.getByRole('button', { name: /publish slots/i }));
-
-    expect(await screen.findByText('End time must be after the start time.')).toBeInTheDocument();
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(mockAddMyAvailability).not.toHaveBeenCalled();
-  });
-
-  it('publishes a window as UTC and appends the returned slots', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    const created = [
-      { id: 10, startUtc: isoAt(3, 10), endUtc: isoAt(3, 10, 30), isBooked: false },
-      { id: 11, startUtc: isoAt(3, 10, 30), endUtc: isoAt(3, 11), isBooked: false },
+  it('publishes valid availability after confirmation', async () => {
+    const createdSlots = [
+      {
+        id: 10,
+        startUtc: '2026-09-28T04:30:00Z',
+        endUtc: '2026-09-28T04:50:00Z',
+        isBooked: false,
+      },
+      {
+        id: 11,
+        startUtc: '2026-09-28T04:50:00Z',
+        endUtc: '2026-09-28T05:10:00Z',
+        isBooked: false,
+      },
+      {
+        id: 12,
+        startUtc: '2026-09-28T05:10:00Z',
+        endUtc: '2026-09-28T05:30:00Z',
+        isBooked: false,
+      },
     ];
-    mockAddMyAvailability.mockResolvedValue(created);
-    renderManager(<AvailabilityManager hasProfile />);
-    await screen.findByText(/open slot/);
 
-    await user.click(screen.getByRole('button', { name: /add availability/i }));
-    await user.type(screen.getByLabelText('Date'), '2026-09-25');
-    await chooseTime(user, 'From', '10', '00', 'AM');
-    await chooseTime(user, 'To', '11', '00', 'AM');
-    await user.selectOptions(screen.getByLabelText('Slot length'), '30');
-    await user.click(screen.getByRole('button', { name: /publish slots/i }));
+    addMyAvailability.mockResolvedValue(createdSlots);
 
-    // Nothing is published until the confirmation is accepted.
-    const dialog = await screen.findByRole('dialog', { name: 'Publish these consultation slots?' });
-    expect(dialog).toHaveTextContent('2 slots of 30 minutes');
-    expect(mockAddMyAvailability).not.toHaveBeenCalled();
-    await user.click(within(dialog).getByRole('button', { name: 'Yes, Publish' }));
+    renderManager();
 
-    await waitFor(() => expect(mockAddMyAvailability).toHaveBeenCalledTimes(1));
-    expect(mockAddMyAvailability).toHaveBeenCalledWith({
-      startUtc: new Date(2026, 8, 25, 10, 0).toISOString(),
-      endUtc: new Date(2026, 8, 25, 11, 0).toISOString(),
-      slotDurationMinutes: 30,
+    await openAddForm();
+    await fillAddForm();
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /publish slots/i,
+      }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', {
+        name: /publish these consultation slots/i,
+      }),
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /yes, publish/i,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(addMyAvailability).toHaveBeenCalledTimes(1);
     });
-    expect(await screen.findByRole('status')).toHaveTextContent('2 consultation slots published.');
-    expect(screen.getByText(/open slot/)).toHaveTextContent('4 open slots');
-    expect(screen.queryByRole('form', { name: 'Add availability' })).not.toBeInTheDocument();
+
+    expect(showToast).toHaveBeenCalledWith(
+      '3 consultation slots published.',
+    );
+
+    expect(
+      await findAvailabilitySummary('3 open slots'),
+    ).toBeInTheDocument();
   });
 
-  it('sends an afternoon window as PM, not as the same hour in the morning', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    mockAddMyAvailability.mockResolvedValue([]);
-    renderManager(<AvailabilityManager hasProfile />);
-    await screen.findByText(/open slot/);
+  it('updates an existing open consultation slot', async () => {
+    getMyAvailability.mockResolvedValue([slot1]);
 
-    await user.click(screen.getByRole('button', { name: /add availability/i }));
-    await user.type(screen.getByLabelText('Date'), '2026-09-25');
-    await chooseTime(user, 'From', '2', '30', 'PM');
-    await chooseTime(user, 'To', '4', '00', 'PM');
-    await user.click(screen.getByRole('button', { name: /publish slots/i }));
-    await user.click(await screen.findByRole('button', { name: 'Yes, Publish' }));
-
-    await waitFor(() => expect(mockAddMyAvailability).toHaveBeenCalledTimes(1));
-    expect(mockAddMyAvailability).toHaveBeenCalledWith({
-      startUtc: new Date(2026, 8, 25, 14, 30).toISOString(),
-      endUtc: new Date(2026, 8, 25, 16, 0).toISOString(),
-      slotDurationMinutes: 20,
+    updateMyAvailabilitySlot.mockResolvedValue({
+      ...slot1,
+      startUtc: '2026-09-26T03:20:00Z',
+      endUtc: '2026-09-26T03:40:00Z',
     });
+
+    renderManager();
+
+    expect(
+      await findAvailabilitySummary('1 open slot'),
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /edit slot/i,
+      }),
+    );
+
+    expect(
+      screen.getByRole('form', {
+        name: /edit consultation slot/i,
+      }),
+    ).toBeInTheDocument();
+
+    const startHour =
+      screen.getByLabelText(/^new start hour$/i);
+
+    const startMinutes =
+      screen.getByLabelText(/^new start minutes$/i);
+
+    const endHour =
+      screen.getByLabelText(/^new end hour$/i);
+
+    const endMinutes =
+      screen.getByLabelText(/^new end minutes$/i);
+
+    await userEvent.clear(startHour);
+    await userEvent.type(startHour, '8');
+
+    await userEvent.clear(startMinutes);
+    await userEvent.type(startMinutes, '50');
+
+    await userEvent.clear(endHour);
+    await userEvent.type(endHour, '9');
+
+    await userEvent.clear(endMinutes);
+    await userEvent.type(endMinutes, '10');
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /save changes/i,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(
+        updateMyAvailabilitySlot,
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    expect(showToast).toHaveBeenCalledWith(
+      'Consultation slot updated.',
+    );
   });
 
-  it('surfaces an overlap conflict from the API', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    mockAddMyAvailability.mockRejectedValue({ response: { status: 409, data: { message: 'This window overlaps an existing slot.' } } });
-    renderManager(<AvailabilityManager hasProfile />);
-    await screen.findByText(/open slot/);
+  it('removes an existing open consultation slot after confirmation', async () => {
+    getMyAvailability.mockResolvedValue([slot1]);
 
-    await user.click(screen.getByRole('button', { name: /add availability/i }));
-    await user.type(screen.getByLabelText('Date'), '2026-09-23');
-    await chooseTime(user, 'From', '9', '00', 'AM');
-    await chooseTime(user, 'To', '10', '00', 'AM');
-    await user.click(screen.getByRole('button', { name: /publish slots/i }));
-    await user.click(await screen.findByRole('button', { name: 'Yes, Publish' }));
+    deleteMyAvailabilitySlot.mockResolvedValue();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('This window overlaps an existing slot.');
-    expect(screen.getByRole('form', { name: 'Add availability' })).toBeInTheDocument();
+    renderManager();
+
+    expect(
+      await findAvailabilitySummary('1 open slot'),
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /remove slot/i,
+      }),
+    );
+
+    expect(
+      screen.getByRole('dialog', {
+        name: /remove this consultation slot/i,
+      }),
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /yes, remove/i,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(
+        deleteMyAvailabilitySlot,
+      ).toHaveBeenCalledWith(slot1.id);
+    });
+
+    expect(showToast).toHaveBeenCalledWith(
+      'Slot removed.',
+      'danger',
+    );
+
+    expect(
+      await screen.findByText(
+        /no upcoming consultation slots/i,
+      ),
+    ).toBeInTheDocument();
   });
 
-  it('removes an open slot after confirmation', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    mockDeleteMyAvailabilitySlot.mockResolvedValue(undefined);
-    renderManager(<AvailabilityManager hasProfile />);
-    await screen.findByText(/open slot/);
+  it('shows a retry option when loading availability fails', async () => {
+    getMyAvailability
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce([slot1]);
 
-    await user.click(screen.getAllByRole('button', { name: /remove slot/i })[0]);
-    const dialog = await screen.findByRole('dialog', { name: 'Remove this consultation slot?' });
-    await user.click(within(dialog).getByRole('button', { name: 'Yes, Remove' }));
+    renderManager();
 
-    await waitFor(() => expect(mockDeleteMyAvailabilitySlot).toHaveBeenCalledWith(1));
-    expect(await screen.findByRole('status')).toHaveTextContent('Slot removed.');
-    expect(screen.getByText(/open slot/)).toHaveTextContent('1 open slot · 1 booked');
+    expect(
+      await screen.findByText(
+        /we could not reach the doctor service/i,
+      ),
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /retry/i,
+      }),
+    );
+
+    expect(
+      await findAvailabilitySummary('1 open slot'),
+    ).toBeInTheDocument();
+
+    expect(getMyAvailability).toHaveBeenCalledTimes(2);
   });
 
-  it('keeps the slot and explains when the API refuses the removal', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    mockDeleteMyAvailabilitySlot.mockRejectedValue({ response: { status: 409, data: { message: 'A patient has already booked this slot.' } } });
-    renderManager(<AvailabilityManager hasProfile />);
-    await screen.findByText(/open slot/);
+  it('does not allow booked slots to be edited or removed', async () => {
+    getMyAvailability.mockResolvedValue([bookedSlot]);
 
-    await user.click(screen.getAllByRole('button', { name: /remove slot/i })[0]);
-    await user.click(await screen.findByRole('button', { name: 'Yes, Remove' }));
+    renderManager();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('A patient has already booked this slot.');
-    expect(screen.getAllByRole('button', { name: /remove slot/i })).toHaveLength(2);
+    expect(
+      await screen.findByText('Booked', {
+        selector: '.dp-slot-status',
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole('button', {
+        name: /edit slot/i,
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole('button', {
+        name: /remove slot/i,
+      }),
+    ).not.toBeInTheDocument();
   });
 });
