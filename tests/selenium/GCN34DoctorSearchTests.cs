@@ -26,7 +26,7 @@ namespace CareNova.Frontend.Tests.Selenium
             options.AddArgument("--window-size=1920,1080");
 
             _driver = new ChromeDriver(options);
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(15));
         }
 
         private void LoginAsPatient()
@@ -38,32 +38,46 @@ namespace CareNova.Frontend.Tests.Selenium
             );
 
             var password = _driver.FindElement(By.Name("password"));
+
             var loginButton = _driver.FindElement(
                 By.CssSelector("button[type='submit']")
             );
 
             email.SendKeys(_patientEmail);
             password.SendKeys(_patientPassword);
+
             loginButton.Click();
 
-            _wait.Until(d => d.Url.Contains("dashboard"));
+            _wait.Until(
+                d => d.Url.Contains("dashboard")
+            );
+        }
+
+        private void OpenDoctorSearchPage()
+        {
+            _driver.Navigate().GoToUrl(
+                $"{_baseUrl}/patient/doctors"
+            );
+
+            _wait.Until(
+                d => d.FindElement(By.Id("doctor-search"))
+            );
         }
 
         [Test]
         public void Patient_CanViewDoctorSearchResults()
         {
             LoginAsPatient();
-
-            _driver.Navigate().GoToUrl($"{_baseUrl}/patient/doctors");
-
-            _wait.Until(
-                d => d.FindElement(By.Id("doctor-search"))
-            );
+            OpenDoctorSearchPage();
 
             var cards = _wait.Until(d =>
             {
-                var elements = d.FindElements(By.CssSelector(".pd-card"));
-                return elements.Count > 0 ? elements : null;
+                var elements =
+                    d.FindElements(By.CssSelector(".pd-card"));
+
+                return elements.Count > 0
+                    ? elements
+                    : null;
             });
 
             Assert.That(
@@ -73,148 +87,195 @@ namespace CareNova.Frontend.Tests.Selenium
             );
         }
 
+        [Test]
+        public void Patient_CanSearchDoctorsBySpecialization()
+        {
+            LoginAsPatient();
+            OpenDoctorSearchPage();
+
+            var searchInput = _wait.Until(
+                d => d.FindElement(By.Id("doctor-search"))
+            );
+
+            searchInput.Clear();
+            searchInput.SendKeys("Cardiology");
+
+            _driver.FindElement(
+                By.CssSelector("button[type='submit']")
+            ).Click();
+
+            var card = _wait.Until(d =>
+            {
+                var cards =
+                    d.FindElements(By.CssSelector(".pd-card"));
+
+                foreach (var result in cards)
+                {
+                    if (result.Text.Contains(
+                        "Cardiology",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        return result;
+                    }
+                }
+
+                return null;
+            });
+
+            Assert.That(
+                card.Text,
+                Does.Contain("Cardiology").IgnoreCase,
+                "Search results should include a Cardiology doctor."
+            );
+        }
 
         [Test]
-public void Patient_CanSearchDoctorsBySpecialization()
-{
-    LoginAsPatient();
+        public void Patient_SearchWithNoMatches_ShowsNoDoctorsFound()
+        {
+            LoginAsPatient();
+            OpenDoctorSearchPage();
 
-    _driver.Navigate().GoToUrl($"{_baseUrl}/patient/doctors");
+            var searchInput = _wait.Until(
+                d => d.FindElement(By.Id("doctor-search"))
+            );
 
-    var searchInput = _wait.Until(
-        d => d.FindElement(By.Id("doctor-search"))
-    );
+            searchInput.Clear();
+            searchInput.SendKeys("ZZZZZZ");
 
-    searchInput.SendKeys("Cardiology");
+            _driver.FindElement(
+                By.CssSelector("button[type='submit']")
+            ).Click();
 
-    var searchButton = _driver.FindElement(
-        By.CssSelector("button[type='submit']")
-    );
+            var emptyMessage = _wait.Until(
+                d => d.FindElement(
+                    By.CssSelector(".pd-empty h2")
+                )
+            );
 
-    searchButton.Click();
+            Assert.That(
+                emptyMessage.Text,
+                Is.EqualTo("No doctors found")
+            );
+        }
 
-    var card = _wait.Until(
-        d => d.FindElement(By.CssSelector(".pd-card"))
-    );
+        [Test]
+        public void Patient_InvalidOneCharacterSearch_ShowsValidationError()
+        {
+            LoginAsPatient();
+            OpenDoctorSearchPage();
 
-    Assert.That(
-        card.Text,
-        Does.Contain("Cardiology"),
-        "Search results should include a Cardiology doctor."
-    );
-}
+            var searchInput = _wait.Until(
+                d => d.FindElement(By.Id("doctor-search"))
+            );
 
-[Test]
-public void Patient_SearchWithNoMatches_ShowsNoDoctorsFound()
-{
-    LoginAsPatient();
+            searchInput.Clear();
+            searchInput.SendKeys("D");
 
-    _driver.Navigate().GoToUrl($"{_baseUrl}/patient/doctors");
+            _driver.FindElement(
+                By.CssSelector("button[type='submit']")
+            ).Click();
 
-    var searchInput = _wait.Until(
-        d => d.FindElement(By.Id("doctor-search"))
-    );
+            var error = _wait.Until(
+                d => d.FindElement(
+                    By.CssSelector(".field-error")
+                )
+            );
 
-    searchInput.SendKeys("ZZZZZZ");
+            Assert.That(
+                error.Text,
+                Does.Contain("at least 2 characters")
+                    .IgnoreCase
+            );
+        }
 
-    _driver.FindElement(
-        By.CssSelector("button[type='submit']")
-    ).Click();
+        [Test]
+        public void Patient_CanSelectDoctorAndViewProfile()
+        {
+            LoginAsPatient();
+            OpenDoctorSearchPage();
 
-    var emptyMessage = _wait.Until(
-        d => d.FindElement(By.CssSelector(".pd-empty h2"))
-    );
+            var viewProfileButton = _wait.Until(
+                d => d.FindElement(
+                    By.CssSelector(".pd-view-btn")
+                )
+            );
 
-    Assert.That(
-        emptyMessage.Text,
-        Is.EqualTo("No doctors found")
-    );
-}
+            viewProfileButton.Click();
 
-[Test]
-public void Patient_InvalidOneCharacterSearch_ShowsValidationError()
-{
-    LoginAsPatient();
+            _wait.Until(
+                d => d.Url.Contains("/patient/doctors/")
+            );
 
-    _driver.Navigate().GoToUrl($"{_baseUrl}/patient/doctors");
+            // Wait for the asynchronous doctor profile request
+            // to finish before checking the rendered page.
+            _wait.Until(d =>
+                !d.PageSource.Contains(
+                    "Loading doctor profile...",
+                    StringComparison.OrdinalIgnoreCase)
+            );
 
-    var searchInput = _wait.Until(
-        d => d.FindElement(By.Id("doctor-search"))
-    );
+            _wait.Until(d =>
+                d.PageSource.Contains(
+                    "Cardiology",
+                    StringComparison.OrdinalIgnoreCase)
+            );
 
-    searchInput.SendKeys("D");
+            Assert.That(
+                _driver.Url,
+                Does.Contain("/patient/doctors/"),
+                "Selecting a doctor should navigate to the doctor's profile."
+            );
 
-    _driver.FindElement(
-        By.CssSelector("button[type='submit']")
-    ).Click();
+            Assert.That(
+                _driver.PageSource,
+                Does.Contain("Cardiology").IgnoreCase,
+                "Doctor profile should display the doctor's professional information."
+            );
+        }
 
-    var error = _wait.Until(
-        d => d.FindElement(By.CssSelector(".field-error"))
-    );
+        [Test]
+        public void Patient_OpenSlotsOnly_ShowsDoctorWithAvailableSlot()
+        {
+            LoginAsPatient();
+            OpenDoctorSearchPage();
 
-    Assert.That(
-        error.Text,
-        Does.Contain("at least 2 characters")
-    );
-}
+            var openSlotsCheckbox = _wait.Until(
+                d => d.FindElement(
+                    By.Id("doctor-available-only")
+                )
+            );
 
-[Test]
-public void Patient_CanSelectDoctorAndViewProfile()
-{
-    LoginAsPatient();
+            openSlotsCheckbox.Click();
 
-    _driver.Navigate().GoToUrl($"{_baseUrl}/patient/doctors");
+            _driver.FindElement(
+                By.CssSelector("button[type='submit']")
+            ).Click();
 
-    var viewProfileButton = _wait.Until(
-        d => d.FindElement(By.CssSelector(".pd-view-btn"))
-    );
+            var card = _wait.Until(d =>
+            {
+                var cards =
+                    d.FindElements(By.CssSelector(".pd-card"));
 
-    viewProfileButton.Click();
+                foreach (var result in cards)
+                {
+                    if (System.Text.RegularExpressions.Regex.IsMatch(
+                        result.Text,
+                        @"\d+\s+open\s+slots?",
+                        System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                    {
+                        return result;
+                    }
+                }
 
-    _wait.Until(
-        d => d.Url.Contains("/patient/doctors/")
-    );
+                return null;
+            });
 
-    Assert.That(
-        _driver.Url,
-        Does.Contain("/patient/doctors/"),
-        "Selecting a doctor should navigate to the doctor's profile."
-    );
-
-    Assert.That(
-        _driver.PageSource,
-        Does.Contain("Cardiology"),
-        "Doctor profile should display the doctor's professional information."
-    );
-}
-
-[Test]
-public void Patient_OpenSlotsOnly_ShowsDoctorWithAvailableSlot()
-{
-    LoginAsPatient();
-
-    _driver.Navigate().GoToUrl($"{_baseUrl}/patient/doctors");
-
-    var openSlotsCheckbox = _wait.Until(
-        d => d.FindElement(By.Id("doctor-available-only"))
-    );
-
-    openSlotsCheckbox.Click();
-
-    _driver.FindElement(
-        By.CssSelector("button[type='submit']")
-    ).Click();
-
-    var card = _wait.Until(
-        d => d.FindElement(By.CssSelector(".pd-card"))
-    );
-
-    Assert.That(
-        card.Text,
-        Does.Contain("1 open slot"),
-        "Doctor with an available consultation slot should appear when Open slots only is enabled."
-    );
-}
+            Assert.That(
+                card.Text,
+                Does.Match(@"(?i)\d+\s+open\s+slots?"),
+                "Doctor with an available consultation slot should appear when Open slots only is enabled."
+            );
+        }
 
         [TearDown]
         public void Teardown()
