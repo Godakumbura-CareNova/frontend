@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { medicineApi } from '../api/medicineApi';
 import { inventoryApi } from '../api/inventoryApi';
@@ -17,6 +17,7 @@ export default function InventoryManagementPage() {
   const [low, setLow] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const batchesRef = useRef(null);
 
   const load = async () => {
     try {
@@ -29,6 +30,8 @@ export default function InventoryManagementPage() {
   };
 
   useEffect(() => { load(); }, [low]);
+  useEffect(() => { if (selectedMedicine) batchesRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }); }, [selectedMedicine, batches]);
+  useEffect(() => { if (error) window.scrollTo?.({ top: 0, behavior: 'smooth' }); }, [error]);
 
   const clearForm = () => { setForm(empty); setEditingBatchId(null); };
   const showBatches = async (item) => {
@@ -70,17 +73,17 @@ export default function InventoryManagementPage() {
     <div className="management-grid">
       <form className="management-card medicine-form" onSubmit={submit}>
         <h2>{editingBatchId ? 'Edit stock batch' : 'Add stock batch'}</h2>
-        <label>Medicine<select required disabled={Boolean(editingBatchId)} value={form.medicineId} onChange={(event) => setForm({ ...form, medicineId: event.target.value })}><option value="">Select medicine</option>{medicines.map((medicine) => <option key={medicine.id} value={medicine.id}>{medicine.name}</option>)}</select></label>
-        <label>Batch number<input required value={form.batchNumber} onChange={(event) => setForm({ ...form, batchNumber: event.target.value })}/></label>
-        <label>Quantity<input required min="0" type="number" value={form.quantity} onChange={(event) => setForm({ ...form, quantity: event.target.value })}/></label>
-        <label>Purchase price<input required min="0" type="number" value={form.purchasePrice} onChange={(event) => setForm({ ...form, purchasePrice: event.target.value })}/></label>
-        <label>Selling price<input required min="0" type="number" value={form.sellingPrice} onChange={(event) => setForm({ ...form, sellingPrice: event.target.value })}/></label>
-        <label>Manufacturing date<input required type="date" value={form.manufacturingDate} onChange={(event) => setForm({ ...form, manufacturingDate: event.target.value })}/></label>
-        <label>Expiry date<input required type="date" value={form.expiryDate} onChange={(event) => setForm({ ...form, expiryDate: event.target.value })}/></label>
+        <label>Medicine<select name="medicineId" required disabled={Boolean(editingBatchId)} value={form.medicineId} onChange={(event) => setForm({ ...form, medicineId: event.target.value })}><option value="">Select medicine</option>{medicines.map((medicine) => <option key={medicine.id} value={medicine.id}>{medicine.name}</option>)}</select></label>
+        <label>Batch number<input name="batchNumber" required value={form.batchNumber} onChange={(event) => setForm({ ...form, batchNumber: event.target.value })}/></label>
+        <label>Quantity<input name="quantity" required min="0" type="number" value={form.quantity} onChange={(event) => setForm({ ...form, quantity: event.target.value })}/></label>
+        <label>Purchase price<input name="purchasePrice" required min="0" type="number" value={form.purchasePrice} onChange={(event) => setForm({ ...form, purchasePrice: event.target.value })}/></label>
+        <label>Selling price<input name="sellingPrice" required min="0" type="number" value={form.sellingPrice} onChange={(event) => setForm({ ...form, sellingPrice: event.target.value })}/></label>
+        <label>Manufacturing date<input name="manufacturingDate" required type="date" value={form.manufacturingDate} onChange={(event) => setForm({ ...form, manufacturingDate: event.target.value })}/></label>
+        <label>Expiry date<input name="expiryDate" required type="date" value={form.expiryDate} onChange={(event) => setForm({ ...form, expiryDate: event.target.value })}/></label>
         <div className="management-actions"><button className="primary-action">{editingBatchId ? 'Save changes' : 'Save stock batch'}</button>{editingBatchId && <button type="button" className="secondary-action" onClick={clearForm}>Cancel</button>}</div>
       </form>
-      <div className="management-card"><h2>Medicine inventory</h2><label className="check-label"><input type="checkbox" checked={low} onChange={(event) => setLow(event.target.checked)}/> Low stock only</label>{inventory.map((item) => <div className="list-row" key={item.medicineId}><div><strong>{item.medicineName}</strong><span>{item.totalQuantity} units · {item.availabilityStatus}</span></div><div className="row-actions"><button onClick={() => showBatches(item)}>View batches</button></div></div>)}</div>
+      <div className="management-card"><h2>Medicine inventory</h2><label className="check-label"><input name="lowStockOnly" type="checkbox" checked={low} onChange={(event) => setLow(event.target.checked)}/> Low stock only</label>{inventory.map((item) => <div className="list-row" key={item.medicineId}><div><strong>{item.medicineName}</strong><span>{item.totalQuantity} units · {item.availabilityStatus}</span></div><div className="row-actions"><button onClick={() => showBatches(item)}>View batches</button></div></div>)}</div>
     </div>
-    {selectedMedicine && <div className="management-card inventory-batches"><h2>{selectedMedicine.medicineName} batches</h2>{batches.length === 0 ? <p>No stock batches yet.</p> : batches.map((batch) => <div className="list-row" key={batch.id}><div><strong>{batch.batchNumber}</strong><span>{batch.quantity} units · Expires {dateValue(batch.expiryDate)}</span></div><div className="row-actions"><button onClick={() => editBatch(batch)}>Edit</button></div></div>)}</div>}
+    {selectedMedicine && <div ref={batchesRef} className="management-card inventory-batches"><h2>{selectedMedicine.medicineName} batches</h2>{batches.length === 0 ? <p>No stock batches yet.</p> : batches.map((batch) => <div className="list-row" key={batch.id}><div><strong>{batch.batchNumber}</strong><span>{batch.quantity} units · Expires {dateValue(batch.expiryDate)}</span></div><div className="row-actions"><button onClick={() => editBatch(batch)}>Edit</button></div></div>)}</div>}
   </section></DashboardLayout>;
 }
