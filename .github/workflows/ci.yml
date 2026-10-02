@@ -36,4 +36,4 @@ jobs:
         run: npm run build
 
       - name: Build Docker image
-        run: docker build -t carenova-frontend:ci-test --build-arg VITE_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net --build-arg VITE_DOCTOR_PAYMENT_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net/doctor-payment .
+        run: docker build -t carenova-frontend:ci-test --build-arg VITE_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net --build-arg VITE_DOCTOR_PAYMENT_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net/doctor-payment --build-arg VITE_APPOINTMENT_API_BASE_URL=https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net/appointment .

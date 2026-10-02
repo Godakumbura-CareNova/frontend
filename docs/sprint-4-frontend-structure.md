@@ -27,7 +27,7 @@ do not hard-code service addresses in components.
 - Deployed: `https://carenova-gateway-cwa9etfmdtgvazgm.centralindia-01.azurewebsites.net/appointment`
   (once the gateway route is added)
 
-When the appointment API client is implemented, the variable also has to be
-added to `.env.example`, as an `ARG`/`ENV` in the `Dockerfile` build stage,
-and as a build argument in `.github/workflows/ci.yml` and `cd.yml`, the same
-way `VITE_DOCTOR_PAYMENT_API_BASE_URL` was added in Sprint 3.
+The variable is set in `.env.example`, as an `ARG`/`ENV` in the `Dockerfile`
+build stage, and as a build argument in `.github/workflows/ci.yml` and
+`cd.yml`. Copy it into your local `.env.local` to run against a local
+appointment service.
