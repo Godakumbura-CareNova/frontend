@@ -118,10 +118,14 @@ describe('to24HourTime', () => {
     expect(to24HourTime('12', '15', 'PM')).toBe('12:15');
   });
 
-  it('reads an incomplete or invalid selection as no time chosen', () => {
-    expect(to24HourTime('', '00', 'AM')).toBe('');
-    expect(to24HourTime('13', '00', 'AM')).toBe('');
-    expect(to24HourTime('9', '00', '')).toBe('');
+  it('reads a blank time as no time chosen', () => {
+    expect(to24HourTime('', '', 'AM')).toBe('');
+  });
+
+  it('marks an incomplete or invalid time as invalid', () => {
+    expect(to24HourTime('', '00', 'AM')).toBe('invalid');
+    expect(to24HourTime('13', '00', 'AM')).toBe('invalid');
+    expect(to24HourTime('9', '00', '')).toBe('invalid');
   });
 });
 

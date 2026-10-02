@@ -1,31 +1,38 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarClock, CalendarPlus, Lock, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CalendarPlus, Lock, Pencil, Plus, RefreshCw, Save, Trash2 } from 'lucide-react';
 import ConfirmDialog from '../ConfirmDialog';
 import { useToast } from '../../context/ToastContext';
 import ProfileSection from './ProfileSection';
 import { formatSlotTime, parseUtcDate } from './AvailabilityBadge';
-import { addMyAvailability, deleteMyAvailabilitySlot, getMyAvailability } from '../../services/doctorService';
 import {
-  AVAILABILITY_HOUR_OPTIONS,
+  addMyAvailability,
+  deleteMyAvailabilitySlot,
+  getMyAvailability,
+  updateMyAvailabilitySlot,
+} from '../../services/doctorService';
+import {
   AVAILABILITY_MERIDIEM_OPTIONS,
-  AVAILABILITY_MINUTE_OPTIONS,
   AVAILABILITY_SLOT_OPTIONS,
   combineLocalDateTime,
   countAvailabilitySlots,
+  findConflictingSlot,
   mapServerValidationErrors,
   to24HourTime,
   toAvailabilityRequest,
+  toAvailabilitySlotUpdateRequest,
+  typedTimeError,
   validateAvailabilityForm,
+  validateAvailabilitySlotEdit,
 } from '../../utils/doctorValidation';
 
-// The doctor picks hour / minute / AM-PM; the validator and the API work in 24-hour time.
+// The doctor types the hour and minutes and picks AM / PM; the validator and the API work in 24-hour time.
 const emptyForm = () => ({
   date: '',
   startHour: '',
-  startMinute: '00',
+  startMinute: '',
   startMeridiem: 'AM',
   endHour: '',
-  endMinute: '00',
+  endMinute: '',
   endMeridiem: 'AM',
   slotDurationMinutes: '20',
 });
@@ -37,10 +44,36 @@ const toTimeForm = (form) => ({
   slotDurationMinutes: form.slotDurationMinutes,
 });
 
+// Runs the form validator, then replaces its generic "invalid time" with what exactly is wrong in the typed hour / minutes.
+const validateTimes = (form, validate) => {
+  const { errors } = validate(toTimeForm(form));
+  const startProblem = typedTimeError(form.startHour, form.startMinute);
+  const endProblem = typedTimeError(form.endHour, form.endMinute);
+  if (startProblem) errors.startTime = startProblem;
+  if (endProblem) errors.endTime = endProblem;
+  return { isValid: Object.keys(errors).length === 0, errors };
+};
+
+const pad = (value) => String(value).padStart(2, '0');
+
 const todayInputValue = () => {
   const now = new Date();
-  const pad = (value) => String(value).padStart(2, '0');
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+};
+
+// Prefills the edit form from a slot, in the doctor's local zone.
+const slotToEditForm = (slot) => {
+  const start = parseUtcDate(slot.startUtc);
+  const end = parseUtcDate(slot.endUtc);
+  return {
+    date: `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`,
+    startHour: String(start.getHours() % 12 || 12),
+    startMinute: pad(start.getMinutes()),
+    startMeridiem: start.getHours() < 12 ? 'AM' : 'PM',
+    endHour: String(end.getHours() % 12 || 12),
+    endMinute: pad(end.getMinutes()),
+    endMeridiem: end.getHours() < 12 ? 'AM' : 'PM',
+  };
 };
 
 const formatTimeOnly = (value) => {
@@ -52,6 +85,8 @@ const formatDayHeading = (value) => {
   const date = parseUtcDate(value);
   return date ? date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : '';
 };
+
+const sortByStart = (slots) => [...slots].sort((a, b) => parseUtcDate(a.startUtc) - parseUtcDate(b.startUtc));
 
 // Groups slots by local calendar day so a week of availability reads as a schedule rather than a flat list.
 const groupByDay = (slots) => {
@@ -65,22 +100,46 @@ const groupByDay = (slots) => {
   return Array.from(groups.values());
 };
 
+const conflictMessage = (slot) =>
+  `This time overlaps your existing slot on ${formatSlotTime(slot.startUtc)} – ${formatTimeOnly(slot.endUtc)}. Choose another time, or edit or remove that slot first.`;
+
+// The API reports StartUtc / EndUtc; the form shows those errors under the From / To pickers.
+const toFormFieldErrors = (serverErrors) => {
+  const mapped = mapServerValidationErrors(serverErrors);
+  const { startUtc, endUtc, ...rest } = mapped;
+  return { ...rest, ...(startUtc && { startTime: startUtc }), ...(endUtc && { endTime: endUtc }) };
+};
+
 const describeError = (error, fallback) => {
   const status = error?.response?.status;
   const serverMessage = error?.response?.data?.message;
   if (status === 400) {
-    return { message: serverMessage || 'Please check the availability details.', fieldErrors: mapServerValidationErrors(error?.response?.data?.errors), retryable: false };
+    return { message: serverMessage || 'Please check the availability details.', fieldErrors: toFormFieldErrors(error?.response?.data?.errors), retryable: false };
   }
+  if (status === 404) return { message: serverMessage || 'That slot no longer exists.', fieldErrors: {}, retryable: false, gone: true };
   if (status === 409) return { message: serverMessage || 'This change clashes with your existing availability.', fieldErrors: {}, retryable: false };
-  if (status === 401 || status === 403) return { message: 'You are not authorized to manage this availability.', fieldErrors: {}, retryable: false };
+  if (status === 401) return { message: 'Your session has expired. Please sign in again to manage your availability.', fieldErrors: {}, retryable: false };
+  if (status === 403) return { message: 'You are not authorized to manage consultation availability. Only doctors can change these slots.', fieldErrors: {}, retryable: false };
   if (!error?.response) return { message: 'We could not reach the doctor service. Check your connection and try again.', fieldErrors: {}, retryable: true };
   return { message: serverMessage || fallback, fieldErrors: {}, retryable: true };
 };
 
+// The hour, minute and AM/PM inputs all report against one error key ("startTime" / "endTime").
+const errorKeyFor = (name) =>
+  (/^(start|end)(Hour|Minute|Meridiem)$/.test(name) ? `${name.replace(/(Hour|Minute|Meridiem)$/, '')}Time` : name);
+
+const clearError = (setter, key) => setter((current) => {
+  if (!current[key] && !current.conflict) return current;
+  const next = { ...current };
+  delete next[key];
+  delete next.conflict;
+  return next;
+});
+
 /**
  * Doctor-side consultation availability: lists upcoming slots and lets the doctor publish a window
- * (split into slots) or withdraw an open slot. Changes save immediately; nothing here is part of the
- * profile edit form. `hasProfile` gates adding, since slots hang off the professional profile.
+ * (split into slots), edit an open slot's time, or withdraw it. Changes save immediately; nothing here is
+ * part of the profile edit form. `hasProfile` gates adding, since slots hang off the professional profile.
  */
 const AvailabilityManager = ({ hasProfile, disabled = false }) => {
   const { showToast } = useToast();
@@ -95,6 +154,11 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
   const [saveError, setSaveError] = useState(null);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [pendingRemoval, setPendingRemoval] = useState(null);
+
+  const [editingSlot, setEditingSlot] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [editErrors, setEditErrors] = useState({});
+  const [editError, setEditError] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -131,17 +195,24 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
-    // The three time selects all report against one error key ("startTime" / "endTime").
-    const errorKey = /^(start|end)(Hour|Minute|Meridiem)$/.test(name) ? `${name.replace(/(Hour|Minute|Meridiem)$/, '')}Time` : name;
-    setErrors((current) => {
-      if (!current[errorKey]) return current;
-      const next = { ...current };
-      delete next[errorKey];
-      return next;
-    });
+    clearError(setErrors, errorKeyFor(name));
+  };
+
+  const handleEditChange = (event) => {
+    const { name, value } = event.target;
+    setEditForm((current) => ({ ...current, [name]: value }));
+    clearError(setEditErrors, errorKeyFor(name));
+  };
+
+  const cancelEdit = () => {
+    setEditingSlot(null);
+    setEditForm(null);
+    setEditErrors({});
+    setEditError(null);
   };
 
   const openForm = () => {
+    cancelEdit();
     setForm(emptyForm());
     setErrors({});
     setSaveError(null);
@@ -154,13 +225,28 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
     setSaveError(null);
   };
 
+  const startEdit = (slot) => {
+    closeForm();
+    setEditingSlot(slot);
+    setEditForm(slotToEditForm(slot));
+    setEditErrors({});
+    setEditError(null);
+  };
+
   const submit = (event) => {
     event.preventDefault();
     setSaveError(null);
 
-    const validation = validateAvailabilityForm(toTimeForm(form));
+    const times = toTimeForm(form);
+    const validation = validateTimes(form, validateAvailabilityForm);
     if (!validation.isValid) {
       setErrors(validation.errors);
+      return;
+    }
+
+    const conflict = findConflictingSlot(combineLocalDateTime(times.date, times.startTime), combineLocalDateTime(times.date, times.endTime), slots);
+    if (conflict) {
+      setErrors({ conflict: conflictMessage(conflict) });
       return;
     }
 
@@ -174,7 +260,7 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
     try {
       const created = await addMyAvailability(toAvailabilityRequest(toTimeForm(form)));
       const added = Array.isArray(created) ? created : [];
-      setSlots((current) => [...current, ...added].sort((a, b) => new Date(a.startUtc) - new Date(b.startUtc)));
+      setSlots((current) => sortByStart([...current, ...added]));
       showToast(`${added.length} consultation slot${added.length === 1 ? '' : 's'} published.`);
       setShowForm(false);
       setForm(emptyForm());
@@ -182,6 +268,52 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
       const described = describeError(error, 'Failed to publish this availability.');
       if (Object.keys(described.fieldErrors).length > 0) setErrors(described.fieldErrors);
       setSaveError(described);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveEdit = async (event) => {
+    event?.preventDefault();
+    if (!editingSlot || !editForm) return;
+    setEditError(null);
+
+    const times = toTimeForm(editForm);
+    const validation = validateTimes(editForm, validateAvailabilitySlotEdit);
+    if (!validation.isValid) {
+      setEditErrors(validation.errors);
+      return;
+    }
+
+    const conflict = findConflictingSlot(
+      combineLocalDateTime(times.date, times.startTime),
+      combineLocalDateTime(times.date, times.endTime),
+      slots,
+      editingSlot.id,
+    );
+    if (conflict) {
+      setEditErrors({ conflict: conflictMessage(conflict) });
+      return;
+    }
+
+    setEditErrors({});
+    setSaving(true);
+    try {
+      const updated = await updateMyAvailabilitySlot(editingSlot.id, toAvailabilitySlotUpdateRequest(times));
+      setSlots((current) => sortByStart(current.map((slot) => (slot.id === editingSlot.id ? { ...slot, ...updated } : slot))));
+      showToast('Consultation slot updated.');
+      cancelEdit();
+    } catch (error) {
+      const described = describeError(error, 'Failed to update this slot. Your previous time is unchanged.');
+      if (Object.keys(described.fieldErrors).length > 0) setEditErrors(described.fieldErrors);
+      if (described.gone) {
+        // Someone (or another tab) already removed it; drop it here too so the schedule stays truthful.
+        setSlots((current) => current.filter((slot) => slot.id !== editingSlot.id));
+        cancelEdit();
+        setSaveError(described);
+      } else {
+        setEditError({ ...described, retry: described.retryable ? saveEdit : undefined });
+      }
     } finally {
       setSaving(false);
     }
@@ -196,6 +328,7 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
     try {
       await deleteMyAvailabilitySlot(slot.id);
       setSlots((current) => current.filter((item) => item.id !== slot.id));
+      if (editingSlot?.id === slot.id) cancelEdit();
       showToast('Slot removed.', 'danger');
     } catch (error) {
       const described = describeError(error, 'Failed to remove the slot.');
@@ -205,50 +338,80 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
     }
   };
 
-  const fieldError = (key) => (errors[key] ? <span className="field-error" role="alert">{errors[key]}</span> : null);
-  const inputClass = (key) => `form-input${errors[key] ? ' has-error' : ''}`;
+  const renderFieldError = (errs, key) => (errs[key] ? <span className="field-error" role="alert">{errs[key]}</span> : null);
 
-  // Hour / minute / AM-PM, so there is no doubt about which half of the day a time belongs to.
-  const timePicker = (legend, prefix, errorKey) => {
-    const selectClass = `form-select${errors[errorKey] ? ' has-error' : ''}`;
+  const renderConflict = (errs) => (errs.conflict ? (
+    <div className="dp-conflict-warning" role="alert">
+      <AlertTriangle size={15} aria-hidden="true" />
+      <span>{errs.conflict}</span>
+    </div>
+  ) : null);
+
+  // Hour and minutes are typed so a wrong entry is caught by validation; AM / PM is chosen so the half of the day is never in doubt.
+  const renderTimeField = ({ legend, prefix, errorKey, values, errs, onChange }) => {
+    const invalid = Boolean(errs[errorKey] || errs.conflict);
+    const inputClass = `form-input dp-time-number${invalid ? ' has-error' : ''}`;
     return (
       <fieldset className="dp-time-field">
         <legend className="form-label">{legend}</legend>
         <div className="dp-time-inputs">
-          <select
-            className={selectClass}
+          <input
+            className={inputClass}
             name={`${prefix}Hour`}
+            type="text"
+            inputMode="numeric"
+            maxLength={2}
+            autoComplete="off"
+            placeholder="hh"
             aria-label={`${legend} hour`}
-            value={form[`${prefix}Hour`]}
-            onChange={handleChange}
-          >
-            <option value="">Hour</option>
-            {AVAILABILITY_HOUR_OPTIONS.map((hour) => <option key={hour} value={hour}>{hour}</option>)}
-          </select>
+            aria-invalid={invalid}
+            value={values[`${prefix}Hour`]}
+            onChange={onChange}
+          />
           <span className="dp-time-separator" aria-hidden="true">:</span>
-          <select
-            className={selectClass}
+          <input
+            className={inputClass}
             name={`${prefix}Minute`}
+            type="text"
+            inputMode="numeric"
+            maxLength={2}
+            autoComplete="off"
+            placeholder="mm"
             aria-label={`${legend} minutes`}
-            value={form[`${prefix}Minute`]}
-            onChange={handleChange}
-          >
-            {AVAILABILITY_MINUTE_OPTIONS.map((minute) => <option key={minute} value={minute}>{minute}</option>)}
-          </select>
+            aria-invalid={invalid}
+            value={values[`${prefix}Minute`]}
+            onChange={onChange}
+          />
           <select
-            className={selectClass}
+            className={`form-select${invalid ? ' has-error' : ''}`}
             name={`${prefix}Meridiem`}
             aria-label={`${legend} AM or PM`}
-            value={form[`${prefix}Meridiem`]}
-            onChange={handleChange}
+            value={values[`${prefix}Meridiem`]}
+            onChange={onChange}
           >
             {AVAILABILITY_MERIDIEM_OPTIONS.map((period) => <option key={period} value={period}>{period}</option>)}
           </select>
         </div>
-        {fieldError(errorKey)}
+        {renderFieldError(errs, errorKey)}
       </fieldset>
     );
   };
+
+  const renderDateField = (id, values, errs, onChange) => (
+    <div className="dp-editor-field">
+      <label className="form-label" htmlFor={id}>Date</label>
+      <input
+        id={id}
+        name="date"
+        type="date"
+        min={todayInputValue()}
+        className={`form-input${errs.date ? ' has-error' : ''}`}
+        value={values.date}
+        onChange={onChange}
+      />
+      {renderFieldError(errs, 'date')}
+    </div>
+  );
 
   const addButton = showForm ? null : (
     <button
@@ -285,13 +448,9 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
         {showForm && (
           <form className="dp-availability-form" onSubmit={submit} noValidate aria-label="Add availability">
             <div className="dp-form-grid dp-form-grid-3">
-              <div className="dp-editor-field">
-                <label className="form-label" htmlFor="availability-date">Date</label>
-                <input id="availability-date" name="date" type="date" min={todayInputValue()} className={inputClass('date')} value={form.date} onChange={handleChange} />
-                {fieldError('date')}
-              </div>
-              {timePicker('From', 'start', 'startTime')}
-              {timePicker('To', 'end', 'endTime')}
+              {renderDateField('availability-date', form, errors, handleChange)}
+              {renderTimeField({ legend: 'From', prefix: 'start', errorKey: 'startTime', values: form, errs: errors, onChange: handleChange })}
+              {renderTimeField({ legend: 'To', prefix: 'end', errorKey: 'endTime', values: form, errs: errors, onChange: handleChange })}
               <div className="dp-editor-field">
                 <label className="form-label" htmlFor="availability-duration">Slot length</label>
                 <select id="availability-duration" name="slotDurationMinutes" className={`form-select${errors.slotDurationMinutes ? ' has-error' : ''}`} value={form.slotDurationMinutes} onChange={handleChange}>
@@ -299,14 +458,46 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
                     <option key={minutes} value={String(minutes)}>{minutes} minutes</option>
                   ))}
                 </select>
-                {fieldError('slotDurationMinutes')}
+                {renderFieldError(errors, 'slotDurationMinutes')}
               </div>
             </div>
-            <p className="dp-field-hint">The window is split into consecutive slots of the chosen length. Times are in your local time zone.</p>
+            {renderConflict(errors)}
+            <p className="dp-field-hint">The window is split into consecutive slots of the chosen length. Type the hour (1 to 12) and minutes (00 to 59), then choose AM or PM. Times are in your local time zone.</p>
             <div className="dp-actions dp-availability-actions">
               <button type="button" className="btn btn-secondary" onClick={closeForm} disabled={saving}>Cancel</button>
               <button type="submit" className="btn btn-green" disabled={saving}>
                 <CalendarPlus size={16} /> {saving ? 'Publishing...' : 'Publish Slots'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {editingSlot && editForm && (
+          <form className="dp-availability-form" onSubmit={saveEdit} noValidate aria-label="Edit consultation slot">
+            <p className="dp-edit-title">
+              Editing slot <strong>{formatSlotTime(editingSlot.startUtc)} – {formatTimeOnly(editingSlot.endUtc)}</strong>
+            </p>
+            {editError && (
+              <div className="alert alert-error" role="alert">
+                <span>{editError.message}</span>
+                {editError.retry && (
+                  <button type="button" className="dp-retry-btn" onClick={editError.retry} disabled={saving}>
+                    <RefreshCw size={13} /> Retry
+                  </button>
+                )}
+              </div>
+            )}
+            <div className="dp-form-grid dp-form-grid-3">
+              {renderDateField('availability-edit-date', editForm, editErrors, handleEditChange)}
+              {renderTimeField({ legend: 'New start', prefix: 'start', errorKey: 'startTime', values: editForm, errs: editErrors, onChange: handleEditChange })}
+              {renderTimeField({ legend: 'New end', prefix: 'end', errorKey: 'endTime', values: editForm, errs: editErrors, onChange: handleEditChange })}
+            </div>
+            {renderConflict(editErrors)}
+            <p className="dp-field-hint">Type the hour (1 to 12) and minutes (00 to 59), then choose AM or PM. Times are in your local time zone. Patients see the new time as soon as you save.</p>
+            <div className="dp-actions dp-availability-actions">
+              <button type="button" className="btn btn-secondary" onClick={cancelEdit} disabled={saving}>Cancel</button>
+              <button type="submit" className="btn btn-green" disabled={saving}>
+                <Save size={16} /> {saving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </form>
@@ -334,23 +525,37 @@ const AvailabilityManager = ({ hasProfile, disabled = false }) => {
                 <h3 className="dp-availability-day-title">{group.heading}</h3>
                 <ul className="dp-slot-list">
                   {group.slots.map((slot) => (
-                    <li key={slot.id} className={`dp-slot${slot.isBooked ? ' dp-slot-booked' : ''}`}>
+                    <li key={slot.id} className={`dp-slot${slot.isBooked ? ' dp-slot-booked' : ''}${editingSlot?.id === slot.id ? ' dp-slot-editing' : ''}`}>
                       <span className="dp-slot-time">
                         {formatTimeOnly(slot.startUtc)} – {formatTimeOnly(slot.endUtc)}
                       </span>
                       {slot.isBooked ? (
-                        <span className="dp-slot-status" title="A patient has booked this slot"><Lock size={12} aria-hidden="true" /> Booked</span>
+                        <span className="dp-slot-status" title="A patient has booked this slot, so it cannot be edited or removed">
+                          <Lock size={12} aria-hidden="true" /> Booked
+                        </span>
                       ) : (
-                        <button
-                          type="button"
-                          className="dp-remove-btn dp-slot-remove"
-                          onClick={() => setPendingRemoval(slot)}
-                          disabled={disabled || saving}
-                          aria-label={`Remove slot ${formatSlotTime(slot.startUtc)}`}
-                          title="Remove this slot"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="dp-slot-edit"
+                            onClick={() => startEdit(slot)}
+                            disabled={disabled || saving}
+                            aria-label={`Edit slot ${formatSlotTime(slot.startUtc)}`}
+                            title="Edit this slot"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            className="dp-remove-btn dp-slot-remove"
+                            onClick={() => setPendingRemoval(slot)}
+                            disabled={disabled || saving}
+                            aria-label={`Remove slot ${formatSlotTime(slot.startUtc)}`}
+                            title="Remove this slot"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
                       )}
                     </li>
                   ))}

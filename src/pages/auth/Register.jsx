@@ -18,15 +18,22 @@ const initialForm = {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// The backend takes firstName and lastName and joins them with a space into the stored full name.
+const splitFullName = (fullName) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  return { firstName: parts[0] || '', lastName: parts.slice(1).join(' ') };
+};
+
 const normalizeServerField = (field) => {
   const key = String(field || '').trim();
   const map = {
     fullName: 'fullName',
     FullName: 'fullName',
-    firstName: 'firstName',
-    FirstName: 'firstName',
-    lastName: 'lastName',
-    LastName: 'lastName',
+    // The form has one Full name field; the backend validates it as first and last name.
+    firstName: 'fullName',
+    FirstName: 'fullName',
+    lastName: 'fullName',
+    LastName: 'fullName',
     email: 'email',
     Email: 'email',
     password: 'password',
@@ -76,6 +83,8 @@ const validateForm = (values) => {
 
   if (!nextErrors.fullName && values.fullName.trim().length < 2) {
     nextErrors.fullName = 'Full name must be at least 2 characters.';
+  } else if (!nextErrors.fullName && !splitFullName(values.fullName).lastName) {
+    nextErrors.fullName = 'Please enter your first and last name.';
   }
 
   if (!nextErrors.email && !EMAIL_REGEX.test(values.email.trim())) {
@@ -166,6 +175,7 @@ const Register = () => {
     try {
       const payload = {
         fullName: formData.fullName.trim(),
+        ...splitFullName(formData.fullName),
         email: formData.email.trim(),
         password: formData.password.trim(),
         confirmPassword: formData.confirmPassword.trim(),
@@ -203,7 +213,7 @@ const Register = () => {
         const mappedErrors = {};
         Object.entries(serverErrors).forEach(([field, messages]) => {
           const normalizedField = normalizeServerField(field);
-          if (normalizedField && Array.isArray(messages) && messages.length > 0) {
+          if (normalizedField && !mappedErrors[normalizedField] && Array.isArray(messages) && messages.length > 0) {
             mappedErrors[normalizedField] = messages[0];
           }
         });
