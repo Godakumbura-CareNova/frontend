@@ -36,6 +36,7 @@ import PharmacyPrescriptionReviewPage from '../pages/PharmacyPrescriptionReviewP
 import PharmacyPaymentVerificationPage from '../pages/PharmacyPaymentVerificationPage';
 import PaymentTransactionsPage from '../pages/PaymentTransactionsPage';
 import PaymentTransactionDetailPage from '../pages/PaymentTransactionDetailPage';
+import PatientAppointmentBookingPage from '../pages/PatientAppointmentBookingPage';
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return '';
@@ -82,6 +83,7 @@ const PublicAuthRoute = ({ children }) => {
 const AppRoutes = () => (
   <Routes>
     <Route path="/login" element={<LoginPage />} />
+     <Route path="/patient/doctors/:doctorId/book"element={<PatientAppointmentBookingPage />}/>
     <Route path="/register" element={<PublicAuthRoute><RegisterPage /></PublicAuthRoute>} />
     <Route path="/forgot-password" element={<PublicAuthRoute><ForgotPasswordPage /></PublicAuthRoute>} />
     <Route path="/reset-password" element={<PublicAuthRoute><ResetPasswordPage /></PublicAuthRoute>} />
