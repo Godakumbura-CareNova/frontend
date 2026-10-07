@@ -245,15 +245,37 @@ const PatientAppointmentBookingPage = () => {
                 <strong>{success.status}</strong>
               </p>
 
-              <button
-                type="button"
-                className="btn btn-green"
-                onClick={() =>
-                  navigate('/patient/doctors')
-                }
-              >
-                Back to doctors
-              </button>
+             <div
+  style={{
+    display: 'flex',
+    gap: '12px',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: '18px',
+  }}
+>
+  <button
+    type="button"
+    className="btn btn-green"
+    onClick={() =>
+      navigate(
+        `/patient/appointments/${success.id}/payment`
+      )
+    }
+  >
+    Continue to Payment
+  </button>
+
+  <button
+    type="button"
+    className="btn"
+    onClick={() =>
+      navigate('/patient/doctors')
+    }
+  >
+    Back to doctors
+  </button>
+</div>
             </div>
           </div>
         </div>
