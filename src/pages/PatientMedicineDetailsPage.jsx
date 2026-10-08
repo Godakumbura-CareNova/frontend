@@ -8,7 +8,7 @@ import './patientMedicineDetails.css';
 
 const pharmacyHost = (import.meta.env.VITE_PHARMACY_API_BASE_URL || 'http://localhost:5134/api').replace(/\/api$/, '');
 
-export default function PatientMedicineDetailsPage() {
+export default function PatientMedicineDetailsPage({ canOrder = true }) {
   const { medicineId } = useParams();
   const navigate = useNavigate();
   const [medicine, setMedicine] = useState(null);
@@ -70,6 +70,10 @@ export default function PatientMedicineDetailsPage() {
     : null;
 
   const continueToNextStep = async () => {
+    if (!canOrder) {
+      navigate('/login', { state: { from: `/patient/medicines/${medicineId}` } });
+      return;
+    }
     if (medicine.prescriptionRequired) {
       sessionStorage.setItem('carenova.pendingCartItem', JSON.stringify({
         medicineId: medicine.id,

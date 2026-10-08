@@ -77,22 +77,23 @@ const NAV_BY_ROLE = {
 };
 
 const DashboardLayout = ({ children }) => {
-  const { user, role, logout } = useAuth();
+  const { user, role, logout, isAuthenticated } = useAuth();
+  const guest = isAuthenticated === false || !role;
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const patient = normalizeRole(role) === 'Patient';
   const pharmacyStaff = normalizeRole(role) === 'PharmacyStaff';
   const doctor = normalizeRole(role) === 'Doctor';
-  const notificationApi = patient ? combinedPatientNotificationApi : pharmacyStaff ? combinedStaffNotificationApi : doctor ? doctorNotificationApi : null;
+  const notificationApi = guest ? null : patient ? combinedPatientNotificationApi : pharmacyStaff ? combinedStaffNotificationApi : doctor ? doctorNotificationApi : null;
 
   const loadNotifications = async () => {
     if (!notificationApi) return;
     try { setNotifications((await notificationApi.list()).data); } catch { setNotifications([]); }
   };
-  useEffect(() => { loadNotifications(); }, [role]);
+  useEffect(() => { loadNotifications(); }, [role, guest]);
   const openNotifications = () => { setNotificationsOpen(open => !open); if (!notificationsOpen) loadNotifications(); };
   const markRead = async (notification) => {
     if (!notification.isRead) await notificationApi.markRead(notification.id);
@@ -108,7 +109,7 @@ const DashboardLayout = ({ children }) => {
     else navigate(notification.relatedEntityType === 'Order' ? `/patient/orders/${notification.relatedEntityId}` : '/patient/prescriptions');
   };
 
-  const navItems = NAV_BY_ROLE[normalizeRole(role)] || [];
+  const navItems = guest ? NAV_BY_ROLE.Patient.map(item => item.label === 'Dashboard' ? { ...item, to: '/' } : item) : NAV_BY_ROLE[normalizeRole(role)] || [];
 
   const handleLogout = () => {
     logout();
@@ -153,14 +154,14 @@ const DashboardLayout = ({ children }) => {
           })}
         </nav>
 
-        <div className="sidebar-footer">
+        {!guest && <div className="sidebar-footer">
           <Link to="/profile" className="sidebar-nav-item" onClick={() => setSidebarOpen(false)}>
             <User size={18} /> Profile
           </Link>
           <button type="button" className="sidebar-nav-item danger" onClick={handleLogout}>
             <LogOut size={18} /> Logout
           </button>
-        </div>
+        </div>}
       </aside>
 
       <div className="dashboard-area">
@@ -175,6 +176,7 @@ const DashboardLayout = ({ children }) => {
           </button>
 
           <div className="topbar-actions">
+            {guest ? <><Link className="btn btn-primary" to="/login">Login</Link><Link className="btn" to="/register">Register</Link></> : <>
             <button type="button" className="icon-button notification-button" aria-label="Notifications" onClick={openNotifications}>
               <Bell size={20} />
               {notificationApi && notifications.filter(item => !item.isRead).length > 0 && <span className="notification-count">{notifications.filter(item => !item.isRead).length}</span>}
@@ -214,6 +216,7 @@ const DashboardLayout = ({ children }) => {
               </div>
               <ChevronDown size={16} color="var(--text-muted)" />
             </button>
+            </>}
           </div>
         </header>
 

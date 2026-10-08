@@ -1,4 +1,6 @@
 import React from 'react';
+import HomePage from '../pages/HomePage';
+import PublicNotFoundPage from '../pages/PublicNotFoundPage';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -65,18 +67,20 @@ const ProfileRoute = () => {
   return normalizeRole(role) === 'Doctor' ? <DoctorProfilePage /> : <ProfilePage />;
 };
 
-const HomeRedirect = () => {
-  const { isAuthenticated, role, loading } = useAuth();
-
-  if (loading) return null;
-  return <Navigate to={isAuthenticated ? getDashboardRouteByRole(role) : '/login'} replace />;
-};
-
 const PublicAuthRoute = ({ children }) => {
   const { isAuthenticated, role, loading } = useAuth();
 
   if (loading) return null;
   return isAuthenticated ? <Navigate to={getDashboardRouteByRole(role)} replace /> : children;
+};
+
+const MedicineDetailsRoute = () => {
+  const { isAuthenticated, role } = useAuth();
+  return <PatientMedicineDetailsPage canOrder={isAuthenticated && normalizeRole(role) === 'Patient'} />;
+};
+const DoctorDetailsRoute = () => {
+  const { isAuthenticated, role } = useAuth();
+  return <PatientDoctorProfilePage canBook={isAuthenticated && normalizeRole(role) === 'Patient'} />;
 };
 
 const AppRoutes = () => (
@@ -93,8 +97,6 @@ const AppRoutes = () => (
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Patient']} />}>
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
-        <Route path="/patient/medicines" element={<PatientMedicineCataloguePage />} />
-        <Route path="/patient/medicines/:medicineId" element={<PatientMedicineDetailsPage />} />
         <Route path="/patient/prescriptions/upload" element={<PatientPrescriptionUploadPage />} />
         <Route path="/patient/prescriptions" element={<PatientPrescriptionsPage />} />
         <Route path="/patient/cart" element={<PatientCartPage />} />
@@ -103,8 +105,6 @@ const AppRoutes = () => (
         <Route path="/patient/orders/:orderId" element={<PatientOrderDetailsPage />} />
         <Route path="/patient/orders/:orderId/payment" element={<PatientOrderPaymentPage />} />
         <Route path="/patient/orders/:orderId/payment/online" element={<PatientOnlinePaymentPage />} />
-        <Route path="/patient/doctors" element={<PatientDoctorSearchPage />} />
-        <Route path="/patient/doctors/:doctorId" element={<PatientDoctorProfilePage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Doctor']} />}>
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
@@ -129,8 +129,16 @@ const AppRoutes = () => (
       </Route>
     </Route>
 
-    <Route path="/" element={<HomeRedirect />} />
-    <Route path="*" element={<Navigate to="/" replace />} />
+    <Route path="/" element={<HomePage />} />
+    <Route path="/patient/medicines" element={<PatientMedicineCataloguePage />} />
+    <Route path="/patient/medicines/:medicineId" element={<MedicineDetailsRoute />} />
+    <Route path="/patient/doctors" element={<PatientDoctorSearchPage />} />
+    <Route path="/patient/doctors/:doctorId" element={<DoctorDetailsRoute />} />
+    <Route path="/medicines" element={<PatientMedicineCataloguePage />} />
+    <Route path="/medicines/:medicineId" element={<MedicineDetailsRoute />} />
+    <Route path="/doctors" element={<PatientDoctorSearchPage />} />
+    <Route path="/doctors/:doctorId" element={<DoctorDetailsRoute />} />
+    <Route path="*" element={<PublicNotFoundPage />} />
   </Routes>
 );
 
