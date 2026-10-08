@@ -19,6 +19,9 @@ import {
   ChevronDown,
   Menu,
   X,
+  Info,
+  Mail,
+  Settings,
 } from 'lucide-react';
 import pharmacyLogo from '../assets/PHARMACY LOGO .jpeg';
 import { getFirstName } from '../utils/formatName';
@@ -109,7 +112,15 @@ const DashboardLayout = ({ children }) => {
     else navigate(notification.relatedEntityType === 'Order' ? `/patient/orders/${notification.relatedEntityId}` : '/patient/prescriptions');
   };
 
-  const navItems = guest ? NAV_BY_ROLE.Patient.map(item => item.label === 'Dashboard' ? { ...item, to: '/' } : item) : NAV_BY_ROLE[normalizeRole(role)] || [];
+  const roleItems = guest ? NAV_BY_ROLE.Patient.map(item => item.label === 'Dashboard' ? { ...item, to: '/' } : item) : NAV_BY_ROLE[normalizeRole(role)] || [];
+  const navItems = [...roleItems,
+    { to: '/about', label: 'About Us', icon: Info, enabled: true },
+    { to: '/contact', label: 'Contact Us', icon: Mail, enabled: true },
+    ...(!guest && normalizeRole(role) === 'Admin' ? [
+      { to: '/admin/pharmacy-information', label: 'Manage Pharmacy Information', icon: Settings, enabled: true },
+      { to: '/admin/inquiries', label: 'Contact Inquiries', icon: Mail, enabled: true },
+    ] : []),
+  ];
 
   const handleLogout = () => {
     logout();

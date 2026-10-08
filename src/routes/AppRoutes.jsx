@@ -1,5 +1,9 @@
 import React from 'react';
 import HomePage from '../pages/HomePage';
+import AboutUsPage from '../pages/AboutUsPage';
+import ContactUsPage from '../pages/ContactUsPage';
+import AdminPharmacyInformationPage from '../pages/AdminPharmacyInformationPage';
+import AdminContactInquiriesPage from '../pages/AdminContactInquiriesPage';
 import PublicNotFoundPage from '../pages/PublicNotFoundPage';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -121,6 +125,8 @@ const AppRoutes = () => (
         <Route path="/pharmacy/payment-transactions/:paymentId" element={<PaymentTransactionDetailPage />} />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
+        <Route path="/admin/pharmacy-information" element={<AdminPharmacyInformationPage />} />
+        <Route path="/admin/inquiries" element={<AdminContactInquiriesPage />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<UserManagementPage />} />
         <Route path="/admin/fee-requests" element={<AdminFeeChangeRequestsPage />} />
@@ -130,6 +136,8 @@ const AppRoutes = () => (
     </Route>
 
     <Route path="/" element={<HomePage />} />
+    <Route path="/about" element={<AboutUsPage />} />
+    <Route path="/contact" element={<ContactUsPage />} />
     <Route path="/patient/medicines" element={<PatientMedicineCataloguePage />} />
     <Route path="/patient/medicines/:medicineId" element={<MedicineDetailsRoute />} />
     <Route path="/patient/doctors" element={<PatientDoctorSearchPage />} />

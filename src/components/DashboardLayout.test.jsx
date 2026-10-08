@@ -12,6 +12,14 @@ vi.mock('../context/AuthContext', () => ({ useAuth }));
 const CurrentPath = () => <output>{useLocation().pathname}</output>;
 
 describe('DashboardLayout', () => {
+  it.each([null, 'Patient', 'Doctor', 'PharmacyStaff', 'Admin'])('includes About and Contact links for %s', (role) => {
+    useAuth.mockReturnValue({ role, isAuthenticated: Boolean(role), user: { fullName: 'User' }, logout: vi.fn() });
+    render(<MemoryRouter><DashboardLayout><p>Content</p></DashboardLayout></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'About Us' })).toHaveAttribute('href', '/about');
+    expect(screen.getByRole('link', { name: 'Contact Us' })).toHaveAttribute('href', '/contact');
+    if (role === 'Admin') expect(screen.getByRole('link', { name: 'Manage Pharmacy Information' })).toHaveAttribute('href', '/admin/pharmacy-information');
+    else expect(screen.queryByRole('link', { name: 'Manage Pharmacy Information' })).not.toBeInTheDocument();
+  });
   it('uses the patient layout for visitors with login at the top right', () => {
     useAuth.mockReturnValue({ isAuthenticated: false, role: null, user: null });
     render(<MemoryRouter><DashboardLayout><p>Home content</p></DashboardLayout></MemoryRouter>);
