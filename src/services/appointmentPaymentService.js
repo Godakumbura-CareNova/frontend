@@ -3,8 +3,14 @@ import { appointmentApi } from '../api/appointmentApi';
 const paymentPath = (appointmentId) =>
   `/api/appointments/${encodeURIComponent(appointmentId)}/payment`;
 
+const staffPaymentPath =
+  '/api/staff/appointment-payments';
+
 export const getAppointmentPayment = async (appointmentId) => {
-  const response = await appointmentApi.get(paymentPath(appointmentId));
+  const response = await appointmentApi.get(
+    paymentPath(appointmentId)
+  );
+
   return response.data;
 };
 
@@ -64,6 +70,45 @@ export const cancelAppointmentOnlinePayment = async (
 ) => {
   const response = await appointmentApi.post(
     `${paymentPath(appointmentId)}/online/${encodeURIComponent(attemptId)}/cancel`
+  );
+
+  return response.data;
+};
+
+export const getPendingAppointmentReceipts = async () => {
+  const response = await appointmentApi.get(
+    `${staffPaymentPath}/receipts`
+  );
+
+  return response.data;
+};
+
+export const getAppointmentReceiptFile = async (
+  receiptId
+) => {
+  const response = await appointmentApi.get(
+    `${staffPaymentPath}/receipts/${encodeURIComponent(receiptId)}/file`,
+    {
+      responseType: 'blob'
+    }
+  );
+
+  return response.data;
+};
+
+export const verifyAppointmentReceipt = async (
+  appointmentId,
+  approved,
+  rejectionReason = null
+) => {
+  const response = await appointmentApi.post(
+    `${staffPaymentPath}/appointments/${encodeURIComponent(
+      appointmentId
+    )}/receipt/verify`,
+    {
+      approved,
+      rejectionReason
+    }
   );
 
   return response.data;
