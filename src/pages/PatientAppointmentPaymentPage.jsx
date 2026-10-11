@@ -70,8 +70,8 @@ export default function PatientAppointmentPaymentPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     setError('');
 
     try {
@@ -86,7 +86,7 @@ export default function PatientAppointmentPaymentPage() {
         );
       }
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -202,7 +202,7 @@ export default function PatientAppointmentPaymentPage() {
               <PaymentFlow
                 appointmentId={appointmentId}
                 payment={payment}
-                reload={load}
+                reload={() => load(false)}
               />
             )}
           </>
@@ -388,6 +388,8 @@ function OnlinePaymentFlow({
   const [busy, setBusy] =
     useState(false);
 
+  const [confirming, setConfirming] = useState(false);
+
   const running = useRef(false);
 
   const change = (field, value) => {
@@ -460,8 +462,7 @@ function OnlinePaymentFlow({
         await loadPayHere();
 
       payhere.onCompleted = async () => {
-        running.current = false;
-        setBusy(false);
+        setConfirming(true);
 
         try {
           await waitForResult(session.attemptId);
@@ -472,6 +473,10 @@ function OnlinePaymentFlow({
               'Could not confirm your payment.'
             )
           );
+        } finally {
+          running.current = false;
+          setBusy(false);
+          setConfirming(false);
         }
       };
 
@@ -653,7 +658,7 @@ function OnlinePaymentFlow({
           disabled={busy}
         >
           {busy
-            ? 'Opening PayHere...'
+            ? (confirming ? 'Confirming payment...' : 'Opening PayHere...')
             : `Pay LKR ${Number(
                 payment.amount
               ).toFixed(2)}`}
