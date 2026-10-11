@@ -5,9 +5,15 @@ import DashboardLayout from '../components/DashboardLayout';
 import StatCard from '../components/StatCard';
 import { Calendar, CalendarClock, Users, CheckCircle2, Stethoscope, ChevronRight } from 'lucide-react';
 import { getFirstName } from '../utils/formatName';
+import useDoctorAppointments from '../hooks/useDoctorAppointments';
+import { DoctorAppointmentCard, DoctorAppointmentFeedback } from './doctorAppointmentPresentation';
+import './patientOrders.css';
+import './patientAppointments.css';
+import './doctorAppointments.css';
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
+  const { data, error, busy, refresh } = useDoctorAppointments();
 
   return (
     <DashboardLayout>
@@ -19,10 +25,10 @@ const DoctorDashboard = () => {
       </div>
 
       <div className="stat-card-grid">
-        <StatCard icon={Calendar} title="Today's Appointments" />
-        <StatCard icon={CalendarClock} title="Upcoming Appointments" />
-        <StatCard icon={Users} title="Patient Count" />
-        <StatCard icon={CheckCircle2} title="Completed Appointments" />
+        <StatCard icon={Calendar} title="Today's Appointments" value={data?.statistics.today} />
+        <StatCard icon={CalendarClock} title="Upcoming Appointments" value={data?.statistics.upcoming} />
+        <StatCard icon={Users} title="Patient Count" value={data?.statistics.patientCount} />
+        <StatCard icon={CheckCircle2} title="Completed Appointments" value={data?.statistics.completed} />
       </div>
 
       <div className="quicklink-row" style={{ marginBottom: '1.5rem' }}>
@@ -40,12 +46,17 @@ const DoctorDashboard = () => {
         </Link>
       </div>
 
-      <div className="dashboard-section">
-        <h2>Appointment Details</h2>
-        <p className="empty-state">
-          No appointments yet — once the Appointment module is live, each row here will let you mark a visit
-          as <strong>Confirmed</strong>, <strong>Completed</strong>, or <strong>No Show</strong>.
-        </p>
+      <div className="dashboard-section orders-page patient-appointments doctor-appointments">
+        <h2>Today's appointments</h2>
+        <p className="order-intro">All consultation times are in Sri Lanka time.</p>
+        <DoctorAppointmentFeedback {...{ data, error, busy, refresh }} />
+        <div className="appointment-actions">
+          <Link className="order-back-link" to="/doctor/appointments?view=today">View today's appointments</Link>
+          <Link className="order-back-link" to="/doctor/appointments?view=upcoming">Upcoming appointments</Link>
+          <Link className="order-back-link" to="/doctor/appointments?view=completed">Completed appointments</Link>
+        </div>
+        {data && !data.appointments.some(item => item.isToday) && <p className="empty-state">No scheduled appointments today.</p>}
+        {data?.appointments.filter(item => item.isToday).slice(0, 5).map(item => <DoctorAppointmentCard key={item.id} appointment={item} />)}
       </div>
     </DashboardLayout>
   );

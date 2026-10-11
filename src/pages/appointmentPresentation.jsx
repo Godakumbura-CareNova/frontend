@@ -3,7 +3,7 @@ import { CalendarDays, Clock3, CreditCard, Stethoscope } from 'lucide-react';
 
 const methods = { Cash: 'Cash', BankTransfer: 'Bank transfer', PaymentGateway: 'Online payment' };
 const paymentStatuses = { Pending: 'Pending', AwaitingBankTransferReceipt: 'Awaiting bank transfer receipt', ReceiptUnderVerification: 'Receipt under verification', AwaitingGatewayPayment: 'Awaiting online payment', Successful: 'Successful', Failed: 'Failed' };
-const statuses = { Booked: 'Booked', Confirmed: 'Confirmed', Completed: 'Completed', Cancelled: 'Cancelled' };
+const statuses = { Booked: 'Booked', Confirmed: 'Confirmed', Completed: 'Completed', Cancelled: 'Cancelled', NoShow: 'No Show' };
 export const paymentMethodLabel = value => value == null ? 'Not selected' : methods[value] || 'Unavailable';
 export const paymentStatusLabel = value => value == null ? 'Not paid' : paymentStatuses[value] || 'Unavailable';
 export function appointmentDate(value, time = false) {

@@ -13,6 +13,8 @@ import ForbiddenPage from '../pages/ForbiddenPage';
 import ProfilePage from '../pages/ProfilePage';
 import PatientDashboard from '../pages/PatientDashboard';
 import DoctorDashboard from '../pages/DoctorDashboard';
+import DoctorAppointmentsPage from '../pages/DoctorAppointmentsPage';
+import DoctorAppointmentDetailsPage from '../pages/DoctorAppointmentDetailsPage';
 import DoctorProfilePage from '../pages/DoctorProfilePage';
 import PharmacyStaffDashboard from '../pages/PharmacyStaffDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
@@ -299,6 +301,8 @@ const AppRoutes = () => (
           path="/doctor-dashboard"
           element={<DoctorDashboard />}
         />
+        <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
+        <Route path="/doctor/appointments/:appointmentId" element={<DoctorAppointmentDetailsPage />} />
       </Route>
 
       <Route

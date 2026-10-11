@@ -18,6 +18,13 @@ const renderPage = (path = '/patient/appointments') => render(<MemoryRouter init
 beforeEach(() => { vi.resetAllMocks(); });
 afterEach(cleanup);
 
+it('shows No Show in patient appointment history without payment actions', async () => {
+  http.get.mockResolvedValue({ data: appointment({ status: 'NoShow', section: 'Previous', canPay: false }) });
+  renderPage('/patient/appointments/7');
+  expect(await screen.findByText('No Show')).toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Continue to Payment' })).not.toBeInTheDocument();
+});
+
 it('shows upcoming and history with stored status and payment information', async () => {
   http.get.mockResolvedValue({ data: [appointment(), appointment({ id: 8, appointmentReference: 'CN-APT-008', section: 'Previous', status: 'Cancelled', paymentMethod: 'Cash', paymentStatus: 'Pending', canPay: false })] });
   renderPage();
