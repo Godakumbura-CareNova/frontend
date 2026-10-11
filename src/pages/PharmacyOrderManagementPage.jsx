@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { staffOrderApi } from '../api/staffOrderApi';
 import './PharmacyOrderManagementPage.css';
 
 export default function PharmacyOrderManagementPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedStatus = searchParams.get('status');
+  const statusFilter = ['Pending', 'ReadyForCollection'].includes(requestedStatus) ? requestedStatus : '';
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState('');
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejectionError, setRejectionError] = useState('');
+  const visibleOrders = orders?.filter(order => !statusFilter || order.status === statusFilter);
 
   const load = async () => {
     try {
@@ -56,10 +61,16 @@ export default function PharmacyOrderManagementPage() {
           <h1>Medicine orders</h1>
           <p className="order-intro">Prepare pending pharmacy pickup orders and record collection.</p>
         </header>
+        <label className="staff-orders-filter">Order status <select value={statusFilter} onChange={(event) => {
+          const next = new URLSearchParams(searchParams);
+          if (event.target.value) next.set('status', event.target.value);
+          else next.delete('status');
+          setSearchParams(next);
+        }}><option value="">All actionable orders</option><option value="Pending">New orders</option><option value="ReadyForCollection">Ready for collection</option></select></label>
         {error && <div role="alert" className="order-error">{error}<button type="button" onClick={load}>Retry</button></div>}
         {!orders && !error && <p>Loading orders...</p>}
-        {orders?.length === 0 && <p>No orders need pharmacy action.</p>}
-        {orders?.map((order) => (
+        {visibleOrders?.length === 0 && <p>{statusFilter ? 'No orders match this status.' : 'No orders need pharmacy action.'}</p>}
+        {visibleOrders?.map((order) => (
           <article className="order-card staff-order-card" key={order.id}>
             <div className="staff-order-details">
               <p className="staff-order-label">Order</p>

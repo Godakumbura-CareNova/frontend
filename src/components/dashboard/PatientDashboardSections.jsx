@@ -19,11 +19,12 @@ export default function PatientDashboardSections({ dashboard }) {
       })}</div></> : <p className="empty-state">No medicine orders yet.</p>}
     </DashboardSectionState>
     <DashboardSectionState title="Upcoming appointments" state={sections.appointments} retry={() => refreshSection('appointments')} link={appointments ? '/patient/appointments' : null} linkText="View all appointments">
+      {appointments && <><h3>Appointment payment statuses</h3><div className="role-dashboard-statuses">{Object.entries(appointments.paymentStatusCounts).map(([status, count]) => <span key={status}>{statusLabel(status)}: <strong>{count}</strong></span>)}</div></>}
       {appointments?.appointments.length ? <><p>Next {appointments.appointments.length} of {appointments.upcomingCount} appointments</p><div className="management-list">{appointments.appointments.map(item => <article className="list-row role-dashboard-row" key={item.id}><div>
         <Link to={`/patient/appointments/${item.id}`}><strong>{item.reference}</strong></Link><span>{item.doctorName} · {dateTime(item.startUtc)}</span>
         <span>{statusLabel(item.status)} · {methodLabel(item.paymentMethod)} · {statusLabel(item.paymentStatus)}</span></div></article>)}</div></> : <p className="empty-state">No upcoming appointments.</p>}
     </DashboardSectionState>
-    <DashboardSectionState title="Medicine payment statuses" state={sections.medicinePayments} retry={() => refreshSection('medicinePayments')}>
+    <DashboardSectionState id="patient-payment-statuses" title="Medicine payment statuses" state={sections.medicinePayments} retry={() => refreshSection('medicinePayments')}>
       {payments && <><div className="role-dashboard-statuses">{Object.entries(payments.statusCounts).map(([status, count]) => <span key={status}>{statusLabel(status)}: <strong>{count}</strong></span>)}</div>
         {payments.recentPayments.length ? <ul className="role-dashboard-payment-list">{payments.recentPayments.map(p => <li key={p.id}><strong>{p.reference}</strong> · {money(p.amount)} · {methodLabel(p.method)} · {statusLabel(p.status)}</li>)}</ul> : <p className="empty-state">No medicine payments yet.</p>}</>}
     </DashboardSectionState>

@@ -35,12 +35,12 @@ export default function HomePage() {
       <p>Manage your health easily with CareNova.</p>
     </div>
     <div className="stat-card-grid">
-      <StatCard icon={ShoppingBag} title="Recent Medicine Orders" value={isPatient ? dashboard.sections.orders?.data?.totalCount ?? 'Unavailable' : undefined} />
-      <StatCard icon={Calendar} title="Upcoming Appointments" value={isPatient ? dashboard.sections.appointments?.data?.upcomingCount ?? 'Unavailable' : undefined} />
-      <StatCard icon={CreditCard} title="Payment Statuses" value={isPatient ? 'See below' : undefined} />
-      <StatCard icon={Pill} title="Quick Links" />
+      <StatCard to="/patient/orders" icon={ShoppingBag} title="Recent Medicine Orders" value={isPatient ? dashboard.sections.orders?.data?.totalCount ?? 'Unavailable' : undefined} />
+      <StatCard to="/patient/appointments" icon={Calendar} title="Upcoming Appointments" value={isPatient ? dashboard.sections.appointments?.data?.upcomingCount ?? 'Unavailable' : undefined} />
+      <StatCard to={isPatient ? '#patient-payment-statuses' : '/login'} icon={CreditCard} title="Payment Statuses" value={isPatient ? 'See below' : undefined} />
+      <StatCard to="#dashboard-quick-links" icon={Pill} title="Quick Links" />
     </div>
-    <section className="dashboard-section">
+    <section id="dashboard-quick-links" className="dashboard-section">
       <h2>Quick Links</h2>
       <div className="quicklink-row">
         <Link to="/patient/medicines" className="quicklink-card">

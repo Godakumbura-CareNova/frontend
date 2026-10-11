@@ -8,6 +8,18 @@ vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { userId: 'st
 vi.mock('../components/DashboardLayout', () => ({ default: ({ children }) => <main>{children}</main> }));
 vi.mock('../services/roleDashboardService', () => ({ getPatientOrderDashboard: vi.fn(), getPatientMedicinePaymentDashboard: vi.fn(), getPatientAppointmentDashboard: vi.fn(), getStaffOperationsDashboard: vi.fn(), getStaffMedicinePaymentDashboard: vi.fn(), getStaffAppointmentPaymentDashboard: vi.fn() }));
 const time = '2026-10-11T10:00:00Z';
+it('provides direct shortcuts for every staff summary card', async () => {
+  render(<MemoryRouter><PharmacyStaffDashboard /></MemoryRouter>);
+  for (const [name, destination] of [
+    ['New Medicine Orders', '/pharmacy/orders?status=Pending'],
+    ['Awaiting Prescription Verification', '/pharmacy/prescriptions'],
+    ['Medicine Bank Transfers Awaiting Verification', '/pharmacy/payments'],
+    ['Appointment Bank Transfers Awaiting Verification', '/pharmacy/appointment-payments'],
+    ['Low-Stock Medicines', '/pharmacy/inventory?lowStockOnly=true'],
+    ['Ready for Collection', '/pharmacy/orders?status=ReadyForCollection'],
+  ]) expect(screen.getByRole('link', { name: new RegExp(`^${name}`) })).toHaveAttribute('href', destination);
+  await screen.findByText('Panadol');
+});
 const queue = { totalCount: 0, items: [] };
 const payments = amount => ({ pendingTransfers: queue, recentPayments: [], income: { todayAmount: amount, monthAmount: amount, undatedSuccessfulCount: 0, undatedSuccessfulAmount: 0, currency: 'LKR', timeZone: 'Asia/Colombo', asOfUtc: time }, generatedAtUtc: time });
 beforeEach(() => {

@@ -203,11 +203,6 @@ const AppRoutes = () => (
           element={<PatientDashboard />}
         />
 
-<Route
-          path="/patient/medicines/:medicineId"
-          element={<PatientMedicineDetailsPage />}
-        />
-
         <Route
           path="/patient/prescriptions/upload"
           element={<PatientPrescriptionUploadPage />}
@@ -246,11 +241,6 @@ const AppRoutes = () => (
         <Route
           path="/patient/orders/:orderId/payment/online"
           element={<PatientOnlinePaymentPage />}
-        />
-
-<Route
-          path="/patient/doctors/:doctorId"
-          element={<PatientDoctorProfilePage />}
         />
 
         <Route
