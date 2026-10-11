@@ -1,0 +1,14 @@
+.role-dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 1.5rem; align-items: start; }
+.role-dashboard-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+.role-dashboard-section { min-width: 0; }
+.role-dashboard-section h3 { margin-top: 1rem; }
+.role-dashboard-queue + .role-dashboard-queue { margin-top: 1.5rem; }
+.role-dashboard-row { overflow-wrap: anywhere; }
+.role-dashboard-row > div { display: flex; flex-direction: column; gap: .35rem; }
+.role-dashboard-refreshed { font-size: .8rem; color: var(--text-muted, #64748b); margin-top: 1rem; }
+.role-dashboard-statuses { display: flex; flex-wrap: wrap; gap: .75rem; }
+.role-dashboard-payment-list { padding-left: 1.25rem; }
+.role-dashboard-payment-list li { margin: .75rem 0; overflow-wrap: anywhere; }
+.role-dashboard-income { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+.role-dashboard-income dt { color: var(--text-muted, #64748b); }
+.role-dashboard-income dd { margin: .4rem 0; font-size: 1.4rem; font-weight: 700; }

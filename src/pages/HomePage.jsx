@@ -5,9 +5,15 @@ import DashboardLayout from '../components/DashboardLayout';
 import StatCard from '../components/StatCard';
 import { PublicCards } from '../components/home/PublicCards';
 import { getHomeContent } from '../services/publicContentService';
+import { useAuth } from '../context/AuthContext';
+import { useRoleDashboard } from '../hooks/useRoleDashboard';
+import PatientDashboardSections from '../components/dashboard/PatientDashboardSections';
 
 // The landing page and patient dashboard share their content and layout.
 export default function HomePage() {
+  const { user, token } = useAuth();
+  const isPatient = !!token && ['Patient', 'User'].includes(user?.role);
+  const dashboard = useRoleDashboard('Patient');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -29,9 +35,9 @@ export default function HomePage() {
       <p>Manage your health easily with CareNova.</p>
     </div>
     <div className="stat-card-grid">
-      <StatCard icon={ShoppingBag} title="Recent Medicine Orders" />
-      <StatCard icon={Calendar} title="Upcoming Appointments" />
-      <StatCard icon={CreditCard} title="Payment Statuses" />
+      <StatCard icon={ShoppingBag} title="Recent Medicine Orders" value={isPatient ? dashboard.sections.orders?.data?.totalCount ?? 'Unavailable' : undefined} />
+      <StatCard icon={Calendar} title="Upcoming Appointments" value={isPatient ? dashboard.sections.appointments?.data?.upcomingCount ?? 'Unavailable' : undefined} />
+      <StatCard icon={CreditCard} title="Payment Statuses" value={isPatient ? 'See below' : undefined} />
       <StatCard icon={Pill} title="Quick Links" />
     </div>
     <section className="dashboard-section">
@@ -47,6 +53,7 @@ export default function HomePage() {
         </Link>
       </div>
     </section>
+    {isPatient && <PatientDashboardSections dashboard={dashboard} />}
     {loading && <p role="status">Loading pharmacy information…</p>}
     {error && <section className="dashboard-section management-alert error" role="alert">
       <h2>We couldn’t load the home page information.</h2><p>Please try again.</p><button className="btn btn-primary" onClick={retry}>Retry</button>

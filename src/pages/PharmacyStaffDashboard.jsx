@@ -7,15 +7,16 @@ import {
   FileCheck,
   Landmark,
   AlertTriangle,
-  PackageSearch,
   PackageCheck,
-  Receipt,
-  BarChart3,
 } from 'lucide-react';
 import { getFirstName } from '../utils/formatName';
+import { useRoleDashboard } from '../hooks/useRoleDashboard';
+import StaffDashboardSections from '../components/dashboard/StaffDashboardSections';
 
 const PharmacyStaffDashboard = () => {
   const { user } = useAuth();
+  const dashboard = useRoleDashboard('PharmacyStaff');
+  const operations = dashboard.sections.operations?.data;
 
   return (
     <DashboardLayout>
@@ -27,20 +28,15 @@ const PharmacyStaffDashboard = () => {
       </div>
 
       <div className="stat-card-grid">
-        <StatCard icon={ShoppingBag} title="New Medicine Orders" />
-        <StatCard icon={FileCheck} title="Awaiting Prescription Verification" />
-        <StatCard icon={Landmark} title="Bank Transfers Awaiting Verification" />
-        <StatCard icon={AlertTriangle} title="Low-Stock Medicines" />
-        <StatCard icon={PackageSearch} title="Preparing Orders" />
-        <StatCard icon={PackageCheck} title="Ready for Collection" />
-        <StatCard icon={Receipt} title="Recent Payments" />
-        <StatCard icon={BarChart3} title="Sales Summary" />
+        <StatCard icon={ShoppingBag} title="New Medicine Orders" value={operations?.newOrders.totalCount ?? 'Unavailable'} />
+        <StatCard icon={FileCheck} title="Awaiting Prescription Verification" value={operations?.pendingPrescriptions.totalCount ?? 'Unavailable'} />
+        <StatCard icon={Landmark} title="Medicine Bank Transfers Awaiting Verification" value={dashboard.sections.medicinePayments?.data?.pendingTransfers.totalCount ?? 'Unavailable'} />
+        <StatCard icon={Landmark} title="Appointment Bank Transfers Awaiting Verification" value={dashboard.sections.appointmentPayments?.data?.pendingTransfers.totalCount ?? 'Unavailable'} />
+        <StatCard icon={AlertTriangle} title="Low-Stock Medicines" value={operations?.lowStock.totalCount ?? 'Unavailable'} />
+        <StatCard icon={PackageCheck} title="Ready for Collection" value={operations?.readyForCollection.totalCount ?? 'Unavailable'} />
       </div>
 
-      <div className="dashboard-section">
-        <h2>New Medicine Orders</h2>
-        <p className="empty-state">No orders yet — this list fills in once the Medicine Ordering module is live.</p>
-      </div>
+      <StaffDashboardSections dashboard={dashboard} />
     </DashboardLayout>
   );
 };
