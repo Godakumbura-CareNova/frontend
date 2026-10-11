@@ -9,6 +9,8 @@ import PatientAppointmentDetailsPage from './PatientAppointmentDetailsPage';
 const http = vi.hoisted(() => ({ get: vi.fn() }));
 vi.mock('../api/appointmentApi', () => ({ appointmentApi: http }));
 vi.mock('../components/DashboardLayout', () => ({ default: ({ children }) => <main>{children}</main> }));
+vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'patient' }, token: 'test-token', isAuthenticated: true }) }));
+vi.mock('../components/appointments/AppointmentCancellationPanel', () => ({ default: () => null }));
 const appointment = (overrides = {}) => ({ id: 7, appointmentReference: 'CN-APT-007', doctorName: 'Dr Silva', appointmentStartUtc: '2026-10-12T08:00:00Z', appointmentEndUtc: '2026-10-12T08:30:00Z', status: 'Booked', section: 'Upcoming', paymentMethod: null, paymentStatus: null, canPay: true, ...overrides });
 const renderPage = (path = '/patient/appointments') => render(<MemoryRouter initialEntries={[path]}><Routes>
   <Route path="/patient/appointments" element={<PatientAppointmentsPage />} />

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import DashboardLayout from '../components/DashboardLayout';
+import { getPatientAppointment } from '../services/appointmentService';
 import {
   cancelAppointmentOnlinePayment,
   getAppointmentOnlinePaymentResult,
@@ -65,20 +66,31 @@ export default function PatientAppointmentPaymentPage() {
   const { appointmentId } = useParams();
 
   const [payment, setPayment] = useState(null);
+  const [appointment, setAppointment] = useState(null);
+  const requestSequence = useRef(0);
   const [selected, setSelected] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
   const load = async (showLoading = true) => {
+    const sequence = ++requestSequence.current;
     if (showLoading) setLoading(true);
     setError('');
 
     try {
-      const data = await getAppointmentPayment(appointmentId);
+      const [currentAppointment, data] = await Promise.all([
+        getPatientAppointment(appointmentId),
+        getAppointmentPayment(appointmentId).catch(failure => { if (failure?.response?.status === 404) return null; throw failure; }),
+      ]);
+      if (sequence !== requestSequence.current) return;
+      setAppointment(currentAppointment);
       setPayment(data);
-      setSelected(data.method || '');
+      setSelected(data?.method || '');
     } catch (failure) {
+      if (sequence !== requestSequence.current) return;
+      setAppointment(null);
+      setPayment(null);
       if (failure?.response?.status !== 404) {
         setError(
           failure?.response?.data?.message ||
@@ -86,15 +98,18 @@ export default function PatientAppointmentPaymentPage() {
         );
       }
     } finally {
-      if (showLoading) setLoading(false);
+      if (showLoading && sequence === requestSequence.current) setLoading(false);
     }
   };
 
   useEffect(() => {
+    setAppointment(null); setPayment(null);
     load();
+    return () => { requestSequence.current++; };
   }, [appointmentId]);
 
   const chooseMethod = async () => {
+    if (!appointment || appointment.status === 'Cancelled') return;
     if (!selected) {
       setError('Choose a payment method.');
       return;
@@ -134,7 +149,7 @@ export default function PatientAppointmentPaymentPage() {
           <CreditCard size={30} />
           <div>
             <p>APPOINTMENT PAYMENT</p>
-            <h1>Pay for your appointment</h1>
+            <h1>{appointment?.status === 'Cancelled' ? 'Appointment payment history' : 'Pay for your appointment'}</h1>
             <span>
               Choose how you want to pay your consultation fee.
             </span>
@@ -150,7 +165,9 @@ export default function PatientAppointmentPaymentPage() {
 
         {loading ? (
           <p>Loading payment...</p>
-        ) : (
+        ) : appointment?.status === 'Cancelled' ? (
+          <section className="appointment-payment-card"><h2>Payment history</h2><p>This appointment is cancelled. New payments are unavailable.</p>{payment ? <PaymentSummary payment={payment} /> : <p>No payment was recorded.</p>}</section>
+        ) : appointment ? (
           <>
             <section className="appointment-payment-card">
               <h2>Choose payment method</h2>
@@ -206,7 +223,7 @@ export default function PatientAppointmentPaymentPage() {
               />
             )}
           </>
-        )}
+        ) : null}
       </section>
     </DashboardLayout>
   );

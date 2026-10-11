@@ -10,6 +10,8 @@ const api = vi.hoisted(() => ({
   startAppointmentOnlinePayment: vi.fn(), getAppointmentOnlinePaymentResult: vi.fn(), cancelAppointmentOnlinePayment: vi.fn(),
 }));
 const sdk = vi.hoisted(() => ({ startPayment: vi.fn(), onCompleted: null, onDismissed: null, onError: null }));
+const appointments = vi.hoisted(() => ({ getPatientAppointment: vi.fn() }));
+vi.mock('../services/appointmentService', () => appointments);
 vi.mock('../services/appointmentPaymentService', () => api);
 vi.mock('../components/DashboardLayout', () => ({ default: ({ children }) => <main>{children}</main> }));
 vi.mock('../utils/onlinePayment', async importOriginal => ({ ...await importOriginal(), loadPayHere: async () => sdk }));
@@ -22,8 +24,20 @@ const fillBilling = async user => {
 };
 beforeEach(() => {
   vi.resetAllMocks(); api.getAppointmentPayment.mockResolvedValue(payment());
+  appointments.getPatientAppointment.mockResolvedValue({ id: 7, status: 'Booked' });
   api.startAppointmentOnlinePayment.mockResolvedValue(session);
   sdk.onCompleted = sdk.onDismissed = sdk.onError = null;
+});
+
+it.each([['Cash', 'Pending'], ['BankTransfer', 'AwaitingBankTransferReceipt'], ['PaymentGateway', 'Failed']])('shows cancelled %s payment history without payment controls', async (method, status) => {
+  appointments.getPatientAppointment.mockResolvedValue({ id: 7, status: 'Cancelled' }); api.getAppointmentPayment.mockResolvedValue(payment(method, status));
+  renderPage(); expect(await screen.findByRole('heading', { name: 'Payment history' })).toBeInTheDocument();
+  expect(screen.queryByRole('radio')).not.toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /Pay LKR|upload receipt|try again/i })).not.toBeInTheDocument(); expect(screen.getByText('CN-APT-TEST')).toBeInTheDocument();
+});
+it('does not offer payment if appointment status cannot be loaded', async () => {
+  appointments.getPatientAppointment.mockRejectedValue(new Error('offline')); renderPage();
+  expect(await screen.findByText('Could not load appointment payment.')).toBeInTheDocument(); expect(screen.queryByRole('radio')).not.toBeInTheDocument();
 });
 afterEach(cleanup);
 

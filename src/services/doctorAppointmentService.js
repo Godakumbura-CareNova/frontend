@@ -1,7 +1,6 @@
 import { appointmentApi } from '../api/appointmentApi';
 
-const validDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,7})?Z$/.test(value)
-  && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 19) === value.slice(0, 19);
+import { validUtcTimestamp as validDate } from '../utils/validUtcTimestamp';
 const validAppointment = value => value && Number.isInteger(value.id) && value.id > 0 && typeof value.appointmentReference === 'string' && typeof value.status === 'string'
   && ['isToday', 'isUpcoming', 'isCompleted', 'isHistory'].every(key => typeof value[key] === 'boolean')
   && Array.isArray(value.allowedStatuses) && value.allowedStatuses.every(status => ['Confirmed', 'Completed', 'NoShow'].includes(status));

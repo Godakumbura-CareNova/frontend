@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import usePatientAppointments from '../hooks/usePatientAppointments';
+import AppointmentCancellationPanel from '../components/appointments/AppointmentCancellationPanel';
 import { AppointmentInformation, AppointmentNotice, AppointmentStatus } from './appointmentPresentation';
 import './patientOrders.css';
 import './patientAppointments.css';
 
 export default function PatientAppointmentDetailsPage() {
   const { appointmentId } = useParams();
-  const { data: appointment, error, busy, refresh } = usePatientAppointments(appointmentId);
+  const { data, error, busy, refresh, scope } = usePatientAppointments(appointmentId);
+  const [confirmed, setConfirmed] = useState(null);
+  const appointment = data && confirmed?.scope === scope ? { ...data, status: 'Cancelled', section: 'Previous', canPay: false } : data;
+  const onCancelled = () => { setConfirmed({ scope }); refresh(); };
   return <DashboardLayout><section className="orders-page order-details-page patient-appointments">
     <Link className="order-back-link" to="/patient/appointments"><ArrowLeft size={17} />My appointments</Link>
     {error && <div role="alert" className="order-error">{error}{appointment && <p>Showing the last loaded information.</p>}{error !== 'Appointment not found.' && <button onClick={refresh} disabled={busy}>Retry</button>}</div>}
@@ -21,8 +25,9 @@ export default function PatientAppointmentDetailsPage() {
         <AppointmentInformation appointment={appointment} /><AppointmentNotice appointment={appointment} />
         <div className="appointment-actions">
           {appointment.canPay && !error && <Link className="btn btn-green" to={`/patient/appointments/${appointment.id}/payment`}>Continue to Payment</Link>}
-          {!appointment.canPay && ['Successful', 'ReceiptUnderVerification'].includes(appointment.paymentStatus) && <Link className="order-back-link" to={`/patient/appointments/${appointment.id}/payment`}>View payment</Link>}
+          {!appointment.canPay && appointment.paymentMethod && appointment.paymentMethod !== 'Unavailable' && <Link className="order-back-link" to={`/patient/appointments/${appointment.id}/payment`}>View payment</Link>}
         </div>
+        <AppointmentCancellationPanel key={scope} appointmentId={appointmentId} appointmentReference={appointment.appointmentReference} appointmentStartUtc={appointment.appointmentStartUtc} onCancelled={onCancelled} />
       </section>
     </>}
   </section></DashboardLayout>;
