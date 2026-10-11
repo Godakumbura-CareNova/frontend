@@ -187,7 +187,12 @@ const PatientDoctorProfilePage = ({ canBook = true }) => {
                     ))}
                   </ul>
                 )}
-                <p className="dp-hint">Booking a consultation will be available once the appointment module is live.</p>
+                <Link
+  to={`/patient/doctors/${doctorId}/book`}
+  className="btn btn-green"
+>
+  Book Appointment
+</Link>
               </div>
             ) : (
               <div className="pd-slots">

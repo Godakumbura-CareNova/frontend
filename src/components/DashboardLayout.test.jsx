@@ -29,6 +29,21 @@ describe('DashboardLayout', () => {
     expect(screen.queryByRole('button', { name: 'Notifications' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Logout/ })).not.toBeInTheDocument();
   });
+  it('opens doctor appointments from the sidebar', async () => {
+    useAuth.mockReturnValue({ user: { fullName: 'Test Doctor' }, role: 'Doctor', logout: vi.fn() });
+    const user = userEvent.setup();
+    render(<MemoryRouter initialEntries={['/doctor-dashboard']}><DashboardLayout><CurrentPath /></DashboardLayout></MemoryRouter>);
+    await user.click(screen.getByRole('link', { name: 'Appointments' }));
+    expect(screen.getByText('/doctor/appointments')).toBeInTheDocument();
+  });
+  it('opens patient appointments from the sidebar', async () => {
+    useAuth.mockReturnValue({ user: { fullName: 'Test Patient' }, role: 'Patient', logout: vi.fn() });
+    const user = userEvent.setup();
+    render(<MemoryRouter initialEntries={['/patient-dashboard']}><DashboardLayout><CurrentPath /></DashboardLayout></MemoryRouter>);
+    await user.click(screen.getByRole('link', { name: 'Appointments' }));
+    expect(screen.getByText('/patient/appointments')).toBeInTheDocument();
+  });
+
   it('opens My cart from the patient top bar', async () => {
     useAuth.mockReturnValue({
       user: { fullName: 'GCN17' },
