@@ -12,6 +12,14 @@ vi.mock('../context/AuthContext', () => ({ useAuth }));
 const CurrentPath = () => <output>{useLocation().pathname}</output>;
 
 describe('DashboardLayout', () => {
+  it('opens patient appointments from the sidebar', async () => {
+    useAuth.mockReturnValue({ user: { fullName: 'Test Patient' }, role: 'Patient', logout: vi.fn() });
+    const user = userEvent.setup();
+    render(<MemoryRouter initialEntries={['/patient-dashboard']}><DashboardLayout><CurrentPath /></DashboardLayout></MemoryRouter>);
+    await user.click(screen.getByRole('link', { name: 'Appointments' }));
+    expect(screen.getByText('/patient/appointments')).toBeInTheDocument();
+  });
+
   it('opens My cart from the patient top bar', async () => {
     useAuth.mockReturnValue({
       user: { fullName: 'GCN17' },

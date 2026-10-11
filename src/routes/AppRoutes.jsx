@@ -39,6 +39,8 @@ import PatientDoctorSearchPage from '../pages/PatientDoctorSearchPage';
 import PatientDoctorProfilePage from '../pages/PatientDoctorProfilePage';
 import PatientAppointmentBookingPage from '../pages/PatientAppointmentBookingPage';
 import PatientAppointmentPaymentPage from '../pages/PatientAppointmentPaymentPage';
+import PatientAppointmentsPage from '../pages/PatientAppointmentsPage';
+import PatientAppointmentDetailsPage from '../pages/PatientAppointmentDetailsPage';
 
 import PharmacyOrderManagementPage from '../pages/PharmacyOrderManagementPage';
 import PharmacyPrescriptionReviewPage from '../pages/PharmacyPrescriptionReviewPage';
@@ -268,6 +270,16 @@ const AppRoutes = () => (
         <Route
           path="/patient/doctors/:doctorId/book"
           element={<PatientAppointmentBookingPage />}
+        />
+
+        <Route
+          path="/patient/appointments"
+          element={<PatientAppointmentsPage />}
+        />
+
+        <Route
+          path="/patient/appointments/:appointmentId"
+          element={<PatientAppointmentDetailsPage />}
         />
 
         <Route

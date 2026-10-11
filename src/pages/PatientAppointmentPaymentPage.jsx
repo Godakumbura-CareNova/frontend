@@ -125,7 +125,7 @@ export default function PatientAppointmentPaymentPage() {
       <section className="appointment-payment-page">
         <Link
           className="appointment-payment-back"
-          to="/patient-dashboard"
+          to={`/patient/appointments/${appointmentId}`}
         >
           ← Back
         </Link>

@@ -60,9 +60,10 @@ const NAV_BY_ROLE = {
       enabled: true,
     },
     {
+      to: '/patient/appointments',
       label: 'Appointments',
       icon: Calendar,
-      enabled: false,
+      enabled: true,
     },
     {
       label: 'Payments',

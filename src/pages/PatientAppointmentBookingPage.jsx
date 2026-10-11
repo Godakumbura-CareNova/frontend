@@ -266,6 +266,9 @@ const PatientAppointmentBookingPage = () => {
     Continue to Payment
   </button>
 
+  <Link className="btn" to={`/patient/appointments/${success.id}`}>View appointment</Link>
+  <Link className="btn" to="/patient/appointments">My appointments</Link>
+
   <button
     type="button"
     className="btn"
