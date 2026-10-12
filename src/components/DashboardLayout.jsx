@@ -196,19 +196,22 @@ const NAV_BY_ROLE = {
       enabled: true,
     },
     {
+      to: '/admin/doctors',
       label: 'Doctors',
       icon: Stethoscope,
-      enabled: false,
+      enabled: true,
     },
     {
+      to: '/admin/medicines',
       label: 'Medicines',
       icon: Pill,
-      enabled: false,
+      enabled: true,
     },
     {
+      to: '/admin/appointments',
       label: 'Appointments',
       icon: Calendar,
-      enabled: false,
+      enabled: true,
     },
     {
       to: '/admin/payments',
@@ -217,9 +220,10 @@ const NAV_BY_ROLE = {
       enabled: true,
     },
     {
+      to: '/admin/reports',
       label: 'Reports',
       icon: BarChart3,
-      enabled: false,
+      enabled: true,
     },
   ],
 };

@@ -12,6 +12,13 @@ vi.mock('../context/AuthContext', () => ({ useAuth }));
 const CurrentPath = () => <output>{useLocation().pathname}</output>;
 
 describe('DashboardLayout', () => {
+  it('enables Admin directories and the approved Reports page', () => {
+    useAuth.mockReturnValue({ role: 'Admin', isAuthenticated: true, user: { fullName: 'Admin' }, logout: vi.fn() });
+    render(<MemoryRouter><DashboardLayout>Content</DashboardLayout></MemoryRouter>);
+    for (const label of ['Doctors', 'Medicines', 'Appointments'])
+      expect(screen.getByRole('link', { name: label })).toHaveAttribute('href', `/admin/${label.toLowerCase()}`);
+    expect(screen.getByRole('link', { name: 'Reports' })).toHaveAttribute('href', '/admin/reports');
+  });
   it.each([null, 'Patient', 'Doctor', 'PharmacyStaff', 'Admin'])('includes About and Contact links for %s', (role) => {
     useAuth.mockReturnValue({ role, isAuthenticated: Boolean(role), user: { fullName: 'User' }, logout: vi.fn() });
     render(<MemoryRouter><DashboardLayout><p>Content</p></DashboardLayout></MemoryRouter>);

@@ -4,6 +4,8 @@ import AboutUsPage from '../pages/AboutUsPage';
 import ContactUsPage from '../pages/ContactUsPage';
 import AdminPharmacyInformationPage from '../pages/AdminPharmacyInformationPage';
 import AdminContactInquiriesPage from '../pages/AdminContactInquiriesPage';
+import AdminDirectoryPage from '../pages/AdminDirectoryPage';
+import AdminReportsPage from '../pages/AdminReportsPage';
 import PublicNotFoundPage from '../pages/PublicNotFoundPage';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -340,6 +342,10 @@ const AppRoutes = () => (
         />
       </Route>
       <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
+        <Route path="/admin/reports" element={<AdminReportsPage />} />
+        <Route path="/admin/doctors" element={<AdminDirectoryPage key="doctors" kind="doctors" />} />
+        <Route path="/admin/medicines" element={<AdminDirectoryPage key="medicines" kind="medicines" />} />
+        <Route path="/admin/appointments" element={<AdminDirectoryPage key="appointments" kind="appointments" />} />
         <Route path="/admin/pharmacy-information" element={<AdminPharmacyInformationPage />} />
         <Route path="/admin/inquiries" element={<AdminContactInquiriesPage />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
