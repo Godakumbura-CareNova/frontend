@@ -10,6 +10,18 @@ vi.mock('../components/DashboardLayout', () => ({ default: ({ children }) => <ma
 vi.mock('../api/staffOrderApi', () => ({ staffOrderApi: { listActive, updateStatus } }));
 
 describe('PharmacyOrderManagementPage', () => {
+  it.each(['Pending', 'ReadyForCollection'])('opens the %s queue from a dashboard shortcut', async (status) => {
+    listActive.mockResolvedValue({ data: [
+      { id: 1, orderNumber: 'NEW-ORDER', status: 'Pending', totalAmount: 100, items: [] },
+      { id: 2, orderNumber: 'READY-ORDER', status: 'ReadyForCollection', totalAmount: 200, items: [] },
+    ] });
+    render(<MemoryRouter initialEntries={[`/pharmacy/orders?status=${status}`]}><PharmacyOrderManagementPage /></MemoryRouter>);
+    expect(await screen.findByText(status === 'Pending' ? 'NEW-ORDER' : 'READY-ORDER')).toBeInTheDocument();
+    expect(screen.queryByText(status === 'Pending' ? 'READY-ORDER' : 'NEW-ORDER')).not.toBeInTheDocument();
+    await userEvent.setup().selectOptions(screen.getByLabelText('Order status'), '');
+    expect(screen.getByText('NEW-ORDER')).toBeInTheDocument();
+    expect(screen.getByText('READY-ORDER')).toBeInTheDocument();
+  });
   it('shows only actionable pharmacy orders', async () => {
     listActive.mockResolvedValue({ data: [{ id: 3, orderNumber: 'CN-000003', status: 'Pending', totalAmount: 600, items: [{ medicineName: 'Amoxicillin', quantity: 2, unitPrice: 300 }] }] });
     render(<MemoryRouter><PharmacyOrderManagementPage /></MemoryRouter>);

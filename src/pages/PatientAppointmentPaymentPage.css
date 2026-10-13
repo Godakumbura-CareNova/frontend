@@ -1,0 +1,173 @@
+.appointment-payment-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.appointment-payment-back {
+  display: inline-block;
+  margin-bottom: 16px;
+  text-decoration: none;
+}
+
+.appointment-payment-hero {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 24px;
+  margin-bottom: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.appointment-payment-hero p {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.appointment-payment-hero h1 {
+  margin: 0 0 6px;
+}
+
+.appointment-payment-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.appointment-payment-methods {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.appointment-payment-method {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid #d5d5d5;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.appointment-payment-method.selected {
+  border: 2px solid #15803d;
+}
+
+.appointment-payment-method span {
+  display: flex;
+  flex-direction: column;
+}
+
+.appointment-payment-method small {
+  margin-top: 3px;
+  color: #666;
+}
+
+.appointment-payment-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 18px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #15803d;
+  color: white;
+}
+
+.appointment-payment-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.appointment-payment-error {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 10px;
+  background: #fdecea;
+  color: #a1291c;
+}
+
+.appointment-payment-success {
+  text-align: center;
+}
+
+.appointment-payment-summary {
+  margin: 18px 0;
+}
+
+.appointment-payment-summary div {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.appointment-receipt-upload {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
+  margin: 16px 0;
+  border: 1px dashed #999;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.appointment-receipt-upload input {
+  display: none;
+}
+
+.appointment-payment-security {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  margin: 16px 0;
+  border-radius: 10px;
+  background: #edf7f0;
+}
+
+.appointment-billing-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.appointment-billing-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.appointment-billing-form input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.appointment-billing-form small {
+  color: #a1291c;
+}
+
+.appointment-billing-form button {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 700px) {
+  .appointment-billing-form {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-payment-page {
+    padding: 16px;
+  }
+}

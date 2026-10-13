@@ -45,6 +45,12 @@ const renderPage = () =>
   );
 
 describe('PatientDoctorProfilePage', () => {
+  it('redirects a visitor booking attempt to login', async () => {
+    mockGetDoctorPublicProfile.mockResolvedValue(profile);
+    render(<MemoryRouter initialEntries={[`/patient/doctors/${doctorId}`]}><Routes><Route path="/patient/doctors/:doctorId" element={<PatientDoctorProfilePage canBook={false} />} /><Route path="/login" element={<h1>Login page</h1>} /></Routes></MemoryRouter>);
+    await userEvent.click(await screen.findByRole('link', { name: 'Book appointment' }));
+    expect(screen.getByText('Login page')).toBeInTheDocument();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetDoctorPublicProfile.mockResolvedValue(profile);

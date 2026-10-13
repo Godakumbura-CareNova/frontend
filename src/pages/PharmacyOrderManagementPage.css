@@ -7,6 +7,30 @@
   margin-bottom: 28px;
 }
 
+.staff-orders-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.staff-orders-filter select {
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.staff-orders-filter select:focus-visible {
+  outline: 2px solid var(--red-strong);
+  outline-offset: 2px;
+}
+
 .staff-orders-eyebrow,
 .staff-order-label {
   margin: 0 0 6px;

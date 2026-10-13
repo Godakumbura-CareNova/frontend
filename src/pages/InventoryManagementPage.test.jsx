@@ -29,6 +29,7 @@ const fillForm = async (user, quantity) => {
 
 describe('InventoryManagementPage', () => {
   beforeEach(() => {
+    window.history.replaceState({}, '', '/pharmacy/inventory');
     vi.clearAllMocks();
     medicineApi.list.mockResolvedValue({ data: [{ id: 1, name: 'Paracetamol', isActive: true }, { id: 2, name: 'Retired', isActive: false }] });
     inventoryApi.list.mockResolvedValue({
@@ -45,6 +46,13 @@ describe('InventoryManagementPage', () => {
     expect(screen.getByText('Paracetamol', { selector: 'strong' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Paracetamol' })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'Retired' })).not.toBeInTheDocument();
+  });
+
+  it('opens the low stock filter when following the dashboard shortcut', async () => {
+    window.history.replaceState({}, '', '/pharmacy/inventory?lowStockOnly=true');
+    renderPage();
+    expect(screen.getByLabelText('Low stock only')).toBeChecked();
+    await screen.findByText('3 units · Low stock');
   });
 
   it('submits a new stock batch with numeric fields and shows the success message', async () => {

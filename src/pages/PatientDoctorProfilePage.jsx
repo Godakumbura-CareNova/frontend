@@ -42,7 +42,7 @@ const experienceLabel = (years) => {
   return `${years} year${years === 1 ? '' : 's'} of experience`;
 };
 
-const PatientDoctorProfilePage = () => {
+const PatientDoctorProfilePage = ({ canBook = true }) => {
   const { doctorId } = useParams();
 
   const [profile, setProfile] = useState(null);
@@ -169,6 +169,7 @@ const PatientDoctorProfilePage = () => {
           </ProfileSection>
 
           <ProfileSection icon={CalendarClock} title="Consultation Availability">
+            {!canBook && <Link className="btn btn-green" to="/login" state={{ from: `/patient/doctors/${doctorId}` }}>Book appointment</Link>}
             {availability.hasAvailableSlots ? (
               <div className="pd-slots">
                 <p className="pd-slots-summary">
@@ -186,7 +187,12 @@ const PatientDoctorProfilePage = () => {
                     ))}
                   </ul>
                 )}
-                <p className="dp-hint">Booking a consultation will be available once the appointment module is live.</p>
+                <Link
+  to={`/patient/doctors/${doctorId}/book`}
+  className="btn btn-green"
+>
+  Book Appointment
+</Link>
               </div>
             ) : (
               <div className="pd-slots">

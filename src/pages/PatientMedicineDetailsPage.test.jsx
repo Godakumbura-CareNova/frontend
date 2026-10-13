@@ -11,6 +11,16 @@ vi.mock('../api/catalogueApi', () => ({ catalogueApi: { getMedicine } }));
 vi.mock('../api/cartApi', () => ({ cartApi: { addItem } }));
 
 describe('PatientMedicineDetailsPage', () => {
+  it.each([false, true])('redirects visitors to login before any cart or prescription action (%s)', async (prescriptionRequired) => {
+    sessionStorage.clear();
+    addItem.mockClear();
+    getMedicine.mockResolvedValue({ data: { id: 1, name: 'Medicine', price: 100, stockQuantity: 2, prescriptionRequired } });
+    render(<MemoryRouter initialEntries={['/patient/medicines/1']}><Routes><Route path="/patient/medicines/:medicineId" element={<PatientMedicineDetailsPage canOrder={false} />} /><Route path="/login" element={<h1>Login page</h1>} /></Routes></MemoryRouter>);
+    await userEvent.click(await screen.findByRole('button', { name: /add to cart|continue to prescription upload/i }));
+    expect(screen.getByText('Login page')).toBeInTheDocument();
+    expect(addItem).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem('carenova.pendingCartItem')).toBeNull();
+  });
   beforeEach(() => getMedicine.mockResolvedValue({ data: { id: 1, name: 'Antibiotic', categoryName: 'Medicine', description: 'Details', price: 100, stockQuantity: 2, prescriptionRequired: true } }));
   it('limits quantity to stock and uses prescription action text', async () => {
     const user = userEvent.setup();
