@@ -7,7 +7,15 @@ const adminOptions = () => {
 };
 export const getPharmacyInformation = async (admin = false) => (await client.get(`/api/${admin ? 'admin' : 'public'}/pharmacy-information`, admin ? adminOptions() : {})).data;
 export const savePharmacyInformation = async data => (await client.put('/api/admin/pharmacy-information', data, adminOptions())).data;
-export const submitInquiry = async data => (await client.post('/api/public/contact-inquiries', data)).data;
+export const submitInquiry = async data => {
+  const response = await client.post('/api/public/contact-inquiries', data);
+  const saved = response.data;
+  // Only a 201 with the saved inquiry's id proves the inquiry was stored.
+  if (response.status !== 201 || !saved || typeof saved !== 'object' || !saved.id) {
+    throw new Error('The inquiry was not confirmed as saved.');
+  }
+  return saved;
+};
 export const uploadPharmacyImage = async file => {
   const form = new FormData(); form.append('file', file);
   return (await client.post('/api/admin/pharmacy-information/images', form, adminOptions())).data;
