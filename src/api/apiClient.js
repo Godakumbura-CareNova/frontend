@@ -33,7 +33,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && error.response.status === 401 && !error.config?.handleUnauthorizedLocally) {
       clearStoredAuth();
       window.dispatchEvent(new Event('carenova:unauthorized'));
       if (window.location.pathname !== '/login') {

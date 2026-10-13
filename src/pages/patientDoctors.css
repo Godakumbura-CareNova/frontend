@@ -405,3 +405,13 @@
 .pd-avatar-img { object-fit: cover; object-position: center; background: var(--white); }
 .pd-avatar-md.pd-avatar-img { border: 2px solid var(--dp-green-border); }
 .pd-avatar-lg.pd-avatar-img { border: 3px solid rgba(255, 255, 255, 0.92); }
+.pd-slot.selected {
+  border: 2px solid currentColor;
+  font-weight: 700;
+  transform: translateY(-1px);
+}
+
+.pd-slot.selected::after {
+  content: " ✓";
+  font-weight: 700;
+}

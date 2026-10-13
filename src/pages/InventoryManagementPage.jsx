@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { medicineApi } from '../api/medicineApi';
 import { inventoryApi } from '../api/inventoryApi';
@@ -8,13 +9,20 @@ const empty = { medicineId: '', batchNumber: '', quantity: '', purchasePrice: ''
 const dateValue = (value) => value ? value.slice(0, 10) : '';
 
 export default function InventoryManagementPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [form, setForm] = useState(empty);
   const [editingBatchId, setEditingBatchId] = useState(null);
   const [medicines, setMedicines] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [batches, setBatches] = useState([]);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
-  const [low, setLow] = useState(false);
+  const low = searchParams.get('lowStockOnly') === 'true';
+  const setLow = (value) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set('lowStockOnly', 'true');
+    else next.delete('lowStockOnly');
+    setSearchParams(next);
+  };
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const batchesRef = useRef(null);
