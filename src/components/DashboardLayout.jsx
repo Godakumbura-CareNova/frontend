@@ -164,11 +164,6 @@ const NAV_BY_ROLE = {
       icon: Calendar,
       enabled: true,
     },
-    {
-      label: 'Patients',
-      icon: UsersIcon,
-      enabled: false,
-    },
   ],
 
   Admin: [
