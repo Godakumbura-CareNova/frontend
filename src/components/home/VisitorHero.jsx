@@ -1,15 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Stethoscope, Pill, ShieldCheck, Users, ArrowRight, Search, HeartPulse, Sparkles, Truck } from 'lucide-react';
+import { Calendar, Stethoscope, Pill, ShieldCheck, Users, ArrowRight, Search, HeartPulse, Sparkles, Truck, Plus } from 'lucide-react';
 import useReveal from './useReveal';
-import heroPhoto from '../../assets/doctor.jpg';
+import heroPhoto from '../../assets/home-hero-pharmacist.jpg';
+import appointmentsPhoto from '../../assets/home-feature-appointments.jpg';
+import doctorsPhoto from '../../assets/home-feature-doctors.jpg';
+import pharmacyPhoto from '../../assets/home-feature-pharmacy.jpg';
+import carePhoto from '../../assets/home-feature-care.jpg';
+import whyDoctorPhoto from '../../assets/home-why-doctor.jpg';
 import '../../styles/visitor-home.css';
 
 const highlights = [
-  { icon: Calendar, title: 'Easy Appointment Booking', text: 'Pick a doctor and a time that suits you.' },
-  { icon: Users, title: 'Trusted Doctors', text: 'Published, verified professional profiles.' },
-  { icon: Pill, title: 'Online Pharmacy', text: 'Browse medicines and order in a few clicks.' },
-  { icon: ShieldCheck, title: 'Secure & Reliable Care', text: 'Your details stay private and protected.' },
+  { icon: Calendar, title: 'Easy Appointment Booking', text: 'Pick a doctor and a time that suits you.', photo: appointmentsPhoto },
+  { icon: Users, title: 'Trusted Doctors', text: 'Published, verified professional profiles.', photo: doctorsPhoto },
+  { icon: Pill, title: 'Online Pharmacy', text: 'Browse medicines and order in a few clicks.', photo: pharmacyPhoto },
+  { icon: ShieldCheck, title: 'Secure & Reliable Care', text: 'Your details stay private and protected.', photo: carePhoto },
 ];
 
 const actions = [
@@ -19,10 +24,10 @@ const actions = [
 ];
 
 const reasons = [
-  { icon: HeartPulse, title: 'Patient Focused', text: 'Your well-being comes first.' },
-  { icon: ShieldCheck, title: 'Trusted Professionals', text: 'Experienced and qualified doctors.' },
-  { icon: Sparkles, title: 'Modern Technology', text: 'Simple, secure and convenient.' },
-  { icon: Truck, title: 'Complete Healthcare', text: 'From consultation to pharmacy and more.' },
+  { icon: HeartPulse, title: 'Patient Focused', text: 'Your well-being comes first.', tone: 'red' },
+  { icon: ShieldCheck, title: 'Trusted Professionals', text: 'Experienced and qualified doctors.', tone: 'green' },
+  { icon: Sparkles, title: 'Modern Technology', text: 'Simple, secure and convenient.', tone: 'green' },
+  { icon: Truck, title: 'Complete Healthcare', text: 'From consultation to pharmacy and more.', tone: 'red' },
 ];
 
 export default function VisitorHero() {
@@ -40,7 +45,7 @@ export default function VisitorHero() {
         </div>
       </div>
       <div className="vh-hero-visual">
-        <img className="vh-photo" src={heroPhoto} alt="Smiling CareNova doctor with a stethoscope" />
+        <img className="vh-photo" src={heroPhoto} alt="CareNova pharmacist selecting medicine from a shelf" />
         <div className="vh-chip vh-chip-a"><Stethoscope size={18} /> Expert doctors</div>
         <div className="vh-chip vh-chip-b"><Pill size={18} /> Online pharmacy</div>
         <div className="vh-chip vh-chip-c"><Users size={18} /> Trusted by patients</div>
@@ -48,7 +53,8 @@ export default function VisitorHero() {
     </section>
 
     <section className="vh-highlights" data-reveal>
-      {highlights.map(({ icon: Icon, title, text }) => <div className="vh-highlight" key={title}>
+      {highlights.map(({ icon: Icon, title, text, photo }) => <div className="vh-highlight" key={title}>
+        <div className="vh-highlight-media" style={{ '--vh-media': `url(${photo})` }}><img className="vh-highlight-photo" src={photo} alt="" loading="lazy" /></div>
         <span className="vh-icon"><Icon size={22} /></span><strong>{title}</strong><small>{text}</small>
       </div>)}
     </section>
@@ -62,16 +68,27 @@ export default function VisitorHero() {
 
     <section className="vh-why" data-reveal>
       <div className="vh-why-copy">
-        <h2>Why Choose CareNova?</h2>
+        <span className="vh-why-eyebrow">Why choose CareNova?</span>
+        <h2>Better Healthcare<br />for a <span>Healthier</span> Tomorrow</h2>
         <p>We are committed to providing accessible, reliable and patient-centered healthcare services.</p>
         <div className="vh-reasons">
-          {reasons.map(({ icon: Icon, title, text }) => <div className="vh-reason" key={title}><Icon size={22} /><strong>{title}</strong><small>{text}</small></div>)}
+          {reasons.map(({ icon: Icon, title, text, tone }) => <div className={`vh-reason vh-reason-${tone}`} key={title}>
+            <span className="vh-reason-icon"><Icon size={26} /></span>
+            <div><strong>{title}</strong><small>{text}</small></div>
+          </div>)}
         </div>
       </div>
       <div className="vh-why-panel">
-        <h3>Your Partner in Health and Wellness</h3>
-        <p>We strive to make quality healthcare accessible to everyone, every day.</p>
-        <Link to="/register" className="vh-btn vh-btn-white">Create a free account <ArrowRight size={16} /></Link>
+        <span className="vh-why-dots" aria-hidden="true" />
+        <Plus className="vh-why-cross vh-why-cross-a" size={64} strokeWidth={5} aria-hidden="true" />
+        <Plus className="vh-why-cross vh-why-cross-b" size={34} strokeWidth={5} aria-hidden="true" />
+        <div className="vh-why-panel-copy">
+          <span className="vh-why-kicker">CareNova</span>
+          <h3>Your Partner in Health and Wellness</h3>
+          <p>We strive to make quality healthcare accessible to everyone, every day.</p>
+          <Link to="/register" className="vh-btn vh-btn-white">Create a free account</Link>
+        </div>
+        <img className="vh-why-doctor" src={whyDoctorPhoto} alt="Smiling CareNova doctor holding a clipboard" loading="lazy" />
       </div>
     </section>
   </div>;
