@@ -6,6 +6,7 @@ import '../../styles/visitor-home.css';
 import '../../styles/visitor-sections.css';
 import pharmacyPhoto from '../../assets/pharmacy.jpg';
 import doctorPhoto from '../../assets/doctor.jpg';
+import patientPhoto from '../../assets/home-service-patient.jpg';
 
 const iconFor = (title = '') => {
   const text = title.toLowerCase();
@@ -14,7 +15,10 @@ const iconFor = (title = '') => {
   if (/patient|care/.test(text)) return HeartPulse;
   return Sparkles;
 };
-const photoFor = (title = '') => (/doctor|professional|consult/i.test(title) ? doctorPhoto : pharmacyPhoto);
+const photoFor = (title = '') => {
+  if (/patient/i.test(title)) return patientPhoto;
+  return /doctor|professional|consult/i.test(title) ? doctorPhoto : pharmacyPhoto;
+};
 const initials = (name = '') => name.replace(/^dr\.?\s*/i, '').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('') || 'Dr';
 
 function Services({ services = [], introduction }) {
@@ -32,7 +36,7 @@ function Services({ services = [], introduction }) {
         {services.map((service, index) => {
           const Icon = iconFor(service.title);
           return <button key={service.title} type="button" aria-pressed={index === active} className={`vh-service-tab${index === active ? ' is-active' : ''}`} onClick={() => setActive(index)} onMouseEnter={() => setActive(index)}>
-            <span className="vh-icon"><Icon size={20} /></span><strong>{service.title}</strong><ArrowRight size={16} />
+            <span className="vh-icon"><Icon size={20} /></span><strong>{service.title}</strong>
           </button>;
         })}
       </div>
