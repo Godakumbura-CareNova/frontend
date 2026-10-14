@@ -52,7 +52,7 @@ const DoctorDashboard = () => {
         </Link>
       </div>
 
-      <div className="dashboard-section orders-page patient-appointments doctor-appointments">
+      <div className="dashboard-section orders-page patient-appointments doctor-appointments doctor-dashboard-appointments">
         <p className="order-intro">All consultation times are in Sri Lanka time.</p>
         <button className="orders-refresh" type="button" onClick={refresh} disabled={busy}>Refresh appointments</button>
         <DoctorAppointmentFeedback {...{ data, error, busy, refresh }} />
