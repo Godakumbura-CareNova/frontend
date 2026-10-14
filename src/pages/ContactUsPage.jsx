@@ -6,6 +6,7 @@ import InformationStatus from '../components/public/InformationStatus';
 import usePharmacyInformation from '../hooks/usePharmacyInformation';
 import { submitInquiry } from '../services/pharmacyInformationService';
 import { inquiryServerErrors, validateInquiry } from '../utils/pharmacyInformationValidation';
+import storefrontPhoto from '../assets/contact-storefront.jpg';
 import './pharmacyInformation.css';
 const empty = { name: '', email: '', phone: '', subject: '', message: '' };
 export default function ContactUsPage() {
@@ -24,6 +25,7 @@ export default function ContactUsPage() {
   };
   return <DashboardLayout><div className="pharmacy-info-page">
     <header className="welcome-banner"><h1>Contact <span className="welcome-name">CareNova</span></h1><p>We’re here to help. Find our contact details or send an inquiry.</p></header>
+    <figure className="pharmacy-storefront"><img src={storefrontPhoto} alt="Godakumbura CareNova pharmacy storefront" /></figure>
     <InformationStatus {...state} />
     {!state.loading && !state.error && data && <>
       <div className="pharmacy-info-grid"><section className="management-card"><h2>Get in touch</h2><h3>Address</h3><p className="pharmacy-preserve-lines">{data.address || 'Address has not been published yet.'}</p><h3>Phone</h3><p>{data.phone ? <a href={`tel:${data.phone.replace(/[^\d+]/g, '')}`}>{data.phone}</a> : 'Phone number has not been published yet.'}</p><h3>Email</h3><p>{data.email ? <a href={`mailto:${data.email}`}>{data.email}</a> : 'Email address has not been published yet.'}</p></section><OpeningHours hours={data.openingHours} /></div>

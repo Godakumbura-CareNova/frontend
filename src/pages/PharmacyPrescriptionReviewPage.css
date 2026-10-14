@@ -10,7 +10,7 @@
 .staff-prescriptions-eyebrow,
 .staff-prescription-label {
   margin: 0 0 6px;
-  color: #a71919;
+  color: var(--cn-red-700);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -34,19 +34,19 @@
   align-items: center;
   margin: 16px 0;
   padding: 24px 26px;
-  border-color: #e1e4e8;
-  box-shadow: 0 8px 22px rgba(26, 35, 45, 0.06);
+  border-color: var(--cn-gray-200);
+  box-shadow: 0 8px 22px rgba(20, 83, 45, 0.06);
 }
 
 .staff-prescription-card h2 {
   margin: 0;
-  color: #111827;
+  color: var(--cn-green-900);
   font-size: 1.2rem;
 }
 
 .staff-prescription-medicine {
   margin: 10px 0 4px;
-  color: #374151;
+  color: var(--cn-gray-800);
   font-weight: 650;
 }
 
@@ -81,41 +81,41 @@
 .staff-prescription-status {
   padding: 7px 11px;
   border-radius: 999px;
-  background: #fff4e3;
-  color: #925000;
+  background: var(--cn-amber-50);
+  color: var(--cn-amber-800);
   font-size: 0.84rem;
   font-weight: 700;
 }
 
 .staff-prescriptions-page button.staff-prescription-file {
-  border-color: #087443;
-  color: #087443;
-  background: #f3fbf6;
+  border-color: var(--cn-green-700);
+  color: var(--cn-green-700);
+  background: var(--cn-green-50);
 }
 
 .staff-prescriptions-page button.staff-prescription-file:hover {
-  background: #e1f3e7;
+  background: var(--cn-green-100);
 }
 
 .staff-prescriptions-page button.staff-prescription-verify,
 .staff-prescriptions-page button.staff-prescription-confirm {
-  border-color: #16803a;
-  background: #16803a;
-  color: #fff;
+  border-color: var(--cn-green-700);
+  background: var(--cn-green-700);
+  color: var(--cn-white);
 }
 
 .staff-prescriptions-page button.staff-prescription-verify:hover,
 .staff-prescriptions-page button.staff-prescription-confirm:hover {
-  background: #126b31;
+  background: var(--cn-green-700);
 }
 
 .staff-prescriptions-page button.staff-prescription-reject {
-  border-color: #ef4444;
-  color: #c92121;
+  border-color: var(--cn-red-400);
+  color: var(--cn-red-600);
 }
 
 .staff-prescriptions-page button.staff-prescription-reject:hover {
-  background: #fff1f1;
+  background: var(--cn-red-50);
 }
 
 .staff-prescription-rejection {
@@ -125,14 +125,14 @@
   width: 100%;
   margin-top: 6px;
   padding: 16px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--cn-red-100);
   border-radius: 12px;
-  background: #fff8f8;
+  background: var(--cn-white);
 }
 
 .staff-prescription-rejection label {
   grid-column: 1 / -1;
-  color: #374151;
+  color: var(--cn-gray-800);
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -141,14 +141,14 @@
   width: 100%;
   min-width: 0;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--cn-gray-300);
   border-radius: 8px;
   font: inherit;
 }
 
 .staff-prescription-rejection input:focus {
-  border-color: #d9231b;
-  outline: 3px solid rgba(217, 35, 27, 0.14);
+  border-color: var(--cn-red-600);
+  outline: 3px solid rgba(211, 39, 31, 0.14);
 }
 
 .staff-prescription-rejection-actions {

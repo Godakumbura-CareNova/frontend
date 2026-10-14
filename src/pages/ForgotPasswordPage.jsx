@@ -43,10 +43,10 @@ const ForgotPasswordPage = () => {
             display: 'inline-flex',
             padding: '0.75rem',
             borderRadius: '1rem',
-            background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(248, 113, 113, 0.2))',
+            background: 'var(--cn-red-100)',
             marginBottom: '1rem'
           }}>
-            <KeyRound size={32} color="var(--warning)" />
+            <KeyRound size={32} color="var(--red-strong)" />
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Reset Password</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Enter your email to receive recovery instructions</p>
