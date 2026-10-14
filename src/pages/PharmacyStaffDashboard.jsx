@@ -53,7 +53,7 @@ const PharmacyStaffDashboard = () => {
           <StatCard to="/pharmacy/orders?status=Pending" icon={ShoppingBag} title="New Medicine Orders" value={operations?.newOrders.totalCount ?? 'Unavailable'} />
           <StatCard to="/pharmacy/prescriptions" icon={FileCheck} title="Awaiting Prescription Verification" value={operations?.pendingPrescriptions.totalCount ?? 'Unavailable'} />
           <StatCard to="/pharmacy/payments" icon={Landmark} title="Medicine Bank Transfers Awaiting Verification" value={dashboard.sections.medicinePayments?.data?.pendingTransfers.totalCount ?? 'Unavailable'} />
-          <StatCard to="/pharmacy/appointment-payments" icon={Landmark} title="Appointment Bank Transfers Awaiting Verification" value={dashboard.sections.appointmentPayments?.data?.pendingTransfers.totalCount ?? 'Unavailable'} />
+          <StatCard to="/pharmacy/appointment-payments?view=verification" icon={Landmark} title="Appointment Bank Transfers Awaiting Verification" value={dashboard.sections.appointmentPayments?.data?.pendingTransfers.totalCount ?? 'Unavailable'} />
           <StatCard to="/pharmacy/inventory?lowStockOnly=true" icon={AlertTriangle} title="Low-Stock Medicines" value={operations?.lowStock.totalCount ?? 'Unavailable'} />
           <StatCard to="/pharmacy/orders?status=ReadyForCollection" icon={PackageCheck} title="Ready for Collection" value={operations?.readyForCollection.totalCount ?? 'Unavailable'} />
         </div>
