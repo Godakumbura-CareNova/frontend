@@ -1,0 +1,128 @@
+/* Pharmacy staff dashboard. Scoped to .pharmacy-dashboard so other dashboards are unaffected. */
+
+.pharmacy-dashboard { display: grid; gap: 4px; }
+
+/* ---------- Hero ---------- */
+.pharmacy-dashboard .phd-hero {
+  position: relative;
+  display: block;
+  padding-right: 280px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px solid var(--cn-gray-200);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 78% -20%, rgba(211, 39, 31, .10) 0 160px, transparent 161px),
+    radial-gradient(circle at 0% 120%, rgba(21, 128, 61, .08) 0 140px, transparent 141px),
+    var(--cn-white);
+  box-shadow: var(--cn-shadow);
+}
+.pharmacy-dashboard .phd-hero::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 6px; background: linear-gradient(var(--cn-red-600), var(--cn-green-600)); }
+.pharmacy-dashboard .phd-hero-copy { padding: 26px 28px 26px 34px; }
+.pharmacy-dashboard .phd-eyebrow { color: var(--cn-green-600); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.pharmacy-dashboard .phd-hero h1 { margin-top: 6px; font-size: clamp(24px, 2.6vw, 32px); font-weight: 800; line-height: 1.2; color: var(--cn-gray-900); }
+.pharmacy-dashboard .phd-hero h1 .welcome-name { color: var(--cn-red-600); }
+.pharmacy-dashboard .phd-hero p { margin-top: 6px; color: var(--cn-gray-600); }
+.pharmacy-dashboard .phd-date { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--cn-green-700); background: var(--cn-green-50); border: 1px solid var(--cn-green-100); }
+.pharmacy-dashboard .phd-quick { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.pharmacy-dashboard .phd-quick-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; border: 1.5px solid transparent; transition: transform .2s, box-shadow .2s, background .2s; }
+.pharmacy-dashboard .phd-quick-link:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0, 0, 0, .1); text-decoration: none; }
+.pharmacy-dashboard .phd-quick-link:focus-visible { outline: 3px solid var(--cn-green-600); outline-offset: 2px; }
+.pharmacy-dashboard .phd-quick-red { color: var(--cn-white); background: var(--cn-red-600); }
+.pharmacy-dashboard .phd-quick-green { color: var(--cn-white); background: var(--cn-green-600); }
+.pharmacy-dashboard .phd-quick-outline { color: var(--cn-red-600); background: var(--cn-white); border-color: var(--cn-red-200); }
+.pharmacy-dashboard .phd-hero-photo { position: absolute; top: 0; right: 0; width: 300px; height: 100%; object-fit: cover; object-position: 30% 35%; -webkit-mask-image: linear-gradient(to right, transparent, #000 28%); mask-image: linear-gradient(to right, transparent, #000 28%); }
+
+/* ---------- Section titles ---------- */
+.pharmacy-dashboard .phd-section-title { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; font-size: 18px; font-weight: 800; color: var(--cn-gray-900); }
+.pharmacy-dashboard .phd-section-title::before { content: ""; width: 4px; height: 20px; border-radius: 4px; background: var(--cn-red-600); }
+
+/* ---------- Stat cards ---------- */
+.pharmacy-dashboard .phd-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+.pharmacy-dashboard .phd-stats .stat-card {
+  --tone: var(--cn-red-600);
+  --tone-soft: var(--cn-red-50);
+  --tone-mid: var(--cn-red-100);
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  grid-template-areas: "icon value" "title title";
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 10px;
+  padding: 18px 18px 16px;
+  border: 1px solid var(--cn-gray-200);
+  border-top: 4px solid var(--tone);
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--tone-soft), var(--cn-white) 55%);
+  box-shadow: var(--cn-shadow);
+  transition: transform .2s, box-shadow .2s;
+}
+.pharmacy-dashboard .phd-stats .stat-card-link:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(0, 0, 0, .1); }
+.pharmacy-dashboard .phd-stats .stat-card-link::after { content: "→"; position: absolute; top: 14px; right: 16px; color: var(--tone); font-weight: 800; opacity: .5; transition: transform .2s, opacity .2s; }
+.pharmacy-dashboard .phd-stats .stat-card-link:hover::after { opacity: 1; transform: translateX(3px); }
+.pharmacy-dashboard .phd-stats .stat-card-icon { grid-area: icon; width: 48px; height: 48px; margin: 0; border-radius: 14px; color: var(--tone); background: var(--tone-mid); }
+.pharmacy-dashboard .phd-stats .stat-card-value { grid-area: value; font-size: 26px; font-weight: 800; line-height: 1; color: var(--cn-gray-900); }
+.pharmacy-dashboard .phd-stats .stat-card-title { grid-area: title; margin: 0; font-size: 14px; font-weight: 700; color: var(--cn-gray-800); }
+.pharmacy-dashboard .phd-stats .stat-card:nth-child(2),
+.pharmacy-dashboard .phd-stats .stat-card:nth-child(6) { --tone: var(--cn-green-600); --tone-soft: var(--cn-green-50); --tone-mid: var(--cn-green-100); }
+.pharmacy-dashboard .phd-stats .stat-card:nth-child(3),
+.pharmacy-dashboard .phd-stats .stat-card:nth-child(4) { --tone: var(--cn-amber-600); --tone-soft: var(--cn-amber-50); --tone-mid: var(--cn-amber-100); }
+.pharmacy-dashboard .phd-stats .stat-card:nth-child(5) { --tone: var(--cn-red-700); --tone-soft: var(--cn-red-50); --tone-mid: var(--cn-red-100); }
+
+/* ---------- Work queues and income ---------- */
+.pharmacy-dashboard .role-dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.pharmacy-dashboard .role-dashboard-section { margin: 0; padding: 22px 24px; border: 1px solid var(--cn-gray-200); border-radius: 18px; background: var(--cn-white); box-shadow: var(--cn-shadow); }
+.pharmacy-dashboard .role-dashboard-section > .role-dashboard-heading h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 17px; font-weight: 800; }
+.pharmacy-dashboard .role-dashboard-section > .role-dashboard-heading h2::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--cn-red-600); box-shadow: 0 0 0 4px var(--cn-red-100); }
+.pharmacy-dashboard .role-dashboard-section > .role-dashboard-heading { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--cn-gray-200); }
+
+/* Operations spans the full width with its four queues in a 2 x 2 grid */
+.pharmacy-dashboard .role-dashboard-grid > .role-dashboard-section:first-child { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; align-items: start; }
+.pharmacy-dashboard .role-dashboard-grid > .role-dashboard-section:first-child > :not(.role-dashboard-queue) { grid-column: 1 / -1; }
+.pharmacy-dashboard .role-dashboard-grid > .role-dashboard-section:first-child > .role-dashboard-heading h2::before { background: var(--cn-green-600); box-shadow: 0 0 0 4px var(--cn-green-100); }
+.pharmacy-dashboard .role-dashboard-queue { padding: 16px; border-radius: 14px; background: var(--cn-gray-50); border: 1px solid var(--cn-gray-100); }
+.pharmacy-dashboard .role-dashboard-queue + .role-dashboard-queue { margin-top: 0; }
+.pharmacy-dashboard .role-dashboard-queue .role-dashboard-heading h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--cn-gray-900); }
+.pharmacy-dashboard .role-dashboard-queue .role-dashboard-heading a { font-size: 13px; font-weight: 700; color: var(--cn-green-600); text-decoration: none; }
+.pharmacy-dashboard .role-dashboard-queue .role-dashboard-heading a:hover { color: var(--cn-green-700); text-decoration: none; }
+.pharmacy-dashboard .role-dashboard-queue > p { margin-top: 6px; font-size: 13px; color: var(--cn-gray-600); }
+.pharmacy-dashboard .role-dashboard-queue .management-list { display: grid; gap: 8px; margin-top: 10px; }
+.pharmacy-dashboard .role-dashboard-row { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--cn-gray-200); border-left: 4px solid var(--cn-red-600); background: var(--cn-white); }
+.pharmacy-dashboard .role-dashboard-row strong { color: var(--cn-gray-900); }
+.pharmacy-dashboard .role-dashboard-row span { font-size: 13px; color: var(--cn-gray-600); }
+.pharmacy-dashboard .role-dashboard-queue .empty-state { margin-top: 8px; padding: 10px 12px; border-radius: 10px; color: var(--cn-green-700); background: var(--cn-green-50); font-weight: 600; }
+
+/* Income figures as two highlighted tiles */
+.pharmacy-dashboard .role-dashboard-section h3 { font-size: 15px; font-weight: 800; color: var(--cn-gray-900); }
+.pharmacy-dashboard .role-dashboard-section > h3 + p { margin-top: 2px; font-size: 13px; color: var(--cn-gray-600); }
+.pharmacy-dashboard .role-dashboard-income { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.pharmacy-dashboard .role-dashboard-income > div { padding: 14px 16px; border-radius: 14px; background: linear-gradient(150deg, var(--cn-green-50), var(--cn-white)); border: 1px solid var(--cn-green-100); }
+.pharmacy-dashboard .role-dashboard-income > div:last-child { background: linear-gradient(150deg, var(--cn-red-50), var(--cn-white)); border-color: var(--cn-red-100); }
+.pharmacy-dashboard .role-dashboard-income dt { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--cn-gray-600); }
+.pharmacy-dashboard .role-dashboard-income dd { margin: 6px 0 0; font-size: 22px; font-weight: 800; color: var(--cn-gray-900); }
+.pharmacy-dashboard .role-dashboard-payment-list { display: grid; gap: 8px; padding: 0; list-style: none; }
+.pharmacy-dashboard .role-dashboard-payment-list li { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--cn-gray-50); border: 1px solid var(--cn-gray-100); font-size: 14px; }
+.pharmacy-dashboard .role-dashboard-section > a { display: inline-block; margin-top: 12px; font-weight: 700; color: var(--cn-green-600); text-decoration: none; }
+.pharmacy-dashboard .role-dashboard-refreshed { font-size: 12px; }
+.pharmacy-dashboard .role-dashboard-section .management-alert.error { border-radius: 12px; }
+
+@media (max-width: 1100px) {
+  .pharmacy-dashboard .phd-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .pharmacy-dashboard .phd-stats { grid-template-columns: 1fr; }
+  .pharmacy-dashboard .phd-hero { padding-right: 0; }
+  .pharmacy-dashboard .phd-hero-photo { display: none; }
+  .pharmacy-dashboard .role-dashboard-grid,
+  .pharmacy-dashboard .role-dashboard-grid > .role-dashboard-section:first-child,
+  .pharmacy-dashboard .role-dashboard-income { grid-template-columns: 1fr; }
+}
+
+/* No underlines on any link in this dashboard (cards, shortcuts, "View all", payment references) */
+.pharmacy-dashboard a,
+.pharmacy-dashboard a:hover,
+.pharmacy-dashboard a:focus,
+.pharmacy-dashboard a:active,
+.pharmacy-dashboard a:visited,
+.pharmacy-dashboard a * { text-decoration: none; }
