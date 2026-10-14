@@ -19,11 +19,11 @@
 
 .appointment-receipt-header p {
   margin: 0;
-  color: #666;
+  color: var(--cn-gray-600);
 }
 
 .refresh-button {
-  border: 1px solid #ccc;
+  border: 1px solid var(--cn-gray-300);
   background: white;
   padding: 10px 18px;
   border-radius: 8px;
@@ -42,22 +42,22 @@
 }
 
 .appointment-receipt-alert.error {
-  background: #fdeaea;
-  color: #a52222;
+  background: var(--cn-red-50);
+  color: var(--cn-red-600);
 }
 
 .appointment-receipt-alert.success {
-  background: #e8f6ec;
-  color: #23753a;
+  background: var(--cn-green-50);
+  color: var(--cn-green-700);
 }
 
 .appointment-receipt-empty {
   background: white;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--cn-gray-200);
   border-radius: 12px;
   padding: 32px;
   text-align: center;
-  color: #666;
+  color: var(--cn-gray-600);
 }
 
 .appointment-receipt-list {
@@ -68,7 +68,7 @@
 
 .appointment-receipt-card {
   background: white;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--cn-gray-200);
   border-radius: 12px;
   padding: 20px;
 }
@@ -90,8 +90,8 @@
   display: inline-block;
   padding: 5px 10px;
   border-radius: 999px;
-  background: #fff4d6;
-  color: #8a6500;
+  background: var(--cn-amber-100);
+  color: var(--cn-amber-800);
   font-size: 13px;
 }
 
@@ -115,7 +115,7 @@
 
 .detail-label {
   font-size: 13px;
-  color: #777;
+  color: var(--cn-gray-600);
 }
 
 .receipt-details-grid strong {
@@ -139,17 +139,17 @@
 }
 
 .view-receipt-button {
-  background: #eef2f7;
-  color: #222;
+  background: var(--cn-green-50);
+  color: var(--cn-gray-900);
 }
 
 .approve-receipt-button {
-  background: #238636;
+  background: var(--cn-green-600);
   color: white;
 }
 
 .reject-receipt-button {
-  background: #c62828;
+  background: var(--cn-red-600);
   color: white;
   align-self: flex-start;
 }
@@ -162,7 +162,7 @@
 }
 
 .receipt-rejection {
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--cn-gray-100);
   padding-top: 18px;
   display: flex;
   flex-direction: column;
@@ -176,7 +176,7 @@
 .receipt-rejection textarea {
   width: 100%;
   resize: vertical;
-  border: 1px solid #ccc;
+  border: 1px solid var(--cn-gray-300);
   border-radius: 8px;
   padding: 10px;
   font: inherit;

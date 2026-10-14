@@ -258,7 +258,7 @@ const DashboardLayout = ({ children }) => {
     }
   };
 
-  const roleItems = guest ? NAV_BY_ROLE.Patient.map(item => item.label === 'Dashboard' ? { ...item, to: '/' } : item) : NAV_BY_ROLE[normalizeRole(role)] || [];
+  const roleItems = guest ? NAV_BY_ROLE.Patient.filter(item => item.label !== 'Payments').map(item => item.label === 'Dashboard' ? { ...item, to: '/' } : item) : NAV_BY_ROLE[normalizeRole(role)] || [];
   const navItems = [...roleItems,
     { to: '/about', label: 'About Us', icon: Info, enabled: true },
     { to: '/contact', label: 'Contact Us', icon: Mail, enabled: true },
