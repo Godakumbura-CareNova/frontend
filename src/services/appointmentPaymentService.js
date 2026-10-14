@@ -6,6 +6,12 @@ const paymentPath = (appointmentId) =>
 const staffPaymentPath =
   '/api/staff/appointment-payments';
 
+export const listAppointmentPaymentTransactions = async (params, signal) =>
+  (await appointmentApi.get(`${staffPaymentPath}/transactions`, { params, signal, timeout: 15000 })).data;
+
+export const getStaffAppointmentPaymentTransaction = async (paymentId, signal) =>
+  (await appointmentApi.get(`${staffPaymentPath}/transactions/${encodeURIComponent(paymentId)}`, { signal, timeout: 15000 })).data;
+
 export const getAppointmentPayment = async (appointmentId) => {
   const response = await appointmentApi.get(
     paymentPath(appointmentId)

@@ -69,11 +69,6 @@ const NAV_BY_ROLE = {
       enabled: true,
     },
     {
-      label: 'Payments',
-      icon: CreditCard,
-      enabled: false,
-    },
-    {
       to: '/patient/medicines',
       label: 'Medicines',
       icon: Pill,

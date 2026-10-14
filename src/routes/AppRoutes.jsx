@@ -55,7 +55,8 @@ import PatientAppointmentDetailsPage from '../pages/PatientAppointmentDetailsPag
 import PharmacyOrderManagementPage from '../pages/PharmacyOrderManagementPage';
 import PharmacyPrescriptionReviewPage from '../pages/PharmacyPrescriptionReviewPage';
 import PharmacyPaymentVerificationPage from '../pages/PharmacyPaymentVerificationPage';
-import AppointmentReceiptVerificationPage from '../pages/AppointmentReceiptVerificationPage';
+import AppointmentPaymentTransactionsPage from '../pages/AppointmentPaymentTransactionsPage';
+import AppointmentPaymentTransactionDetailPage from '../pages/AppointmentPaymentTransactionDetailPage';
 
 import PaymentTransactionsPage from '../pages/PaymentTransactionsPage';
 import PaymentTransactionDetailPage from '../pages/PaymentTransactionDetailPage';
@@ -328,8 +329,10 @@ const AppRoutes = () => (
 
         <Route
           path="/pharmacy/appointment-payments"
-          element={<AppointmentReceiptVerificationPage />}
+          element={<AppointmentPaymentTransactionsPage />}
         />
+
+        <Route path="/pharmacy/appointment-payments/transactions/:paymentId" element={<AppointmentPaymentTransactionDetailPage />} />
 
         <Route
           path="/pharmacy/payment-transactions"

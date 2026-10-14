@@ -14,7 +14,7 @@ it('provides direct shortcuts for every staff summary card', async () => {
     ['New Medicine Orders', '/pharmacy/orders?status=Pending'],
     ['Awaiting Prescription Verification', '/pharmacy/prescriptions'],
     ['Medicine Bank Transfers Awaiting Verification', '/pharmacy/payments'],
-    ['Appointment Bank Transfers Awaiting Verification', '/pharmacy/appointment-payments'],
+    ['Appointment Bank Transfers Awaiting Verification', '/pharmacy/appointment-payments?view=verification'],
     ['Low-Stock Medicines', '/pharmacy/inventory?lowStockOnly=true'],
     ['Ready for Collection', '/pharmacy/orders?status=ReadyForCollection'],
   ]) expect(screen.getByRole('link', { name: new RegExp(`^${name}`) })).toHaveAttribute('href', destination);
@@ -34,6 +34,7 @@ it('shows real queues and separates medicine from appointment income', async () 
   expect(screen.getByText(/Out of stock/)).toBeInTheDocument();
   const medicines = screen.getByRole('region', { name: 'Medicine payments and income' });
   const appointments = screen.getByRole('region', { name: 'Appointment payments and income' });
+  expect(within(appointments).getByRole('link', { name: /View all/ })).toHaveAttribute('href', '/pharmacy/appointment-payments?view=verification');
   expect(within(medicines).getAllByText(/100\.00/).length).toBe(2);
   expect(within(appointments).getAllByText(/200\.00/).length).toBe(2);
 });
