@@ -1,14 +1,14 @@
 /* Doctor professional profile page (GCN-36) */
 
 .dp-page {
-  --dp-green: #15803d;
-  --dp-green-dark: #14532d;
-  --dp-green-soft: #edf7f0;
-  --dp-green-border: #d5e9da;
-  --dp-red-soft: #fdeeed;
-  --dp-red-border: #f3cfcc;
-  --dp-surface: #f9fbfa;
-  --dp-line: #e6ece8;
+  --dp-green: var(--cn-green-700);
+  --dp-green-dark: var(--cn-green-900);
+  --dp-green-soft: var(--cn-green-50);
+  --dp-green-border: var(--cn-green-100);
+  --dp-red-soft: var(--cn-red-50);
+  --dp-red-border: var(--cn-red-100);
+  --dp-surface: var(--cn-gray-50);
+  --dp-line: var(--cn-gray-200);
   width: 100%;
   max-width: 1060px;
   margin: 0 auto;
@@ -41,8 +41,8 @@
   padding: 24px 28px;
   border-radius: 14px;
   color: var(--white);
-  background: linear-gradient(120deg, #d3271f 0%, #c3221b 55%, #b91c1c 100%);
-  box-shadow: 0 12px 30px rgba(185, 28, 28, 0.22);
+  background: linear-gradient(120deg, var(--cn-red-600) 0%, var(--cn-red-600) 55%, var(--cn-red-600) 100%);
+  box-shadow: 0 12px 30px rgba(211, 39, 31, 0.22);
   overflow: hidden;
 }
 
@@ -62,7 +62,7 @@
   padding: 3px;
   border: 3px solid rgba(255, 255, 255, 0.92);
   background: var(--white);
-  box-shadow: 0 6px 16px rgba(91, 18, 15, 0.28);
+  box-shadow: 0 6px 16px rgba(127, 29, 29, 0.28);
   display: block;
 }
 
@@ -239,7 +239,7 @@
 }
 
 .dp-callout > div { flex: 1 1 auto; }
-.dp-callout p { margin: 4px 0 0; font-size: 13px; color: #3f5f48; }
+.dp-callout p { margin: 4px 0 0; font-size: 13px; color: var(--cn-gray-800); }
 
 /* Sections */
 .dp-section {
@@ -284,7 +284,7 @@
   color: var(--dp-green-dark);
 }
 
-.dp-section-red .dp-section-title { color: #7f1d1d; }
+.dp-section-red .dp-section-title { color: var(--cn-red-700); }
 
 .dp-section-action { margin-left: auto; }
 
@@ -353,7 +353,7 @@
   gap: 8px;
   font-size: 13.5px;
   line-height: 1.55;
-  color: #374151;
+  color: var(--cn-gray-800);
   white-space: pre-wrap;
 }
 
@@ -376,7 +376,7 @@
 .dp-credential-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .dp-credential-title { font-size: 14px; font-weight: 700; color: var(--text-main); }
 .dp-credential-subtitle { font-size: 12.5px; color: var(--text-muted); }
-.dp-credential-note { margin-top: 3px; font-size: 12.5px; color: #374151; white-space: pre-wrap; }
+.dp-credential-note { margin-top: 3px; font-size: 12.5px; color: var(--cn-gray-800); white-space: pre-wrap; }
 
 .dp-credential-side {
   display: flex;
@@ -502,7 +502,7 @@
 
 /* Consultation availability (doctor side) */
 .dp-availability { display: flex; flex-direction: column; gap: 14px; }
-.dp-availability-summary { margin: 0; font-size: 13.5px; color: #374151; }
+.dp-availability-summary { margin: 0; font-size: 13.5px; color: var(--cn-gray-800); }
 .dp-availability-summary strong { color: var(--dp-green-dark); }
 .dp-availability-hint { margin: 0 0 10px; }
 
@@ -558,7 +558,7 @@
   font-weight: 600;
 }
 
-.dp-slot-booked { background: #f3f4f6; border-color: #e5e7eb; color: var(--text-muted); padding-right: 12px; }
+.dp-slot-booked { background: var(--cn-gray-50); border-color: var(--cn-gray-200); color: var(--text-muted); padding-right: 12px; }
 
 .dp-slot-status { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; }
 
@@ -591,9 +591,9 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #f5c26b;
-  background: #fff8e6;
-  color: #8a5300;
+  border: 1px solid var(--cn-amber-200);
+  background: var(--cn-amber-50);
+  color: var(--cn-amber-800);
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1.45;
@@ -633,9 +633,9 @@
   font-weight: 700;
   white-space: nowrap;
 }
-.dp-fee-status-pending { background: #fff8e6; color: #8a5300; }
+.dp-fee-status-pending { background: var(--cn-amber-50); color: var(--cn-amber-800); }
 .dp-fee-status-approved { background: var(--dp-green-soft); color: var(--dp-green-dark); }
-.dp-fee-status-rejected { background: var(--dp-red-soft); color: #7f1d1d; }
+.dp-fee-status-rejected { background: var(--dp-red-soft); color: var(--cn-red-700); }
 
 .dp-fee-request {
   display: flex;
@@ -649,7 +649,7 @@
   font-size: 13px;
 }
 .dp-fee-request p { margin: 0; line-height: 1.5; }
-.dp-fee-request-pending { border-color: #f5c26b; background: #fffcf3; }
+.dp-fee-request-pending { border-color: var(--cn-amber-200); background: var(--cn-gray-50); }
 
 
 

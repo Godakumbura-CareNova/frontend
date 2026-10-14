@@ -1,21 +1,56 @@
 :root {
-  --red-strong: #d3271f;
-  --red-deep: #b91c1c;
+  /* CareNova palette: red, green and white. Every page colour comes from these tokens. */
+  --cn-red-50: #fdf3f2;
+  --cn-red-100: #f9dedb;
+  --cn-red-200: #f0aaa4;
+  --cn-red-400: #e2564e;
+  --cn-red-600: #d3271f;
+  --cn-red-700: #b91c1c;
+  --cn-red-900: #7f1d1d;
+  --cn-green-50: #f0faf3;
+  --cn-green-100: #dcf2e4;
+  --cn-green-200: #a8dbbb;
+  --cn-green-400: #3c9f62;
+  --cn-green-600: #15803d;
+  --cn-green-700: #166534;
+  --cn-green-900: #14532d;
+  /* Amber is kept only for "pending" and warning states. */
+  --cn-amber-50: #fff8eb;
+  --cn-amber-100: #fdeccb;
+  --cn-amber-200: #f3cf86;
+  --cn-amber-400: #d39a2b;
+  --cn-amber-600: #a15c07;
+  --cn-amber-800: #7a3e0a;
+  --cn-white: #ffffff;
+  --cn-gray-50: #f7f8f7;
+  --cn-gray-100: #eff1f0;
+  --cn-gray-200: #e3e6e4;
+  --cn-gray-300: #d9d9d9;
+  --cn-gray-400: #9aa09d;
+  --cn-gray-600: #6b6b6b;
+  --cn-gray-800: #363a38;
+  --cn-gray-900: #1a1a1a;
+  --cn-font: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+  --cn-radius: 16px;
+  --cn-shadow: 0 6px 20px rgba(17, 24, 20, 0.06);
+
+  --red-strong: var(--cn-red-600);
+  --red-deep: var(--cn-red-700);
   --red-soft: #f6d3d0;
-  --white: #ffffff;
-  --black: #1a1a1a;
-  --gray-text: #6b6b6b;
-  --gray-border: #d9d9d9;
-  --offwhite: #f7f0f0;
+  --white: var(--cn-white);
+  --black: var(--cn-gray-900);
+  --gray-text: var(--cn-gray-600);
+  --gray-border: var(--cn-gray-300);
+  --offwhite: var(--cn-gray-50);
   --soft-gray: #8a8a8a;
-  --danger: #d3271f;
-  --primary: #d3271f;
-  --success: #15803d;
-  --warning: #b45309;
-  --accent: #1d4ed8;
-  --text-main: #1a1a1a;
-  --text-muted: #6b6b6b;
-  --border-color: #d9d9d9;
+  --danger: var(--cn-red-600);
+  --primary: var(--cn-red-600);
+  --success: var(--cn-green-600);
+  --warning: var(--cn-amber-600);
+  --accent: var(--cn-green-600);
+  --text-main: var(--cn-gray-900);
+  --text-muted: var(--cn-gray-600);
+  --border-color: var(--cn-gray-300);
 }
 
 * {
@@ -31,8 +66,8 @@ html, body, #root {
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #ececec;
+  font-family: var(--cn-font);
+  background: var(--cn-gray-100);
   color: var(--black);
 }
 
@@ -54,7 +89,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #efefef;
+  background: var(--cn-gray-100);
   padding: 32px 16px;
 }
 
@@ -63,7 +98,7 @@ a:hover {
   background: var(--white);
   border-radius: 12px;
   overflow: hidden;
-  border: 0.5px solid #e7e7e7;
+  border: 0.5px solid var(--cn-gray-200);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
@@ -90,7 +125,7 @@ a:hover {
   justify-content: center;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--cn-white);
   border: 2px solid rgba(255, 255, 255, 0.9);
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
@@ -108,7 +143,7 @@ a:hover {
   display: block;
   object-fit: cover;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--cn-white);
   padding: 2px;
 }
 
@@ -125,9 +160,9 @@ a:hover {
   font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.2px;
-  color: #ffffff;
+  color: var(--cn-white);
   line-height: 1.2;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--cn-font);
 }
 
 .brand-subtitle {
@@ -135,7 +170,7 @@ a:hover {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.96);
   line-height: 1.25;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--cn-font);
 }
 
 .registration-body {
@@ -167,7 +202,7 @@ a:hover {
   height: 84px;
   border-radius: 50%;
   background: var(--offwhite);
-  border: 1.5px dashed #d9a5ac;
+  border: 1.5px dashed var(--cn-red-200);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,7 +237,7 @@ a:hover {
 
 .optional-photo-input {
   margin-top: 12px;
-  background: #f5f5f5;
+  background: var(--cn-gray-50);
 }
 
 .form-row {
@@ -223,7 +258,7 @@ a:hover {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--cn-gray-800);
   margin-bottom: 6px;
 }
 
@@ -311,15 +346,15 @@ a:hover {
 }
 
 .alert-success {
-  background: rgba(34, 139, 34, 0.08);
-  border: 1px solid rgba(34, 139, 34, 0.25);
-  color: #1e7a34;
+  background: rgba(21, 128, 61, 0.08);
+  border: 1px solid rgba(21, 128, 61, 0.25);
+  color: var(--cn-green-700);
 }
 
 .registration-success {
-  background: rgba(21, 128, 61, 0.08);
-  border: 1px solid rgba(21, 128, 61, 0.2);
-  color: #166534;
+  background: rgba(22, 101, 52, 0.08);
+  border: 1px solid rgba(22, 101, 52, 0.2);
+  color: var(--cn-green-700);
 }
 
 .profile-shell {
@@ -334,9 +369,9 @@ a:hover {
   width: min(100%, 760px);
   align-self: flex-start;
   background: var(--white);
-  border: 1px solid #efc5c2;
+  border: 1px solid var(--cn-red-100);
   border-radius: 12px;
-  box-shadow: 0 14px 34px rgba(128, 26, 22, 0.12);
+  box-shadow: 0 14px 34px rgba(185, 28, 28, 0.12);
   padding: 32px;
 }
 
@@ -366,7 +401,7 @@ a:hover {
   border: 3px solid rgba(255, 255, 255, 0.9);
   object-fit: cover;
   background: var(--white);
-  box-shadow: 0 6px 16px rgba(91, 18, 15, 0.22);
+  box-shadow: 0 6px 16px rgba(127, 29, 29, 0.22);
   display: block;
 }
 
@@ -509,10 +544,10 @@ a:hover {
   flex-direction: column;
   gap: 6px;
   padding: 14px;
-  border: 1px solid #f0d8d6;
+  border: 1px solid var(--cn-red-100);
   border-left: 4px solid var(--red-strong);
   border-radius: 8px;
-  background: #fffafa;
+  background: var(--cn-white);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -568,7 +603,7 @@ a:hover {
 }
 
 .profile-edit-cancel-btn:hover {
-  background: #f5f5f5;
+  background: var(--cn-gray-50);
   color: var(--black);
 }
 
@@ -615,13 +650,13 @@ a:hover {
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: #eef2f8;
+  background: var(--cn-green-50);
 }
 
 .glass-card {
   background: var(--white);
   border-radius: 12px;
-  border: 1px solid #e7e7e7;
+  border: 1px solid var(--cn-gray-200);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
@@ -644,7 +679,7 @@ a:hover {
 }
 
 .forgot-password-link {
-  color: #e11624;
+  color: var(--cn-red-600);
   font-weight: 500;
 }
 
@@ -655,7 +690,7 @@ a:hover {
   transform: translateY(-50%);
   border: none;
   background: transparent;
-  color: #8ca0ba;
+  color: var(--cn-green-400);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -673,13 +708,13 @@ a:hover {
   align-items: center;
   gap: 0.55rem;
   font-size: 1rem;
-  color: #4a5e79;
+  color: var(--cn-green-600);
 }
 
 .remember-label input[type='checkbox'] {
   width: 19px;
   height: 19px;
-  accent-color: #d3271f;
+  accent-color: var(--cn-red-600);
 }
 
 .login-submit-button {
@@ -697,7 +732,7 @@ a:hover {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--cn-gray-800);
   margin-bottom: 6px;
 }
 
@@ -745,9 +780,9 @@ a:hover {
 }
 
 .btn-secondary {
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #e3e3e3;
+  background: var(--cn-gray-50);
+  color: var(--cn-gray-800);
+  border: 1px solid var(--cn-gray-200);
 }
 
 .btn-danger {
@@ -765,9 +800,9 @@ a:hover {
 }
 
 .alert-success {
-  background: rgba(21, 128, 61, 0.08);
-  border: 1px solid rgba(21, 128, 61, 0.2);
-  color: #166534;
+  background: rgba(22, 101, 52, 0.08);
+  border: 1px solid rgba(22, 101, 52, 0.2);
+  color: var(--cn-green-700);
 }
 
 .container {
@@ -803,23 +838,23 @@ a:hover {
 }
 
 .badge-patient {
-  background: #ecfdf3;
-  color: #166534;
+  background: var(--cn-green-50);
+  color: var(--cn-green-700);
 }
 
 .badge-doctor {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--cn-green-50);
+  color: var(--cn-green-400);
 }
 
 .badge-pharmacy {
-  background: #fff7ed;
-  color: #9a3412;
+  background: var(--cn-red-50);
+  color: var(--cn-red-600);
 }
 
 .badge-admin {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--cn-red-50);
+  color: var(--cn-red-600);
 }
 
 .data-table {
@@ -831,7 +866,7 @@ a:hover {
 .data-table td {
   text-align: left;
   padding: 0.75rem;
-  border-bottom: 1px solid #ececec;
+  border-bottom: 1px solid var(--cn-gray-100);
 }
 
 .data-table th {
@@ -867,7 +902,7 @@ a:hover {
 .confirm-dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(20, 83, 45, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -920,7 +955,7 @@ a:hover {
 .dashboard-shell {
   display: flex;
   min-height: 100vh;
-  background: #f5f6f8;
+  background: var(--cn-gray-50);
 }
 
 .dashboard-sidebar {
@@ -1106,23 +1141,23 @@ a:hover {
 }
 
 .notification-button { position: relative; }
-.notification-count { position: absolute; top: -5px; right: -6px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: #d92d20; color: #fff; font-size: 11px; font-weight: 700; line-height: 17px; }
-.notification-menu { position: absolute; z-index: 20; top: 66px; right: 168px; width: min(360px, calc(100vw - 28px)); max-height: 430px; overflow: auto; background: #fff; border: 1px solid #dfe8e2; border-radius: 14px; box-shadow: 0 16px 36px rgba(20, 50, 35, .16); padding: 10px; }
-.notification-menu-heading { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 10px; color: #173b2a; }
-.notification-menu-heading button { border: 0; background: transparent; color: #087b48; font-weight: 700; cursor: pointer; }
-.notification-item { width: 100%; display: grid; gap: 4px; text-align: left; border: 0; border-radius: 10px; background: #fff; padding: 12px; cursor: pointer; color: #22312a; }
-.notification-item:hover, .notification-item.unread { background: #eefaf3; }
-.notification-item span { font-size: 13px; line-height: 1.4; color: #58665f; }
+.notification-count { position: absolute; top: -5px; right: -6px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--cn-red-600); color: var(--cn-white); font-size: 11px; font-weight: 700; line-height: 17px; }
+.notification-menu { position: absolute; z-index: 20; top: 66px; right: 168px; width: min(360px, calc(100vw - 28px)); max-height: 430px; overflow: auto; background: var(--cn-white); border: 1px solid var(--cn-gray-200); border-radius: 14px; box-shadow: 0 16px 36px rgba(20, 83, 45, .16); padding: 10px; }
+.notification-menu-heading { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 10px; color: var(--cn-green-900); }
+.notification-menu-heading button { border: 0; background: transparent; color: var(--cn-green-700); font-weight: 700; cursor: pointer; }
+.notification-item { width: 100%; display: grid; gap: 4px; text-align: left; border: 0; border-radius: 10px; background: var(--cn-white); padding: 12px; cursor: pointer; color: var(--cn-gray-900); }
+.notification-item:hover, .notification-item.unread { background: var(--cn-green-50); }
+.notification-item span { font-size: 13px; line-height: 1.4; color: var(--cn-gray-800); }
 .notification-item strong { font-size: 14px; line-height: 1.35; font-weight: 700; }
 /* GCN-42: a rejected bank transfer is shown in a light red box. */
-.notification-item.rejected, .notification-item.rejected:hover { margin-bottom: 6px; background: #fef6f5; }
-.notification-item.rejected.unread { background: #fdefee; }
-.notification-item.rejected strong { color: #7f1d1d; }
-.notification-item.rejected span { color: #8a3a35; }
+.notification-item.rejected, .notification-item.rejected:hover { margin-bottom: 6px; background: var(--cn-gray-50); }
+.notification-item.rejected.unread { background: var(--cn-red-50); }
+.notification-item.rejected strong { color: var(--cn-red-700); }
+.notification-item.rejected span { color: var(--cn-red-700); }
 .notification-menu-actions { display: inline-flex; align-items: center; gap: 6px; }
-.notification-menu-heading .notification-close { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border-radius: 50%; color: #58665f; }
-.notification-menu-heading .notification-close:hover { background: #eefaf3; color: #173b2a; }
-.notification-empty { padding: 18px 8px; color: #68756e; }
+.notification-menu-heading .notification-close { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border-radius: 50%; color: var(--cn-gray-800); }
+.notification-menu-heading .notification-close:hover { background: var(--cn-green-50); color: var(--cn-green-900); }
+.notification-empty { padding: 18px 8px; color: var(--cn-gray-600); }
 
 .user-menu {
   display: flex;
@@ -1351,13 +1386,13 @@ a:hover {
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: #eef2f8;
+  background: var(--cn-green-50);
 }
 
 .glass-card {
   background: var(--white);
   border-radius: 12px;
-  border: 1px solid #e7e7e7;
+  border: 1px solid var(--cn-gray-200);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
@@ -1380,7 +1415,7 @@ a:hover {
 }
 
 .forgot-password-link {
-  color: #e11624;
+  color: var(--cn-red-600);
   font-weight: 500;
 }
 
@@ -1391,7 +1426,7 @@ a:hover {
   transform: translateY(-50%);
   border: none;
   background: transparent;
-  color: #8ca0ba;
+  color: var(--cn-green-400);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1409,13 +1444,13 @@ a:hover {
   align-items: center;
   gap: 0.55rem;
   font-size: 1rem;
-  color: #4a5e79;
+  color: var(--cn-green-600);
 }
 
 .remember-label input[type='checkbox'] {
   width: 19px;
   height: 19px;
-  accent-color: #d3271f;
+  accent-color: var(--cn-red-600);
 }
 
 .login-submit-button {
@@ -1433,7 +1468,7 @@ a:hover {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--cn-gray-800);
   margin-bottom: 6px;
 }
 
@@ -1481,9 +1516,9 @@ a:hover {
 }
 
 .btn-secondary {
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #e3e3e3;
+  background: var(--cn-gray-50);
+  color: var(--cn-gray-800);
+  border: 1px solid var(--cn-gray-200);
 }
 
 .btn-danger {
@@ -1492,9 +1527,9 @@ a:hover {
 }
 
 .alert-success {
-  background: rgba(21, 128, 61, 0.08);
-  border: 1px solid rgba(21, 128, 61, 0.2);
-  color: #166534;
+  background: rgba(22, 101, 52, 0.08);
+  border: 1px solid rgba(22, 101, 52, 0.2);
+  color: var(--cn-green-700);
 }
 
 .container {
@@ -1530,23 +1565,23 @@ a:hover {
 }
 
 .badge-patient {
-  background: #ecfdf3;
-  color: #166534;
+  background: var(--cn-green-50);
+  color: var(--cn-green-700);
 }
 
 .badge-doctor {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--cn-green-50);
+  color: var(--cn-green-400);
 }
 
 .badge-pharmacy {
-  background: #fff7ed;
-  color: #9a3412;
+  background: var(--cn-red-50);
+  color: var(--cn-red-600);
 }
 
 .badge-admin {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--cn-red-50);
+  color: var(--cn-red-600);
 }
 
 .data-table {
@@ -1558,7 +1593,7 @@ a:hover {
 .data-table td {
   text-align: left;
   padding: 0.75rem;
-  border-bottom: 1px solid #ececec;
+  border-bottom: 1px solid var(--cn-gray-100);
 }
 
 .data-table th {
@@ -1602,7 +1637,7 @@ a:hover {
 .dashboard-shell {
   display: flex;
   min-height: 100vh;
-  background: #f5f6f8;
+  background: var(--cn-gray-50);
 }
 
 .dashboard-sidebar {
@@ -1996,7 +2031,7 @@ a:hover {
 .user-detail-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(20, 83, 45, 0.45);
   display: flex;
   justify-content: flex-end;
   z-index: 200;
@@ -2023,7 +2058,7 @@ a:hover {
   flex-direction: column;
   gap: 2px;
   padding: 0.6rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--cn-gray-100);
 }
 
 .user-detail-row-label {
@@ -2054,9 +2089,9 @@ a:hover {
   width: min(100%, 760px);
   align-self: flex-start;
   background: var(--white);
-  border: 1px solid #efc5c2;
+  border: 1px solid var(--cn-red-100);
   border-radius: 12px;
-  box-shadow: 0 14px 34px rgba(128, 26, 22, 0.12);
+  box-shadow: 0 14px 34px rgba(185, 28, 28, 0.12);
   padding: 32px;
 }
 
@@ -2086,7 +2121,7 @@ a:hover {
   border: 3px solid rgba(255, 255, 255, 0.9);
   object-fit: contain;
   background: var(--white);
-  box-shadow: 0 6px 16px rgba(91, 18, 15, 0.22);
+  box-shadow: 0 6px 16px rgba(127, 29, 29, 0.22);
   display: block;
 }
 
@@ -2229,10 +2264,10 @@ a:hover {
   flex-direction: column;
   gap: 6px;
   padding: 14px;
-  border: 1px solid #f0d8d6;
+  border: 1px solid var(--cn-red-100);
   border-left: 4px solid var(--red-strong);
   border-radius: 8px;
-  background: #fffafa;
+  background: var(--cn-white);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -2288,7 +2323,7 @@ a:hover {
 }
 
 .profile-edit-cancel-btn:hover {
-  background: #f5f5f5;
+  background: var(--cn-gray-50);
   color: var(--black);
 }
 

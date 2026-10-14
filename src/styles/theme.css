@@ -1,0 +1,190 @@
+/*
+ * CareNova shared look.
+ * Loaded after every page stylesheet so all pages share one header, card and
+ * typography style in the red / green / white theme. Visual rules only.
+ */
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--cn-font);
+}
+
+/* ---------- Page headers: one clean white card on every page ---------- */
+body :is(
+  .welcome-banner,
+  .orders-list-header,
+  .cart-header,
+  .checkout-hero,
+  .prescriptions-hero,
+  .catalogue-dashboard-header,
+  .medicine-dashboard-header,
+  .dp-hero,
+  .op-hero,
+  .tx-hero,
+  .btv-hero,
+  .afr-header,
+  .transactions-header,
+  .staff-orders-header,
+  .staff-prescriptions-header,
+  .management-heading,
+  .appointment-receipt-header,
+  .appointment-payment-hero,
+  .profile-header
+) {
+  position: relative;
+  color: var(--cn-gray-900);
+  background: linear-gradient(110deg, var(--cn-white) 62%, var(--cn-red-50));
+  border: 1px solid var(--cn-gray-200);
+  border-left: 5px solid var(--cn-red-600);
+  border-radius: 18px;
+  box-shadow: var(--cn-shadow);
+  padding: 22px 26px;
+  margin-bottom: 22px;
+}
+
+body :is(
+  .welcome-banner,
+  .orders-list-header,
+  .cart-header,
+  .checkout-hero,
+  .prescriptions-hero,
+  .catalogue-dashboard-header,
+  .medicine-dashboard-header,
+  .dp-hero,
+  .op-hero,
+  .tx-hero,
+  .btv-hero,
+  .afr-header,
+  .transactions-header,
+  .staff-orders-header,
+  .staff-prescriptions-header,
+  .management-heading,
+  .appointment-receipt-header,
+  .appointment-payment-hero,
+  .profile-header
+) :is(h1, .dp-hero-title, .tx-hero-title, .btv-hero-title, .profile-title) {
+  color: var(--cn-gray-900);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+body :is(.dp-hero, .op-hero, .tx-hero, .btv-hero, .profile-header) :is(
+  p,
+  .dp-hero-name,
+  .dp-hero-subtitle,
+  .dp-hero-note,
+  .tx-hero-subtitle,
+  .btv-hero-subtitle,
+  .profile-subtitle
+) {
+  color: var(--cn-gray-600);
+}
+
+/* Small uppercase labels above titles */
+body :is(
+  .staff-orders-eyebrow,
+  .staff-prescriptions-eyebrow,
+  .transactions-eyebrow,
+  .tx-hero-eyebrow,
+  .btv-hero-eyebrow,
+  .btv-review-eyebrow,
+  .checkout-eyebrow,
+  .prescriptions-eyebrow,
+  .op-eyebrow
+) {
+  color: var(--cn-green-600);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Header icons: soft red tile with a red icon */
+body :is(
+  .orders-list-icon,
+  .cart-header-icon,
+  .checkout-hero-icon,
+  .prescriptions-hero-icon,
+  .op-hero-icon,
+  .tx-hero-avatar,
+  .btv-hero-avatar,
+  .afr-header-icon,
+  .pd-hero-icon,
+  .catalogue-dashboard-header > span,
+  .medicine-dashboard-title > span
+) {
+  color: var(--cn-red-600);
+  background: var(--cn-red-100);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Decorative heartbeat lines */
+body :is(.dp-hero-pulse, .tx-hero-pulse, .afr-header-pulse) {
+  color: var(--cn-red-200);
+}
+
+/* Chips, stats and buttons that used to sit on the red banners */
+body .dp-hero-note-error {
+  color: var(--cn-red-700);
+  background: var(--cn-red-50);
+  border-color: var(--cn-red-100);
+}
+
+body .dp-hero-chips .pd-availability-hero.pd-availability-none {
+  color: var(--cn-gray-600);
+  background: var(--cn-gray-100);
+}
+
+body :is(.tx-hero-amount, .btv-hero-stat) {
+  background: var(--cn-white);
+  border: 1px solid var(--cn-gray-200);
+  box-shadow: none;
+}
+
+body .dp-hero-btn {
+  color: var(--cn-white);
+  background: var(--cn-green-600);
+  box-shadow: none;
+}
+
+body .dp-hero-btn:hover {
+  background: var(--cn-green-700);
+}
+
+body .dp-hero-btn-muted {
+  color: var(--cn-red-600);
+  background: var(--cn-white);
+  border: 1px solid var(--cn-red-200);
+}
+
+body .afr-header-text {
+  border-left-color: var(--cn-gray-200);
+}
+
+/* ---------- Cards ---------- */
+body :is(.management-card, .glass-card, .quicklink-card, .stat-card) {
+  border-color: var(--cn-gray-200);
+  border-radius: var(--cn-radius);
+  box-shadow: var(--cn-shadow);
+}
+
+/* ---------- Tables: light header row everywhere ---------- */
+body :is(table, .afr-table) thead th {
+  color: var(--cn-gray-800);
+  background: var(--cn-gray-50);
+  border-bottom: 1px solid var(--cn-gray-200);
+}
+
+/* ---------- Form focus ---------- */
+body :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--cn-green-600);
+  outline-offset: 1px;
+}
+
+/* ---------- Sign-in, sign-up and password pages share one background ---------- */
+body :is(.auth-wrapper, .registration-page) {
+  background: linear-gradient(135deg, var(--cn-red-50) 0%, var(--cn-white) 45%, var(--cn-green-50) 100%);
+}

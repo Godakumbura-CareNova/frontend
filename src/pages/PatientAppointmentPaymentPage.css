@@ -17,7 +17,7 @@
   padding: 24px;
   margin-bottom: 24px;
   border-radius: 16px;
-  background: #ffffff;
+  background: var(--cn-white);
 }
 
 .appointment-payment-hero p {
@@ -31,7 +31,7 @@
 }
 
 .appointment-payment-card {
-  background: #ffffff;
+  background: var(--cn-white);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
@@ -47,14 +47,14 @@
   display: flex;
   gap: 14px;
   align-items: center;
-  border: 1px solid #d5d5d5;
+  border: 1px solid var(--cn-gray-300);
   border-radius: 12px;
   padding: 16px;
   cursor: pointer;
 }
 
 .appointment-payment-method.selected {
-  border: 2px solid #15803d;
+  border: 2px solid var(--cn-green-700);
 }
 
 .appointment-payment-method span {
@@ -64,7 +64,7 @@
 
 .appointment-payment-method small {
   margin-top: 3px;
-  color: #666;
+  color: var(--cn-gray-600);
 }
 
 .appointment-payment-primary {
@@ -76,7 +76,7 @@
   padding: 11px 18px;
   cursor: pointer;
   font-weight: 600;
-  background: #15803d;
+  background: var(--cn-green-700);
   color: white;
 }
 
@@ -92,8 +92,8 @@
   padding: 12px;
   margin: 12px 0;
   border-radius: 10px;
-  background: #fdecea;
-  color: #a1291c;
+  background: var(--cn-red-50);
+  color: var(--cn-red-700);
 }
 
 .appointment-payment-success {
@@ -108,7 +108,7 @@
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--cn-gray-100);
 }
 
 .appointment-receipt-upload {
@@ -117,7 +117,7 @@
   align-items: center;
   padding: 14px;
   margin: 16px 0;
-  border: 1px dashed #999;
+  border: 1px dashed var(--cn-gray-400);
   border-radius: 10px;
   cursor: pointer;
 }
@@ -133,7 +133,7 @@
   padding: 12px;
   margin: 16px 0;
   border-radius: 10px;
-  background: #edf7f0;
+  background: var(--cn-green-50);
 }
 
 .appointment-billing-form {
@@ -150,12 +150,12 @@
 
 .appointment-billing-form input {
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--cn-gray-300);
   border-radius: 8px;
 }
 
 .appointment-billing-form small {
-  color: #a1291c;
+  color: var(--cn-red-700);
 }
 
 .appointment-billing-form button {
