@@ -16,7 +16,7 @@ function PaymentSection({ title, state, retry, medicine }) {
       {data.income.undatedSuccessfulCount > 0 && <div className="management-alert error" role="status">{data.income.undatedSuccessfulCount} successful payments have no confirmed date ({money(data.income.undatedSuccessfulAmount)}). Period totals include only known dated receipts.</div>}
       <dl className="role-dashboard-income"><div><dt>Today</dt><dd>{money(data.income.todayAmount)}</dd></div><div><dt>This month</dt><dd>{money(data.income.monthAmount)}</dd></div></dl>
       <p className="role-dashboard-refreshed">As of {new Date(data.income.asOfUtc).toLocaleString('en-LK', { timeZone: 'Asia/Colombo' })} (Sri Lanka)</p>
-      <Queue title="Bank transfers awaiting verification" queue={data.pendingTransfers} link={medicine ? '/pharmacy/payments' : '/pharmacy/appointment-payments'}
+      <Queue title="Bank transfers awaiting verification" queue={data.pendingTransfers} link={medicine ? '/pharmacy/payments' : '/pharmacy/appointment-payments?view=verification'}
         renderRow={p => <><strong>{p.reference}</strong><span>{money(p.amount)} · {statusLabel(p.status)}</span></>} />
       <h3>Recent confirmed payments</h3>{data.recentPayments.length ? <ul className="role-dashboard-payment-list">{data.recentPayments.map(p => <li key={p.id}>
         {medicine ? <Link to={`/pharmacy/payment-transactions/${p.id}`}>{p.reference}</Link> : <strong>{p.reference}</strong>} · {money(p.amount)} · {methodLabel(p.method)} · {dateTime(p.confirmedAtUtc)}
