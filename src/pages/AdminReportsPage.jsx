@@ -1,20 +1,46 @@
 import React, { useEffect, useState } from 'react';
+import { BarChart3, Pill, Stethoscope, RefreshCw, CheckCircle2 } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import { reportingPeriod, loadMedicineReport, loadAppointmentReport } from '../services/adminReportService';
 import { money } from '../components/dashboard/DashboardSectionState';
 import ReportChart from '../components/dashboard/ReportChart';
-import '../styles/role-dashboard.css';
+import './AdminReportsPage.css';
 
 const medicineSeries = [{ key: 'income', label: 'Income', color: '#dc2626' }, { key: 'buyingCost', label: 'Known buying cost', color: '#64748b' }, { key: 'profit', label: 'Estimated gross profit', color: '#15803d' }];
 const consultationSeries = [{ key: 'amount', label: 'Consultation fees collected', color: '#dc2626' }];
 const today = () => new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10);
 const cash = value => value === null ? 'Unavailable' : money(value);
 function ReportSection({ title, state, retry, children, retryLabel }) {
-  return <section className="dashboard-section" aria-label={title}><h2>{title}</h2>
-    {state?.loading !== false ? <p role="status">Loading report…</p> : state.error ? <div role="alert" className="management-alert error"><p>{state.error}</p>
-      <button className="btn btn-secondary" onClick={retry} aria-label={retryLabel}>Retry</button></div> : children}
+  return <section className="admin-report-section" aria-label={title}>
+    {state?.loading !== false ? <p className="admin-report-state" role="status">Loading report…</p> : state.error ? <div role="alert" className="admin-report-error"><p>{state.error}</p>
+      <button type="button" onClick={retry} aria-label={retryLabel}>Retry</button></div> : children}
   </section>;
+}
+function FinancialReport({ medicine, data }) {
+  return <>
+    <div className="admin-report-overview">
+      <section className="admin-report-chart" aria-label={medicine ? 'Medicine performance' : 'Consultation performance'}>
+        <h2>{medicine ? 'Medicine performance' : 'Consultation fees collected'}</h2>
+        <p className="admin-report-caption">{medicine ? 'Daily income, buying cost and estimated profit' : 'Daily confirmed consultation fees collected'}</p>
+        <ReportChart days={data.days} series={medicine ? medicineSeries : consultationSeries} title={medicine ? 'Medicine income, buying cost and estimated profit chart' : 'Total consultation fees collected chart'} />
+      </section>
+      <aside className="admin-report-summary" aria-label="Period summary"><h2>Period summary</h2>
+        <dl><div className="admin-report-income"><dt>{medicine ? 'Paid medicine income' : 'Total consultation fees collected'}</dt><dd>{money(data.income)}</dd></div>
+          {medicine ? <><div className="admin-report-cost"><dt>Known buying cost</dt><dd>{money(data.buyingCost)}</dd></div><div className="admin-report-profit"><dt><CheckCircle2 size={18} aria-hidden="true" />Estimated gross profit</dt><dd>{cash(data.profit)}</dd></div></>
+            : <div className="admin-report-cost"><dt>Successful payments</dt><dd>{data.count}</dd></div>}
+        </dl>
+        {medicine && <p className="admin-report-caption">Before other expenses and refunds.</p>}
+        {medicine && data.missingCostCount > 0 && <p role="status" className="admin-report-cost-note">{data.missingCostCount} paid orders have missing or unverifiable costs, or returned stock. Known buying cost is incomplete; total profit is unavailable.</p>}
+      </aside>
+    </div>
+    <section className="admin-report-breakdown" aria-label={medicine ? 'Daily medicine breakdown' : 'Daily consultation breakdown'}>
+      <header><h2>{medicine ? 'Daily medicine breakdown' : 'Daily consultation breakdown'}</h2><span>{data.days.length} {data.days.length === 1 ? 'day' : 'days'} in this period</span></header>
+      <div className="admin-report-table-scroll" tabIndex={0} role="region" aria-label="Daily report table"><table><thead><tr><th scope="col">Date</th><th scope="col">{medicine ? 'Income (LKR)' : 'Fees collected (LKR)'}</th>{medicine ? <><th scope="col">Known buying cost (LKR)</th><th scope="col">Estimated gross profit (LKR)</th></> : <th scope="col">Payments</th>}</tr></thead>
+        <tbody>{data.days.map(day => <tr key={day.date}><td>{day.date}</td><td>{money(medicine ? day.income : day.amount)}</td>{medicine ? <><td>{money(day.buyingCost)}</td><td className={day.profit > 0 ? 'admin-report-positive' : ''}>{cash(day.profit)}</td></> : <td>{day.count}</td>}</tr>)}</tbody></table></div>
+      <p className="admin-report-caption">All days are included, including days with no payments.</p>
+    </section>
+  </>;
 }
 export default function AdminReportsPage() {
   const { user, role, token, isAuthenticated } = useAuth();
@@ -23,6 +49,7 @@ export default function AdminReportsPage() {
   const [filter, setFilter] = useState(draft);
   const [validation, setValidation] = useState('');
   const [revision, setRevision] = useState(0);
+  const [activeReport, setActiveReport] = useState('medicine');
   const [state, setState] = useState({ key: '', sections: {}, accessDenied: false });
   const period = reportingPeriod(filter.kind, filter.date);
   const key = `${scope}:${period.from}:${period.to}:${revision}`;
@@ -44,39 +71,34 @@ export default function AdminReportsPage() {
     return () => { active = false; };
   }, [key, scope, filter]);
   const current = state.key === key ? state : { sections: {} };
-  const medicine = current.sections.medicine?.data;
-  const appointment = current.sections.appointments?.data;
+  const report = current.sections[activeReport];
+  const isMedicine = activeReport === 'medicine';
   const refresh = () => setRevision(value => value + 1);
-  return <DashboardLayout>
-    <div className="welcome-banner"><h1>Financial Reports</h1><p>Medicine income and estimated gross profit, with consultation fees reported separately.</p></div>
-    {!scope || current.accessDenied ? <p role="alert" className="alert alert-error">Access denied. Please sign in with an authorized Admin account.</p> : <>
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}><form style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'end' }} onSubmit={event => {
-        event.preventDefault(); try { reportingPeriod(draft.kind, draft.date); setValidation(''); setFilter({ ...draft }); } catch (error) { setValidation(error.message); }
+  const switchReport = event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 'medicine' : event.key === 'End' ? 'appointments' : isMedicine ? 'appointments' : 'medicine';
+    setActiveReport(next); document.getElementById(`report-tab-${next}`)?.focus();
+  };
+  return <DashboardLayout><div className="admin-reports">
+    <header className="admin-reports-heading"><div><h1><BarChart3 size={30} aria-hidden="true" />Financial Reports</h1><p>Track medicine income and consultation fees.</p></div><span className="admin-report-period-label">{period.label}</span></header>
+    {!scope || current.accessDenied ? <p role="alert" className="admin-report-error">Access denied. Please sign in with an authorized Admin account.</p> : <>
+      <div className="admin-report-tabs" role="tablist" aria-label="Financial report type" onKeyDown={switchReport}>
+        {[['medicine', 'Medicine report', Pill], ['appointments', 'Consultation report', Stethoscope]].map(([value, label, Icon]) => <button type="button" role="tab" id={`report-tab-${value}`} key={value} aria-selected={activeReport === value} aria-controls="active-report-panel" tabIndex={activeReport === value ? 0 : -1} onClick={() => setActiveReport(value)}><Icon size={21} aria-hidden="true" />{label}</button>)}
+      </div>
+      <section className="admin-report-filters" aria-label="Report filters"><form noValidate onSubmit={event => {
+        event.preventDefault(); try { reportingPeriod(draft.kind, draft.date); setValidation(''); setFilter({ ...draft }); } catch (error) { setValidation(error.message); document.getElementById('report-date')?.focus(); }
       }}>
-        <div className="form-group"><label htmlFor="report-period">Period</label><select className="form-select" id="report-period" value={draft.kind} onChange={event => setDraft(value => ({ ...value, kind: event.target.value }))}>
+        <div><label htmlFor="report-period">Period</label><select id="report-period" value={draft.kind} onChange={event => setDraft(value => ({ ...value, kind: event.target.value }))}>
           <option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
-        <div className="form-group"><label htmlFor="report-date">Date within the period</label><input className="form-input" id="report-date" type="date" required min="2000-01-01" max="2100-12-31" value={draft.date} onChange={event => setDraft(value => ({ ...value, date: event.target.value }))} /></div>
-        <button className="btn btn-primary" type="submit">Apply filters</button><button className="btn btn-secondary" type="button" onClick={refresh}>Refresh reports</button>
-      </form>{validation && <p role="alert">{validation}</p>}<p>Showing {period.label} · Sri Lanka time · LKR. Weeks run Monday to Sunday.</p></div>
-      <ReportSection title="Medicine income and estimated profit" state={current.sections.medicine} retry={refresh} retryLabel="Retry medicine report">
-        {medicine && <>
-          <dl className="role-dashboard-income"><div><dt>Paid medicine income</dt><dd>{money(medicine.income)}</dd></div><div><dt>Known buying cost</dt><dd>{money(medicine.buyingCost)}</dd></div><div><dt>Estimated gross profit</dt><dd>{cash(medicine.profit)}</dd></div></dl>
-          <p>Buying cost covers medicines allocated to paid orders, using their batches’ current purchase prices. Editing a batch price can change past estimates. Other expenses and refunds are not deducted.</p>
-          {medicine.missingCostCount > 0 && <p role="status" className="management-alert error">{medicine.missingCostCount} paid orders have missing or unverifiable costs, or returned stock. Known buying cost is incomplete; total profit is unavailable.</p>}
-          {medicine.undatedSuccessfulCount > 0 && <p role="status">{medicine.undatedSuccessfulCount} successful medicine payments have no confirmed date and are excluded from period reports.</p>}
-          <ReportChart days={medicine.days} series={medicineSeries} title="Medicine income, buying cost and estimated profit chart" />
-          <details><summary>View daily medicine breakdown</summary><div style={{ overflowX: 'auto' }}><table className="data-table"><thead><tr><th>Date</th><th>Income</th><th>Known buying cost</th><th>Estimated gross profit</th></tr></thead><tbody>{medicine.days.map(day => <tr key={day.date}><td>{day.date}</td><td>{money(day.income)}</td><td>{money(day.buyingCost)}</td><td>{cash(day.profit)}</td></tr>)}</tbody></table></div></details>
-        </>}
-      </ReportSection>
-      <ReportSection title="Consultation fees collected" state={current.sections.appointments} retry={refresh} retryLabel="Retry consultation fee report">
-        {appointment && <>
-          <dl className="role-dashboard-income"><div><dt>Total consultation fees collected</dt><dd>{money(appointment.income)}</dd></div><div><dt>Successful payments</dt><dd>{appointment.count}</dd></div></dl>
-          <p>These are gross consultation fees collected. The pharmacy profit cannot be calculated because the pharmacy’s share is unknown. Payments awaiting reconciliation are excluded.</p>
-          {appointment.undatedSuccessfulCount > 0 && <p role="status">{appointment.undatedSuccessfulCount} successful appointment payments have no confirmed date and are excluded from period reports.</p>}
-          <ReportChart days={appointment.days} series={consultationSeries} title="Total consultation fees collected chart" />
-          <details><summary>View daily consultation breakdown</summary><div style={{ overflowX: 'auto' }}><table className="data-table"><thead><tr><th>Date</th><th>Fees collected</th><th>Payments</th></tr></thead><tbody>{appointment.days.map(day => <tr key={day.date}><td>{day.date}</td><td>{money(day.amount)}</td><td>{day.count}</td></tr>)}</tbody></table></div></details>
-        </>}
-      </ReportSection>
+        <div><label htmlFor="report-date">Date within the period</label><input id="report-date" type="date" required min="2000-01-01" max="2100-12-31" aria-invalid={Boolean(validation)} aria-describedby={validation ? 'report-date-error' : undefined} value={draft.date} onChange={event => setDraft(value => ({ ...value, date: event.target.value }))} /></div>
+        <button className="admin-report-apply" type="submit">Apply filters</button><button className="admin-report-refresh" type="button" onClick={refresh}><RefreshCw size={18} aria-hidden="true" />Refresh reports</button>
+      </form>{validation && <p id="report-date-error" role="alert" className="admin-report-validation">{validation}</p>}<p className="admin-report-caption">Showing {period.label} · Sri Lanka time · LKR. Weeks run Monday to Sunday.</p></section>
+      <div role="tabpanel" id="active-report-panel" aria-labelledby={`report-tab-${activeReport}`}>
+        <ReportSection title={isMedicine ? 'Medicine income and estimated profit' : 'Consultation fees collected'} state={report} retry={refresh} retryLabel={isMedicine ? 'Retry medicine report' : 'Retry consultation fee report'}>
+          {report?.data && <FinancialReport medicine={isMedicine} data={report.data} />}
+        </ReportSection>
+      </div>
     </>}
-  </DashboardLayout>;
+  </div></DashboardLayout>;
 }
