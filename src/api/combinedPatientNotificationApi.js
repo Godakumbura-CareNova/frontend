@@ -1,4 +1,5 @@
 import { patientNotificationApi } from './patientNotificationApi';
+import { appointmentPatientNotificationApi } from './appointmentPatientNotificationApi';
 import {
   listPaymentPatientNotifications, markAllPaymentPatientNotificationsRead, markPaymentPatientNotificationRead,
 } from '../services/paymentService';
@@ -12,6 +13,7 @@ const PHARMACY_ORDER_TITLES = {
 
 const PAYMENT_PREFIX = 'payment-';
 const PHARMACY_PREFIX = 'pharmacy-';
+const APPOINTMENT_PREFIX = 'appointment-';
 
 /**
  * The patient's bell: pharmacy-order notifications (prescriptions, orders) plus the doctor-payment service's
@@ -21,13 +23,15 @@ const PHARMACY_PREFIX = 'pharmacy-';
  */
 export const combinedPatientNotificationApi = {
   list: async () => {
-    const [pharmacy, payment] = await Promise.allSettled([patientNotificationApi.list(), listPaymentPatientNotifications()]);
+    const [pharmacy, payment, appointment] = await Promise.allSettled([patientNotificationApi.list(), listPaymentPatientNotifications(), appointmentPatientNotificationApi.list()]);
     const pharmacyItems = pharmacy.status === 'fulfilled' ? pharmacy.value.data : [];
     const paymentItems = payment.status === 'fulfilled' ? payment.value.data : [];
-    if (pharmacy.status === 'rejected' && payment.status === 'rejected') throw pharmacy.reason;
+    const appointmentItems = appointment.status === 'fulfilled' ? appointment.value.data : [];
+    if (pharmacy.status === 'rejected' && payment.status === 'rejected' && appointment.status === 'rejected') throw pharmacy.reason;
 
     const announced = new Set(paymentItems.map((item) => `${item.orderId}:${item.orderStatus}`));
     const merged = [
+      ...appointmentItems.map(item => ({ ...item, id: `${APPOINTMENT_PREFIX}${item.id}` })),
       ...paymentItems.map((item) => ({
         ...item, id: `${PAYMENT_PREFIX}${item.id}`, relatedEntityType: 'Order', relatedEntityId: item.orderId,
       })),
@@ -38,8 +42,10 @@ export const combinedPatientNotificationApi = {
     ];
     return { data: merged.sort((a, b) => new Date(b.createdAtUtc) - new Date(a.createdAtUtc)) };
   },
-  markRead: (id) => (String(id).startsWith(PAYMENT_PREFIX)
+  markRead: (id) => (String(id).startsWith(APPOINTMENT_PREFIX)
+    ? appointmentPatientNotificationApi.markRead(String(id).slice(APPOINTMENT_PREFIX.length))
+    : String(id).startsWith(PAYMENT_PREFIX)
     ? markPaymentPatientNotificationRead(String(id).slice(PAYMENT_PREFIX.length))
     : patientNotificationApi.markRead(String(id).slice(PHARMACY_PREFIX.length))),
-  markAllRead: () => Promise.allSettled([patientNotificationApi.markAllRead(), markAllPaymentPatientNotificationsRead()]),
+  markAllRead: () => Promise.allSettled([patientNotificationApi.markAllRead(), markAllPaymentPatientNotificationsRead(), appointmentPatientNotificationApi.markAllRead()]),
 };
