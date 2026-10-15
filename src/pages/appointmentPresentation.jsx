@@ -1,5 +1,6 @@
 import React from 'react';
 import { CalendarDays, Clock3, CreditCard, Stethoscope } from 'lucide-react';
+import { hasRejectedReceipt } from '../components/appointments/ReceiptRejectionNotice';
 
 const methods = { Cash: 'Cash', BankTransfer: 'Bank transfer', PaymentGateway: 'Online payment' };
 const paymentStatuses = { Pending: 'Pending', AwaitingBankTransferReceipt: 'Awaiting bank transfer receipt', ReceiptUnderVerification: 'Receipt under verification', AwaitingGatewayPayment: 'Awaiting online payment', Successful: 'Successful', Failed: 'Failed' };
@@ -22,7 +23,7 @@ export function AppointmentInformation({ appointment }) {
     [CalendarDays, 'Appointment date', appointmentDate(appointment.appointmentStartUtc)],
     [Clock3, 'Appointment time', `${appointmentDate(appointment.appointmentStartUtc, true)} – ${appointmentDate(appointment.appointmentEndUtc, true)}`],
     [CreditCard, 'Payment method', paymentMethodLabel(appointment.paymentMethod)],
-    [CreditCard, 'Payment status', paymentStatusLabel(appointment.paymentStatus)],
+    [CreditCard, 'Payment status', hasRejectedReceipt(appointment) ? 'Receipt rejected' : paymentStatusLabel(appointment.paymentStatus)],
   ];
   return <div className="order-meta-grid">{fields.map(([Icon, label, value]) => <div key={label}><Icon size={19} aria-hidden="true" /><div><span>{label}</span><strong>{value}</strong></div></div>)}</div>;
 }

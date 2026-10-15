@@ -241,6 +241,9 @@ const DashboardLayout = ({ children }) => {
     if (!notification.isRead) await notificationApi.markRead(notification.id);
     setNotifications(items => items.map(item => item.id === notification.id ? { ...item, isRead: true } : item));
     setNotificationsOpen(false);
+    if (patient && notification.relatedEntityType === 'Appointment') {
+      navigate(`/patient/appointments/${encodeURIComponent(notification.relatedEntityId)}/payment`);
+    }
     // Online payments open the payment transactions, bank transfer notifications the verification page, the rest orders.
     if (pharmacyStaff) {
       navigate(notification.notificationType === 'OnlinePaymentSucceeded' ? '/pharmacy/payment-transactions'

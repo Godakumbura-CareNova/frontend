@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import {
   AlertTriangle,
   Banknote,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import DashboardLayout from '../components/DashboardLayout';
+import ReceiptRejectionNotice, { hasRejectedReceipt } from '../components/appointments/ReceiptRejectionNotice';
 import { getPatientAppointment } from '../services/appointmentService';
 import {
   cancelAppointmentOnlinePayment,
@@ -64,6 +65,7 @@ const wait = (ms) =>
 
 export default function PatientAppointmentPaymentPage() {
   const { appointmentId } = useParams();
+  const { key: navigationKey } = useLocation();
 
   const [payment, setPayment] = useState(null);
   const [appointment, setAppointment] = useState(null);
@@ -106,7 +108,7 @@ export default function PatientAppointmentPaymentPage() {
     setAppointment(null); setPayment(null);
     load();
     return () => { requestSequence.current++; };
-  }, [appointmentId]);
+  }, [appointmentId, navigationKey]);
 
   const chooseMethod = async () => {
     if (!appointment || appointment.status === 'Cancelled') return;
@@ -124,7 +126,7 @@ export default function PatientAppointmentPaymentPage() {
         selected
       );
 
-      setPayment(data);
+      setPayment(current => ({ ...data, latestReceipt: data.latestReceipt ?? (current?.method === data.method ? current.latestReceipt : null) }));
     } catch (failure) {
       setError(
         failure?.response?.data?.message ||
@@ -344,6 +346,8 @@ function BankTransferFlow({
       <Building2 size={30} />
       <h2>Bank transfer</h2>
 
+      <ReceiptRejectionNotice payment={payment} />
+
       <PaymentSummary payment={payment} />
 
       <p>
@@ -379,7 +383,7 @@ function BankTransferFlow({
         disabled={busy}
         onClick={upload}
       >
-        {busy ? 'Uploading...' : 'Upload receipt'}
+        {busy ? 'Uploading...' : hasRejectedReceipt(payment) ? 'Upload another receipt' : 'Upload receipt'}
       </button>
     </section>
   );
@@ -702,7 +706,7 @@ function PaymentSummary({ payment }) {
 
       <div>
         <dt>Status</dt>
-        <dd>{payment.status}</dd>
+        <dd>{hasRejectedReceipt(payment) ? 'Receipt rejected' : payment.status}</dd>
       </div>
     </dl>
   );

@@ -41,6 +41,19 @@ it('does not offer payment if appointment status cannot be loaded', async () => 
 });
 afterEach(cleanup);
 
+it('shows the rejection reason and allows a corrected receipt, clearing old feedback after upload', async () => {
+  api.getAppointmentPayment.mockResolvedValue({ ...payment('BankTransfer', 'AwaitingBankTransferReceipt'), latestReceipt: { status:'Rejected', rejectionReason:'Incorrect amount', reviewedAtUtc:'2026-10-15T07:00:00Z' } });
+  api.uploadAppointmentReceipt.mockImplementation(async () => { api.getAppointmentPayment.mockResolvedValue({ ...payment('BankTransfer', 'ReceiptUnderVerification'), latestReceipt: { status:'PendingVerification', rejectionReason:null } }); });
+  const user = userEvent.setup(); renderPage();
+  expect(await screen.findByRole('heading', { name:'Receipt rejected' })).toBeInTheDocument();
+  expect(screen.getByRole('alert')).toHaveTextContent('Incorrect amount');
+  await user.upload(screen.getByLabelText('Choose receipt'), new File(['%PDF-1.4 test'], 'corrected.pdf', {type:'application/pdf'}));
+  await user.click(screen.getByRole('button', { name:'Upload another receipt' }));
+  expect(api.uploadAppointmentReceipt).toHaveBeenCalledWith('7', expect.any(File));
+  expect(await screen.findByRole('heading', { name:'Receipt under verification' })).toBeInTheDocument();
+  expect(screen.queryByText(/Incorrect amount/)).not.toBeInTheDocument();
+});
+
 it('selects cash for the routed appointment and shows the saved unpaid status', async () => {
   api.getAppointmentPayment.mockRejectedValue({ response: { status: 404 } });
   api.selectAppointmentPaymentMethod.mockResolvedValue(payment()); const user = userEvent.setup(); renderPage();
