@@ -3,6 +3,7 @@ import { CalendarDays, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import usePatientAppointments from '../hooks/usePatientAppointments';
+import ReceiptRejectionNotice from '../components/appointments/ReceiptRejectionNotice';
 import { AppointmentInformation, AppointmentNotice, AppointmentStatus } from './appointmentPresentation';
 import './patientOrders.css';
 import './patientAppointments.css';
@@ -26,6 +27,7 @@ export default function PatientAppointmentsPage() {
         {items.map(appointment => <article className="order-card order-details-summary" key={appointment.id}>
           <div className="order-summary-top"><Link className="appointment-reference" to={`/patient/appointments/${appointment.id}`} aria-label={`View details for ${appointment.appointmentReference}`}>{appointment.appointmentReference}</Link><AppointmentStatus status={appointment.status} /></div>
           <AppointmentInformation appointment={appointment} /><AppointmentNotice appointment={appointment} />
+          <ReceiptRejectionNotice payment={appointment} reuploadTo={appointment.canPay && !error ? `/patient/appointments/${appointment.id}/payment` : null} />
         </article>)}
       </section>;
     })}

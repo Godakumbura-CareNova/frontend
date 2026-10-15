@@ -1,0 +1,9 @@
+.appointment-receipt-rejection { margin: 0 24px 20px; padding: 16px 18px; border: 1px solid var(--cn-red-100); border-radius: 12px; color: var(--cn-red-700); background: var(--cn-red-50); overflow-wrap: anywhere; }
+.appointment-receipt-rejection h3 { margin: 0 0 8px; font-size: 1rem; }
+.appointment-receipt-rejection p { margin: 6px 0; line-height: 1.5; }
+.appointment-receipt-rejection .receipt-reviewed { color: var(--text-muted); font-size: .8rem; }
+.appointment-receipt-rejection a { display: inline-block; margin-top: 8px; font-weight: 700; cursor: pointer; }
+.appointment-receipt-rejection a:hover { text-decoration: underline; }
+.appointment-receipt-rejection a:focus-visible { outline: 3px solid var(--cn-red-600); outline-offset: 3px; }
+.appointment-payment-card > .appointment-receipt-rejection { margin: 16px 0; }
+@media (max-width: 600px) { .appointment-receipt-rejection { margin-inline: 18px; } }
