@@ -34,7 +34,8 @@ it('shows real queues and separates medicine from appointment income', async () 
   expect(screen.getByText(/Out of stock/)).toBeInTheDocument();
   const medicines = screen.getByRole('region', { name: 'Medicine payments and income' });
   const appointments = screen.getByRole('region', { name: 'Appointment payments and income' });
-  expect(within(appointments).getByRole('link', { name: /View all/ })).toHaveAttribute('href', '/pharmacy/appointment-payments?view=verification');
+  const transfers = screen.getByRole('region', { name: 'Bank transfers awaiting verification' });
+  expect(within(transfers).getAllByRole('link', { name: /View all/ })[1]).toHaveAttribute('href', '/pharmacy/appointment-payments?view=verification');
   expect(within(medicines).getAllByText(/100\.00/).length).toBe(2);
   expect(within(appointments).getAllByText(/200\.00/).length).toBe(2);
 });
@@ -46,9 +47,28 @@ it('reports missing payment information without turning its amounts into zero', 
   expect(within(medicines).queryByText(/LKR/)).not.toBeInTheDocument();
   expect(await screen.findByText('Panadol')).toBeInTheDocument();
 });
-it('warns when successful legacy receipts cannot be dated', async () => {
+it('keeps income totals visible without the undated receipt notice', async () => {
   const data = payments(100); data.income.undatedSuccessfulCount = 2; data.income.undatedSuccessfulAmount = 300;
   service.getStaffMedicinePaymentDashboard.mockResolvedValue(data);
   render(<MemoryRouter><PharmacyStaffDashboard /></MemoryRouter>);
-  expect(await screen.findByText(/2 successful payments have no confirmed date/)).toBeInTheDocument();
+  const medicines = await screen.findByRole('region', { name: 'Medicine payments and income' });
+  await screen.findByText('Panadol');
+  expect(within(medicines).getAllByText(/100\.00/)).toHaveLength(2);
+  expect(screen.queryByText(/successful payments have no confirmed date/)).not.toBeInTheDocument();
+});
+
+it('keeps verification and recent payment details separate while one service fails', async () => {
+  const data = payments(100);
+  data.pendingTransfers = { totalCount: 1, items: [{ id: 7, reference: 'CN-PENDING', amount: 50, status: 'ReceiptUnderVerification' }] };
+  data.recentPayments = [{ id: 8, reference: 'CN-PAID', amount: 100, method: 'BankTransfer', confirmedAtUtc: time }];
+  service.getStaffMedicinePaymentDashboard.mockResolvedValue(data);
+  service.getStaffAppointmentPaymentDashboard.mockRejectedValue(new Error());
+  render(<MemoryRouter><PharmacyStaffDashboard /></MemoryRouter>);
+  expect(await screen.findByText('CN-PENDING')).toBeInTheDocument();
+  const transfers = screen.getByRole('region', { name: 'Bank transfers awaiting verification' });
+  expect(within(transfers).getByText('Receipt under verification')).toBeInTheDocument();
+  expect(within(transfers).queryByText('CN-PAID')).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'CN-PAID' })).toHaveAttribute('href', '/pharmacy/payment-transactions/8');
+  expect(screen.getByRole('button', { name: /Retry appointment payments and income/i })).toBeInTheDocument();
+  expect(within(transfers).queryByText('0')).not.toBeInTheDocument();
 });

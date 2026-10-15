@@ -59,8 +59,6 @@
   transition: transform .2s, box-shadow .2s;
 }
 .pharmacy-dashboard .phd-stats .stat-card-link:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(0, 0, 0, .1); }
-.pharmacy-dashboard .phd-stats .stat-card-link::after { content: "→"; position: absolute; top: 14px; right: 16px; color: var(--tone); font-weight: 800; opacity: .5; transition: transform .2s, opacity .2s; }
-.pharmacy-dashboard .phd-stats .stat-card-link:hover::after { opacity: 1; transform: translateX(3px); }
 .pharmacy-dashboard .phd-stats .stat-card-icon { grid-area: icon; width: 48px; height: 48px; margin: 0; border-radius: 14px; color: var(--tone); background: var(--tone-mid); }
 .pharmacy-dashboard .phd-stats .stat-card-value { grid-area: value; font-size: 26px; font-weight: 800; line-height: 1; color: var(--cn-gray-900); }
 .pharmacy-dashboard .phd-stats .stat-card-title { grid-area: title; margin: 0; font-size: 14px; font-weight: 700; color: var(--cn-gray-800); }
@@ -106,6 +104,66 @@
 .pharmacy-dashboard .role-dashboard-section > a { display: inline-block; margin-top: 12px; font-weight: 700; color: var(--cn-green-600); text-decoration: none; }
 .pharmacy-dashboard .role-dashboard-refreshed { font-size: 12px; }
 .pharmacy-dashboard .role-dashboard-section .management-alert.error { border-radius: 12px; }
+
+/* Payments and income: deliberately scoped below the unchanged operations panel. */
+.pharmacy-dashboard .staff-payments { grid-column: 1 / -1; display: grid; gap: 18px; min-width: 0; }
+.pharmacy-dashboard .staff-payments-title h2 { margin: 4px 0; font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.pharmacy-dashboard .staff-payments-title p { margin: 0; color: var(--cn-gray-600); font-size: 14px; }
+.pharmacy-dashboard .staff-payment-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: stretch; }
+.pharmacy-dashboard .staff-income-card { min-width: 0; }
+.pharmacy-dashboard .staff-income-card > .role-dashboard-section { position: relative; height: 100%; box-sizing: border-box; }
+.pharmacy-dashboard .staff-income-card .role-dashboard-heading { padding: 0 0 0 68px; border: 0; margin: 0; min-height: 24px; }
+.pharmacy-dashboard .staff-income-card .role-dashboard-heading h2 { font-size: 18px; }
+.pharmacy-dashboard .staff-income-card .role-dashboard-heading h2::before { display: none; }
+.pharmacy-dashboard .staff-income-description { padding: 4px 0 18px 68px; border-bottom: 1px solid var(--cn-red-100); }
+.pharmacy-dashboard .staff-income-description p { color: var(--cn-gray-600); font-size: 13px; margin: 0; }
+.pharmacy-dashboard .staff-payment-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 50px; width: 50px; height: 50px; border-radius: 50%; background: var(--cn-red-100); color: var(--cn-red-600); }
+.pharmacy-dashboard .staff-income-description .staff-payment-icon { position: absolute; top: 22px; left: 24px; }
+.pharmacy-dashboard .staff-income-totals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; }
+.pharmacy-dashboard .staff-income-totals > div { padding: 16px; background: linear-gradient(140deg, var(--cn-green-50), var(--cn-white)); border: 1px solid var(--cn-green-100); border-radius: 12px; min-width: 0; }
+.pharmacy-dashboard .staff-income-totals > div:last-child { background: linear-gradient(140deg, var(--cn-red-50), var(--cn-white)); border-color: var(--cn-red-100); }
+.pharmacy-dashboard .staff-income-totals dt { font-size: 13px; font-weight: 700; color: var(--cn-gray-800); }
+.pharmacy-dashboard .staff-income-totals dd { margin: 8px 0 0; font-size: clamp(19px, 1.8vw, 28px); font-weight: 800; letter-spacing: -.03em; line-height: 1.2; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.pharmacy-dashboard .staff-payment-timestamp { margin: 12px 0 0; font-size: 12px; color: var(--cn-gray-600); }
+.pharmacy-dashboard .staff-payment-panel { padding: 20px 24px; border: 1px solid var(--cn-gray-200); border-radius: 18px; background: var(--cn-white); box-shadow: var(--cn-shadow); min-width: 0; }
+.pharmacy-dashboard .staff-payment-panel-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; }
+.pharmacy-dashboard .staff-payment-panel-heading h2 { margin: 0; font-size: 18px; font-weight: 800; }
+.pharmacy-dashboard .staff-payment-column { min-width: 0; }
+.pharmacy-dashboard .staff-payment-panel .staff-payment-column + .staff-payment-column { border-left: 1px solid var(--cn-gray-200); padding-left: 22px; }
+.pharmacy-dashboard .staff-payment-subheading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.pharmacy-dashboard .staff-payment-subheading h3 { margin: 0; font-size: 15px; font-weight: 800; }
+.pharmacy-dashboard .staff-payments a { color: var(--cn-red-600); font-size: 13px; font-weight: 600; cursor: pointer; }
+.pharmacy-dashboard .staff-payments a:hover { color: var(--cn-red-700); text-decoration: underline; }
+.pharmacy-dashboard .staff-payments :is(a, button, [tabindex]):focus-visible { outline: 3px solid var(--cn-green-600); outline-offset: 3px; border-radius: 4px; }
+.pharmacy-dashboard .staff-payments a:active { color: var(--cn-gray-900); }
+.pharmacy-dashboard .staff-payment-count { margin: 0 0 8px; font-size: 12px; color: var(--cn-gray-600); }
+.pharmacy-dashboard .staff-transfer-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.pharmacy-dashboard .staff-transfer-list li { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; padding: 14px; background: var(--cn-gray-50); border: 1px solid var(--cn-gray-200); border-radius: 12px; font-size: 13px; overflow-wrap: anywhere; }
+.pharmacy-dashboard .staff-transfer-list strong { color: var(--cn-red-600); }
+.pharmacy-dashboard .staff-payment-badge { display: inline-flex; padding: 5px 12px; border-radius: 999px; background: var(--cn-amber-50); border: 1px solid var(--cn-amber-100); color: var(--cn-amber-800); font-size: 12px; font-weight: 600; }
+.pharmacy-dashboard .staff-transfer-empty { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0; padding: 18px; border: 1px solid var(--cn-green-100); border-radius: 12px; background: var(--cn-green-50); color: var(--cn-green-700); font-size: 13px; }
+.pharmacy-dashboard .staff-transfer-empty svg { flex-shrink: 0; }
+.pharmacy-dashboard .staff-payment-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 126px; margin: 0; padding: 16px; text-align: center; color: var(--cn-gray-600); font-size: 13px; }
+.pharmacy-dashboard .staff-payment-empty strong { color: var(--cn-gray-900); font-size: 15px; }
+.pharmacy-dashboard .staff-payment-empty p { margin: 0; }
+.pharmacy-dashboard .staff-payment-table-scroll { overflow-x: auto; }
+.pharmacy-dashboard .staff-payment-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+.pharmacy-dashboard .staff-payment-table th { padding: 9px 10px; background: var(--cn-gray-100); color: var(--cn-gray-600); font-weight: 600; white-space: nowrap; }
+.pharmacy-dashboard .staff-payment-table td { padding: 12px 10px; border-bottom: 1px solid var(--cn-gray-200); vertical-align: top; }
+.pharmacy-dashboard .staff-payment-table td:first-child { overflow-wrap: anywhere; min-width: 90px; }
+.pharmacy-dashboard .staff-payment-table td:nth-child(2) { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 1100px) {
+  .pharmacy-dashboard .staff-payment-columns { grid-template-columns: 1fr; }
+  .pharmacy-dashboard .staff-payment-panel .staff-payment-column + .staff-payment-column { border-left: 0; border-top: 1px solid var(--cn-gray-200); padding: 18px 0 0; }
+}
+@media (max-width: 480px) {
+  .pharmacy-dashboard .staff-payment-panel,
+  .pharmacy-dashboard .staff-income-card > .role-dashboard-section { padding: 18px 16px; }
+  .pharmacy-dashboard .staff-income-description .staff-payment-icon { top: 18px; left: 16px; }
+  .pharmacy-dashboard .staff-income-totals { grid-template-columns: 1fr; }
+  .pharmacy-dashboard .staff-payment-panel-heading h2 { flex: 1; font-size: 16px; }
+}
 
 @media (max-width: 1100px) {
   .pharmacy-dashboard .phd-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
