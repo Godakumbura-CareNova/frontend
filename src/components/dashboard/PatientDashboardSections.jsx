@@ -26,7 +26,7 @@ export default function PatientDashboardSections({ dashboard }) {
 
   return <>
     <div className="pd-activity-grid">
-      <DashboardSectionState title="Recent medicine orders" state={sections.orders} retry={() => refreshSection('orders')} link="/patient/orders" linkText="View all orders">
+      <DashboardSectionState title="Recent medicine orders" state={sections.orders} retry={() => refreshSection('orders')} link="/patient/orders" linkText="View all orders" showArrow={false}>
         {orders?.recentOrders.length ? <>
           <div className="pd-table-scroll" role="region" aria-label="Recent medicine orders table" tabIndex={0}>
             <table className="pd-orders-table">
@@ -47,7 +47,7 @@ export default function PatientDashboardSections({ dashboard }) {
         </> : <p className="empty-state">No medicine orders yet.</p>}
       </DashboardSectionState>
 
-      <DashboardSectionState title="Upcoming appointments" state={sections.appointments} retry={() => refreshSection('appointments')} link={appointments ? '/patient/appointments' : null} linkText="View all appointments">
+      <DashboardSectionState title="Upcoming appointments" state={sections.appointments} retry={() => refreshSection('appointments')} link={appointments ? '/patient/appointments' : null} linkText="View all appointments" showArrow={false}>
         {appointments?.appointments.length ? <>
           <div className="pd-appointment-list">{appointments.appointments.map(item => <article className="pd-appointment" key={item.id}>
             <div className="pd-date-tile" aria-hidden="true"><strong>{new Date(item.startUtc).getDate()}</strong><span>{new Date(item.startUtc).toLocaleDateString(undefined, { month: 'short' })}</span></div>

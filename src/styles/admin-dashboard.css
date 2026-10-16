@@ -1,0 +1,101 @@
+/* Admin dashboard follows the pharmacy workspace without changing shared pages. */
+.admin-dashboard { display: grid; gap: 18px; }
+.admin-dashboard .ad-hero { position: relative; padding-right: 280px; overflow: hidden; border: 1px solid var(--cn-gray-200); border-radius: 20px; background: radial-gradient(circle at 78% -20%, var(--cn-red-50) 0 160px, transparent 161px), radial-gradient(circle at 0% 120%, var(--cn-green-50) 0 140px, transparent 141px), var(--cn-white); box-shadow: var(--cn-shadow); }
+.admin-dashboard .ad-hero::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 6px; background: linear-gradient(var(--cn-red-600), var(--cn-green-600)); }
+.admin-dashboard .ad-hero-copy { padding: 26px 28px 26px 34px; }
+.admin-dashboard .ad-eyebrow { color: var(--cn-green-600); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.admin-dashboard .ad-hero h1 { margin: 6px 0 0; font-size: clamp(24px, 2.6vw, 32px); font-weight: 800; line-height: 1.2; }
+.admin-dashboard .welcome-name { color: var(--cn-red-600); }
+.admin-dashboard .ad-hero p { margin: 8px 0 0; color: var(--cn-gray-600); }
+.admin-dashboard .ad-date { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--cn-green-700); background: var(--cn-green-50); border: 1px solid var(--cn-green-100); }
+.admin-dashboard .ad-shortcuts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.admin-dashboard .ad-shortcut { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; border: 1px solid transparent; }
+.admin-dashboard .ad-shortcut-red { color: var(--cn-white); background: var(--cn-red-600); }
+.admin-dashboard .ad-shortcut-green { color: var(--cn-white); background: var(--cn-green-600); }
+.admin-dashboard .ad-shortcut-outline { color: var(--cn-red-600); background: var(--cn-white); border-color: var(--cn-red-200); }
+.admin-dashboard .ad-shortcut:hover { filter: brightness(.95); }
+.admin-dashboard .ad-hero-photo { position: absolute; top: 0; right: 0; width: 300px; height: 100%; object-fit: cover; object-position: 30% 35%; mask-image: linear-gradient(to right, transparent, #000 28%); }
+.admin-dashboard .ad-section-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.admin-dashboard .ad-section-heading h2, .admin-dashboard .ad-section-title { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 18px; font-weight: 800; }
+.admin-dashboard .ad-section-heading h2::before, .admin-dashboard .ad-section-title::before { content: ''; width: 4px; height: 20px; flex-shrink: 0; border-radius: 4px; background: var(--cn-red-600); }
+.admin-dashboard .ad-refresh { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--cn-gray-200); border-radius: 9px; background: var(--cn-white); color: var(--cn-green-700); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.admin-dashboard .ad-refresh:hover { background: var(--cn-green-50); border-color: var(--cn-green-600); }
+.admin-dashboard .ad-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.admin-dashboard .ad-stats .stat-card { --ad-tone: var(--cn-red-600); --ad-soft: var(--cn-red-50); --ad-mid: var(--cn-red-100); display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-areas: 'icon value' 'title title'; align-items: center; gap: 10px 14px; padding: 18px; border: 1px solid var(--cn-gray-200); border-top: 4px solid var(--ad-tone); border-radius: 16px; background: linear-gradient(160deg, var(--ad-soft), var(--cn-white) 55%); box-shadow: var(--cn-shadow); }
+.admin-dashboard .ad-stats .stat-card:nth-child(2), .admin-dashboard .ad-stats .stat-card:nth-child(4), .admin-dashboard .ad-stats .stat-card:nth-child(7) { --ad-tone: var(--cn-green-600); --ad-soft: var(--cn-green-50); --ad-mid: var(--cn-green-100); }
+.admin-dashboard .ad-stats .stat-card:nth-child(6), .admin-dashboard .ad-stats .stat-card:nth-child(8), .admin-dashboard .ad-stats .stat-card:nth-child(9) { --ad-tone: var(--cn-amber-600); --ad-soft: var(--cn-amber-50); --ad-mid: var(--cn-amber-100); }
+.admin-dashboard .ad-stats .stat-card-icon { grid-area: icon; width: 48px; height: 48px; margin: 0; border-radius: 14px; background: var(--ad-mid); color: var(--ad-tone); }
+.admin-dashboard .ad-stats .stat-card-value { grid-area: value; margin: 0; color: var(--cn-gray-900); font-size: clamp(19px, 2vw, 27px); font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.admin-dashboard .ad-stats .stat-card-title { grid-area: title; margin: 0; font-size: 14px; font-weight: 700; color: var(--cn-gray-800); }
+.admin-dashboard .ad-stats .stat-card:hover { transform: translateY(-2px); }
+.admin-dashboard :is(a, button, [tabindex]):focus-visible { outline: 3px solid var(--cn-green-600); outline-offset: 3px; }
+.admin-dashboard a:active { opacity: .85; }
+.admin-dashboard .dashboard-section { margin: 0; padding: 22px 24px; border: 1px solid var(--cn-gray-200); border-radius: 18px; background: var(--cn-white); box-shadow: var(--cn-shadow); min-width: 0; }
+.admin-dashboard .dashboard-section > h2 { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; margin: 0 0 16px; border-bottom: 1px dashed var(--cn-gray-200); font-size: 17px; font-weight: 800; }
+.admin-dashboard .dashboard-section > h2::before { content: ''; width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: var(--cn-green-600); box-shadow: 0 0 0 4px var(--cn-green-100); }
+.admin-dashboard .ad-quick-links .quicklink-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.admin-dashboard .ad-quick-links .quicklink-card { padding: 18px; background: var(--cn-gray-50); border: 1px solid var(--cn-gray-200); box-shadow: none; border-radius: 12px; }
+.admin-dashboard .ad-quick-links .quicklink-card:hover { border-color: var(--cn-red-200); background: var(--cn-red-50); }
+.admin-dashboard .quicklink-card-title { font-size: 15px; font-weight: 800; }
+.admin-dashboard .quicklink-card-subtitle { font-size: 13px; line-height: 1.5; }
+.admin-dashboard .role-dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.admin-dashboard .role-dashboard-section > p { color: var(--cn-gray-600); font-size: 13px; line-height: 1.6; }
+.admin-dashboard .role-dashboard-section > a { display: inline-block; margin-top: 12px; color: var(--cn-green-700); font-size: 13px; font-weight: 700; }
+.admin-dashboard .role-dashboard-section a:hover { color: var(--cn-red-600); text-decoration: underline; }
+.admin-dashboard .role-dashboard-section h3 { font-size: 14px; font-weight: 800; margin: 18px 0 10px; }
+.admin-dashboard .role-dashboard-statuses { gap: 8px; margin: 10px 0 16px; }
+.admin-dashboard .ad-status { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 7px 10px; border-radius: 9px; font-size: 12px; }
+.admin-dashboard .ad-status-success { color: var(--cn-green-700); background: var(--cn-green-50); }
+.admin-dashboard .ad-status-danger { color: var(--cn-red-700); background: var(--cn-red-50); }
+.admin-dashboard .ad-status-pending { color: var(--cn-amber-800); background: var(--cn-amber-50); }
+.admin-dashboard .management-list { display: grid; gap: 10px; }
+.admin-dashboard .role-dashboard-row { padding: 14px; background: var(--cn-gray-50); border: 1px solid var(--cn-gray-200); border-left: 4px solid var(--cn-red-600); border-radius: 11px; }
+.admin-dashboard .role-dashboard-row strong { font-size: 14px; }
+.admin-dashboard .role-dashboard-row span { font-size: 12px; color: var(--cn-gray-600); line-height: 1.6; }
+.admin-dashboard .ad-low-stock { margin-top: 20px; padding: 16px; border: 1px solid var(--cn-amber-100); border-radius: 12px; background: var(--cn-amber-50); }
+.admin-dashboard .ad-low-stock h3 { margin-top: 0; }
+.admin-dashboard .ad-low-stock .role-dashboard-row { background: var(--cn-white); border-left-color: var(--cn-amber-600); }
+.admin-dashboard .empty-state { padding: 14px; border: 1px solid var(--cn-green-100); border-radius: 10px; background: var(--cn-green-50); color: var(--cn-green-700); font-size: 13px; }
+.admin-dashboard #admin-income { display: grid; gap: 18px; min-width: 0; }
+.admin-dashboard .ad-income-intro { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--cn-red-100); }
+.admin-dashboard .ad-income-intro h3 { margin: 0; font-size: 14px; }
+.admin-dashboard .ad-income-intro p { color: var(--cn-gray-600); margin: 4px 0 0; font-size: 12px; line-height: 1.5; }
+.admin-dashboard .ad-payment-icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%; color: var(--cn-red-600); background: var(--cn-red-100); }
+.admin-dashboard .role-dashboard-income { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; }
+.admin-dashboard .role-dashboard-income > div { padding: 16px; border: 1px solid var(--cn-green-100); border-radius: 12px; background: linear-gradient(140deg, var(--cn-green-50), var(--cn-white)); }
+.admin-dashboard .role-dashboard-income > div:last-child { border-color: var(--cn-red-100); background: linear-gradient(140deg, var(--cn-red-50), var(--cn-white)); }
+.admin-dashboard .role-dashboard-income dt { font-size: 13px; font-weight: 700; }
+.admin-dashboard .role-dashboard-income dd { margin: 8px 0 0; font-size: clamp(19px, 1.8vw, 27px); font-weight: 800; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.admin-dashboard .ad-payment-summary { margin-top: 18px; }
+.admin-dashboard .ad-payment-summary p { margin: 0; color: var(--cn-gray-600); font-size: 13px; }
+.admin-dashboard .ad-verification { padding: 16px; margin-top: 16px; border: 1px solid var(--cn-gray-200); border-radius: 12px; background: var(--cn-gray-50); }
+.admin-dashboard .ad-verification h3, .admin-dashboard .ad-recent-heading { display: flex; align-items: center; gap: 8px; }
+.admin-dashboard .ad-verification h3 { margin: 0; }
+.admin-dashboard .ad-verification p { font-size: 13px; color: var(--cn-gray-600); margin: 8px 0 0; }
+.admin-dashboard .role-dashboard-payment-list { padding: 0; margin: 12px 0 0; list-style: none; display: grid; gap: 8px; }
+.admin-dashboard .role-dashboard-payment-list li { padding: 12px; margin: 0; font-size: 12px; line-height: 1.6; border: 1px solid var(--cn-gray-200); border-radius: 9px; background: var(--cn-white); }
+.admin-dashboard .ad-table-scroll { overflow-x: auto; }
+.admin-dashboard .ad-payments-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.admin-dashboard .ad-payments-table th { text-align: left; padding: 10px; color: var(--cn-gray-600); background: var(--cn-gray-100); font-weight: 600; }
+.admin-dashboard .ad-payments-table td { padding: 12px 10px; border-bottom: 1px solid var(--cn-gray-200); vertical-align: top; }
+.admin-dashboard .ad-payments-table td:first-child { overflow-wrap: anywhere; min-width: 90px; }
+.admin-dashboard .ad-payments-table td:nth-child(2) { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.admin-dashboard .ad-payments-table a { color: var(--cn-red-600); font-weight: 600; }
+.admin-dashboard .role-dashboard-section .role-dashboard-refreshed { font-size: 11px; color: var(--cn-gray-600); margin-top: 16px; }
+.admin-dashboard .management-alert.error { padding: 14px; border-radius: 12px; font-size: 13px; }
+@media (max-width: 1050px) {
+  .admin-dashboard .ad-hero { padding-right: 0; }
+  .admin-dashboard .ad-hero-photo { display: none; }
+  .admin-dashboard .ad-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-dashboard .role-dashboard-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .admin-dashboard .ad-stats, .admin-dashboard .ad-quick-links .quicklink-row, .admin-dashboard .role-dashboard-income { grid-template-columns: 1fr; }
+  .admin-dashboard .ad-hero-copy { padding: 22px; }
+  .admin-dashboard .dashboard-section { padding: 18px; }
+  .admin-dashboard .ad-shortcut { flex: 1 1 auto; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-dashboard .stat-card { transition: none; }
+  .admin-dashboard .ad-stats .stat-card:hover { transform: none; }
+}

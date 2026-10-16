@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Pill, Stethoscope, Calendar, ShoppingBag, CreditCard, ArrowRight, FileCheck, User } from 'lucide-react';
+import { Heart, Pill, Stethoscope, Calendar, ShoppingBag, CreditCard, FileCheck, User } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
 import StatCard from '../components/StatCard';
 import { PublicCards } from '../components/home/PublicCards';
@@ -45,8 +45,8 @@ export default function HomePage() {
       <p>Manage your medicines and appointments in one place.</p>
       <h2 className="pd-sr-only">Quick Links</h2>
       <div className="pd-hero-actions">
-        <Link to="/patient/medicines" aria-label="Medicines Browse and order medicines"><Pill size={18} aria-hidden="true" />Browse medicines<ArrowRight size={16} aria-hidden="true" /></Link>
-        <Link to="/patient/doctors"><Stethoscope size={18} aria-hidden="true" />Find a doctor<ArrowRight size={16} aria-hidden="true" /></Link>
+        <Link to="/patient/medicines" aria-label="Medicines Browse and order medicines"><Pill size={18} aria-hidden="true" />Browse medicines</Link>
+        <Link to="/patient/doctors"><Stethoscope size={18} aria-hidden="true" />Find a doctor</Link>
       </div>
     </section>
     <div className="stat-card-grid">
@@ -54,7 +54,7 @@ export default function HomePage() {
       <StatCard to="/patient/appointments" icon={Calendar} title="Upcoming Appointments" value={isPatient ? dashboard.sections.appointments?.data?.upcomingCount ?? 'Unavailable' : undefined} />
       <StatCard to={isPatient ? '#patient-payment-statuses' : '/login'} icon={CreditCard} title="Payment Statuses" value={isPatient ? 'See summary' : undefined} />
     </div>
-    <a className="pd-quick-jump" href="#dashboard-quick-links">Quick Links <ArrowRight size={14} aria-hidden="true" /></a>
+    <a className="pd-quick-jump" href="#dashboard-quick-links">Quick Links</a>
     </>}
     {isPatient && <PatientDashboardSections dashboard={dashboard} />}
     {loading && <p role="status">Loading pharmacy information…</p>}
@@ -69,8 +69,8 @@ export default function HomePage() {
       </div></section>
       {!!data.sectionErrors?.length && <section className="management-alert error" role="alert">{data.sectionErrors.map(message => <p key={message}>{message}</p>)}<button className="btn" onClick={retry}>Retry</button></section>}
       <div className="pd-featured-grid">
-        <section className="dashboard-section"><h2>Featured medicines</h2><PublicCards kind="medicines" items={data.featuredMedicines} /><Link className="pd-browse" to="/patient/medicines">Browse all medicines →</Link></section>
-        <section className="dashboard-section"><h2>Featured doctors</h2><PublicCards kind="doctors" items={data.featuredDoctors} /><Link className="pd-browse" to="/patient/doctors">Browse all doctors →</Link></section>
+        <section className="dashboard-section"><h2>Featured medicines</h2><PublicCards kind="medicines" items={data.featuredMedicines} showArrow={false} /><Link className="pd-browse" to="/patient/medicines">Browse all medicines</Link></section>
+        <section className="dashboard-section"><h2>Featured doctors</h2><PublicCards kind="doctors" items={data.featuredDoctors} showArrow={false} /><Link className="pd-browse" to="/patient/doctors">Browse all doctors</Link></section>
       </div>
       <section className="dashboard-section pd-notices"><FileCheck size={28} aria-hidden="true" /><div><h2 className="pd-sr-only">Notices & announcements</h2>
         {data.notices?.length ? data.notices.map(notice => <article key={notice.title}><h3>{notice.title}</h3><p>{notice.message}</p></article>) : <p>No announcements at the moment.</p>}

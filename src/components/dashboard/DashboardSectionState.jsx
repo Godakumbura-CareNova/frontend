@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export function DashboardSectionState({ id, title, state, retry, children, link, linkText = 'View all' }) {
+export function DashboardSectionState({ id, title, state, retry, children, link, linkText = 'View all', showArrow = true }) {
   return <section id={id} className="dashboard-section role-dashboard-section" aria-label={title}>
-    <div className="role-dashboard-heading"><h2>{title}</h2>{link && <Link to={link}>{linkText} →</Link>}</div>
+    <div className="role-dashboard-heading"><h2>{title}</h2>{link && <Link to={link}>{linkText}{showArrow && ' →'}</Link>}</div>
     {!state || state.loading ? <p role="status">Loading {title.toLowerCase()}…</p>
       : state.error ? <div className="management-alert error" role="alert"><p>{state.error}</p><button type="button" className="secondary-action" aria-label={`Retry ${title.toLowerCase()}`} onClick={retry}>Retry</button></div>
         : children}

@@ -1,7 +1,7 @@
 /* Bank transfer verification (GCN-40, redesigned for GCN-42) in the GCN-43 transaction style: red hero, white cards,
    green for approved, red for rejected, yellow for pending. */
 
-.btv-page {
+.btv-page, .btv-overlay-root {
   --btv-green: var(--cn-green-700);
   --btv-green-dark: var(--cn-green-900);
   --btv-green-soft: var(--cn-green-50);
@@ -15,6 +15,8 @@
   --btv-yellow-soft: var(--cn-amber-100);
   --btv-yellow-border: var(--cn-amber-200);
   --btv-line: var(--cn-gray-200);
+}
+.btv-page {
   max-width: 1180px;
   padding: 28px 24px 56px;
   animation: btv-fade-in .35s ease both;
@@ -108,16 +110,19 @@
 /* Review popup */
 .btv-modal-backdrop {
   position: fixed; inset: 0; z-index: 1000; display: flex; justify-content: center; align-items: flex-start;
-  padding: 32px 16px; overflow-y: auto; background: rgba(20, 83, 45, .55); animation: btv-fade-in .2s ease both;
+  box-sizing: border-box; padding: 32px 16px; overflow-y: auto; overscroll-behavior: contain;
+  background: rgba(20, 83, 45, .55);
 }
 .btv-review {
-  position: relative; width: 100%; max-width: 1040px; padding: 22px 24px; background: var(--cn-white);
+  position: relative; flex-shrink: 0; box-sizing: border-box; width: 100%; max-width: 1040px; margin: auto 0; padding: 22px 24px; background: var(--cn-white);
   border: 1px solid var(--btv-green-border); border-top: 5px solid var(--btv-green); border-radius: 16px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .25); animation: btv-pop .22s ease both;
 }
 @keyframes btv-pop { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
 /* The approve confirmation opens from the popup, so it must sit above it (the shared dialog uses z-index 300). */
-.btv-page .confirm-dialog-backdrop { z-index: 1100; }
+.btv-overlay-root .confirm-dialog-backdrop { z-index: 1100; }
+.btv-overlay-root :is(button, a, textarea, [tabindex]):focus-visible { outline: 3px solid var(--btv-green); outline-offset: 3px; }
+.btv-items-scroll { max-width: 100%; overflow-x: auto; }
 .btv-close {
   position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 36px; height: 36px;
   color: var(--btv-red); background: var(--cn-white); border: 1px solid var(--btv-red-border); border-radius: 50%; cursor: pointer;
@@ -128,6 +133,7 @@
 .btv-review-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-right: 44px; }
 .btv-review-eyebrow { margin: 0; color: var(--btv-red); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .btv-review-header h2 { margin: 4px 0 8px; font-size: 1.4rem; }
+.btv-review-header > div { min-width: 0; overflow-wrap: anywhere; }
 .btv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .btv-review-amount { display: grid; gap: 2px; padding: 10px 16px; text-align: right; background: var(--btv-green-soft); border: 1px solid var(--btv-green-border); border-radius: 12px; }
 .btv-review-amount span { color: var(--text-muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
@@ -219,4 +225,8 @@
   .btv-review-header { flex-direction: column; }
   .btv-steps { grid-template-columns: 1fr; gap: 12px; }
   .btv-info, .btv-form { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btv-page, .btv-review, .btv-reject { animation: none; }
+  .btv-overlay-root .btv-steps li.current > span { animation: none; }
 }

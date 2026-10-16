@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Pill, CalendarDays, Landmark, FileCheck2 } from 'lucide-react';
 import { money, statusLabel, methodLabel } from './DashboardSectionState';
 import '../../styles/role-dashboard.css';
 
@@ -17,24 +18,26 @@ function Section({ id, title, state, retry, children, fallbackAnchor }) {
   </section>;
 }
 function StatusCounts({ counts }) {
-  return <div className="role-dashboard-statuses">{Object.entries(counts).map(([status, count]) => <span key={status}>{statusLabel(status)}: <strong>{count}</strong></span>)}</div>;
+  return <div className="role-dashboard-statuses">{Object.entries(counts).map(([status, count]) => <span className={`ad-status ad-status-${['Paid', 'Successful', 'Completed', 'Collected', 'Confirmed', 'Booked'].includes(status) ? 'success' : ['Rejected', 'ReceiptRejected', 'Failed', 'Cancelled', 'NoShow'].includes(status) ? 'danger' : 'pending'}`} key={status}>{statusLabel(status)}: <strong>{count}</strong></span>)}</div>;
 }
 function PaymentSection({ title, state, retry, medicine }) {
   const data = state?.data;
+  const Icon = medicine ? Pill : CalendarDays;
   return <Section title={title} state={state} retry={retry}>
     {data && <>
-      <h3>Payment summary</h3><p>{data.totalPayments} transactions</p><StatusCounts counts={data.statusCounts} />
-      <h3>Gross confirmed receipts</h3><p>Calendar periods in Sri Lanka time · LKR. Gross receipts, before any refunds.</p>
+      <div className="ad-income-intro"><span className="ad-payment-icon"><Icon size={23} aria-hidden="true" /></span><div><h3>Gross confirmed receipts</h3><p>Calendar periods in Sri Lanka time · LKR. Gross receipts, before any refunds.</p></div></div>
       {data.income.undatedSuccessfulCount > 0 && <p role="status" className="management-alert error">{data.income.undatedSuccessfulCount} successful payments have no confirmed date ({money(data.income.undatedSuccessfulAmount)}). Period totals include only known dated receipts.</p>}
       <dl className="role-dashboard-income"><div><dt>Today</dt><dd>{money(data.income.todayAmount)}</dd></div><div><dt>This month</dt><dd>{money(data.income.monthAmount)}</dd></div></dl>
       <p className="role-dashboard-refreshed">As of {dateTime(data.income.asOfUtc)} (Sri Lanka)</p>
-      <h3>Bank transfers awaiting verification</h3><p>{data.pendingTransfers.totalCount} uploaded receipts awaiting review</p>
+      <div className="ad-payment-summary"><h3>Payment summary</h3><p>{data.totalPayments} transactions</p><StatusCounts counts={data.statusCounts} /></div>
+      <div className="ad-verification"><h3><Landmark size={18} aria-hidden="true" />Bank transfers awaiting verification</h3><p>{data.pendingTransfers.totalCount} uploaded receipts awaiting review</p>
       {data.pendingTransfers.items.length > 0 && <ul className="role-dashboard-payment-list">{data.pendingTransfers.items.map(p => <li key={p.id}>{p.reference} · {money(p.amount)} · {statusLabel(p.status)}</li>)}</ul>}
-      <h3>Recent confirmed payments</h3>
-      {data.recentPayments.length ? <ul className="role-dashboard-payment-list">{data.recentPayments.map(p => <li key={p.id}>
-        {medicine ? <Link to={`/admin/payments/${p.id}`}>{p.reference}</Link> : <strong>{p.reference}</strong>} · {money(p.amount)} · {methodLabel(p.method)} · {dateTime(p.confirmedAtUtc)}
-      </li>)}</ul> : <p className="empty-state">No dated confirmed payments available.</p>}
-      {medicine && <Link to="/admin/payments">View all medicine payments →</Link>}
+      </div>
+      <h3 className="ad-recent-heading"><FileCheck2 size={18} aria-hidden="true" />Recent confirmed payments</h3>
+      {data.recentPayments.length ? <div className="ad-table-scroll" tabIndex={0} role="region" aria-label={`${medicine ? 'Medicine' : 'Appointment'} confirmed payments`}><table className="ad-payments-table"><thead><tr><th scope="col">Reference</th><th scope="col">Amount</th><th scope="col">Method</th><th scope="col">Confirmed</th></tr></thead><tbody>{data.recentPayments.map(p => <tr key={p.id}>
+        <td>{medicine ? <Link to={`/admin/payments/${p.id}`}>{p.reference}</Link> : <strong>{p.reference}</strong>}</td><td>{money(p.amount)}</td><td>{methodLabel(p.method)}</td><td>{dateTime(p.confirmedAtUtc)}</td>
+      </tr>)}</tbody></table></div> : <p className="empty-state">No dated confirmed payments available.</p>}
+      {medicine && <Link className="ad-all-payments" to="/admin/payments">View all medicine payments</Link>}
     </>}
   </Section>;
 }
@@ -45,7 +48,7 @@ export default function AdminDashboardSections({ dashboard }) {
   return <>
     <Section title="User statistics" state={sections.users} retry={() => refreshSection('users')}>
       <p>Registered account totals above include inactive accounts. Total users also includes administrators and other historical roles.</p>
-      <Link to="/admin/users">Manage registered users →</Link>
+      <Link to="/admin/users">Manage registered users</Link>
     </Section>
     <div className="role-dashboard-grid">
       <Section id="admin-orders" fallbackAnchor="admin-low-stock" title="Medicine order activity" state={sections.operations} retry={() => refreshSection('operations')}>
@@ -53,7 +56,7 @@ export default function AdminDashboardSections({ dashboard }) {
           {operations.recentOrders.length ? <div className="management-list">{operations.recentOrders.map(o => <article className="list-row role-dashboard-row" key={o.id}><div>
             <strong>{o.reference}</strong><span>{dateTime(o.orderDate)} · {money(o.totalAmount)}</span><span>{statusLabel(o.status)}</span>
           </div></article>)}</div> : <p className="empty-state">No medicine orders yet.</p>}
-          <section id="admin-low-stock" aria-label="Low-stock alerts"><h3>Low-stock alerts ({operations.lowStock.totalCount})</h3>
+          <section id="admin-low-stock" className="ad-low-stock" aria-label="Low-stock alerts"><h3>Low-stock alerts ({operations.lowStock.totalCount})</h3>
             {operations.lowStock.items.length ? <div className="management-list">{operations.lowStock.items.map(m => <article className="list-row role-dashboard-row" key={m.medicineId}><div>
               <strong>{m.medicineName}</strong><span>{m.quantity === 0 ? 'Out of stock' : `${m.quantity} units remaining`} · Alert threshold: {m.threshold}</span>
             </div></article>)}</div> : <p className="empty-state">No low-stock alerts.</p>}
@@ -70,7 +73,7 @@ export default function AdminDashboardSections({ dashboard }) {
         </>}
       </Section>
     </div>
-    <div id="admin-income"><h2>Sales totals and payments</h2><div id="admin-payment-summary" className="role-dashboard-grid">
+    <div id="admin-income"><h2 className="ad-section-title">Sales totals and payments</h2><div id="admin-payment-summary" className="role-dashboard-grid">
       <PaymentSection title="Medicine payments and income" state={sections.medicinePayments} retry={() => refreshSection('medicinePayments')} medicine />
       <PaymentSection title="Appointment payments and income" state={sections.appointmentPayments} retry={() => refreshSection('appointmentPayments')} />
     </div></div>
