@@ -31,6 +31,20 @@ it('shows appointment patient, doctor and unavailable payment plus lookup warnin
   expect(screen.getByText('APT-1')).toBeInTheDocument(); expect(screen.getByText(/Some patient names/)).toBeInTheDocument();
   expect(screen.getByText('Dr Green')).toBeInTheDocument();
 });
+it('preserves appointment paging and search, and clears back to page one', async () => {
+  loadAdminDirectory.mockResolvedValue({ ...result([{ id: 1, reference: 'APT-1', doctorName: 'Dr Green', patientName: 'Patient One', startUtc: '2026-10-12T06:00:00Z', status: 'Cancelled', paymentMethod: 'PaymentGateway', paymentStatus: 'Failed' }]), totalCount: 21, totalPages: 2 });
+  show('appointments'); await screen.findByText('APT-1');
+  expect(screen.getByText('Cancelled')).toBeInTheDocument();
+  expect(screen.getByText('Failed')).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+  await waitFor(() => expect(loadAdminDirectory).toHaveBeenLastCalledWith('appointments', expect.objectContaining({ page: 2 })));
+  await userEvent.type(screen.getByRole('searchbox'), 'Green');
+  await userEvent.click(screen.getByRole('button', { name: 'Search' }));
+  await waitFor(() => expect(loadAdminDirectory).toHaveBeenLastCalledWith('appointments', expect.objectContaining({ page: 1, search: 'Green' })));
+  await userEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+  expect(screen.getByRole('searchbox')).toHaveFocus();
+  await waitFor(() => expect(loadAdminDirectory).toHaveBeenLastCalledWith('appointments', expect.objectContaining({ page: 1, search: '' })));
+});
 it('searches, pages, resets page for new search and refreshes without losing criteria', async () => {
   loadAdminDirectory.mockResolvedValue({ ...result([{ id: 1, name: 'Medicine A', price: 1, stockQuantity: 1, isActive: true }]), totalCount: 21, totalPages: 2 });
   show('medicines'); await screen.findByText('Medicine A'); const user = userEvent.setup();

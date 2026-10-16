@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   BadgeCheck, Ban, BellRing, CheckCircle2, Clock3, FileImage, ImageOff, Inbox, Landmark, Layers,
   Maximize2, Pill, RefreshCw, ScanEye, Search, Send, ShieldCheck, ShoppingBag, X, XCircle,
@@ -276,6 +277,7 @@ export default function PharmacyPaymentVerificationPage() {
           })}
         </ul>}
 
+      {createPortal(<div className="btv-overlay-root">
       {open && selected && <div className="btv-modal-backdrop" onClick={close}>
         <article className={`btv-review tone-${tone}`} role="dialog" aria-modal="true" aria-label={`Review order ${selected.orderNumber}`}
           onClick={(event) => event.stopPropagation()}>
@@ -320,14 +322,14 @@ export default function PharmacyPaymentVerificationPage() {
               <h4 className="btv-subheading"><ShoppingBag size={15} aria-hidden="true" /> What was ordered</h4>
               {orderedItems.loading && <p className="btv-muted"><span className="btv-spinner" aria-hidden="true" /> Loading medicines...</p>}
               {!orderedItems.loading && orderedItems.items.length === 0 && <p className="btv-muted">The medicines for this order are not available.</p>}
-              {!orderedItems.loading && orderedItems.items.length > 0 && <table className="btv-items">
+              {!orderedItems.loading && orderedItems.items.length > 0 && <div className="btv-items-scroll" role="region" aria-label="Ordered medicines" tabIndex={0}><table className="btv-items">
                 <thead><tr><th>Medicine</th><th>Quantity</th><th>Unit price</th><th>Amount</th></tr></thead>
                 <tbody>{orderedItems.items.map((item, index) => <tr key={`${item.medicineName}-${index}`}>
                   <td><span className="btv-med-icon" aria-hidden="true"><Pill size={12} /></span>{item.medicineName}</td>
                   <td><span className="btv-qty">{item.quantity} ×</span></td><td>{money(item.unitPrice)}</td><td>{money(item.lineTotal)}</td>
                 </tr>)}</tbody>
                 <tfoot><tr><td colSpan={3}>Total</td><td>{money(selected.amount)}</td></tr></tfoot>
-              </table>}
+              </table></div>}
             </Section>
           </div>
 
@@ -384,6 +386,7 @@ export default function PharmacyPaymentVerificationPage() {
         onConfirm={approve}
         onCancel={() => setConfirming(false)}
       />
+      </div>, document.body)}
     </section>
   </DashboardLayout>;
 }

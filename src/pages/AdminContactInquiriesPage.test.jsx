@@ -1,6 +1,6 @@
 import React from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AdminContactInquiriesPage from './AdminContactInquiriesPage';
 import { listContactInquiries, markInquiryReviewed } from '../services/pharmacyInformationService';
@@ -11,11 +11,51 @@ beforeEach(() => { vi.clearAllMocks(); listContactInquiries.mockResolvedValue({ 
 test('admin can read and mark an inquiry reviewed', async () => {
   markInquiryReviewed.mockResolvedValue({ ...inquiry, reviewedAtUtc: '2026-10-08T10:00:00Z' });
   render(<AdminContactInquiriesPage />);
-  await userEvent.click(await screen.findByText('Opening hours — New'));
-  expect(screen.getByText('Please confirm your hours.')).toBeInTheDocument();
-  await userEvent.click(screen.getByRole('button', { name: 'Mark reviewed' }));
-  expect(await screen.findByText('Opening hours — Reviewed')).toBeInTheDocument();
+  const details = screen.getByRole('region', { name: 'Inquiry details' });
+  expect(await within(details).findByText('Please confirm your hours.')).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Mark as reviewed' }));
+  expect(await screen.findByText('Inquiry marked as reviewed.')).toBeInTheDocument();
+  expect(within(details).getByText('Reviewed', { exact: true })).toBeInTheDocument();
   expect(markInquiryReviewed).toHaveBeenCalledWith('test-id');
+});
+
+test('selects messages and filters the current page without another API call', async () => {
+  listContactInquiries.mockResolvedValue({ items: [inquiry, { ...inquiry, id: 'second', name: 'Kasun Silva', subject: 'Appointment booking', message: 'A different message', reviewedAtUtc: '2026-10-09T10:00:00Z' }], totalPages: 1 });
+  render(<AdminContactInquiriesPage />);
+  await userEvent.click(await screen.findByRole('button', { name: /Kasun Silva/ }));
+  const details = screen.getByRole('region', { name: 'Inquiry details' });
+  expect(within(details).getByText('A different message')).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'New', exact: true }));
+  expect(screen.queryByRole('button', { name: /Kasun Silva/ })).not.toBeInTheDocument();
+  expect(within(details).getByText('Please confirm your hours.')).toBeInTheDocument();
+  await userEvent.type(screen.getByRole('searchbox'), 'unmatched');
+  expect(screen.getByText(/No inquiries match/)).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Clear search', exact: true }));
+  expect(screen.getByRole('searchbox')).toHaveFocus();
+  expect(within(details).getByText('Please confirm your hours.')).toBeInTheDocument();
+  expect(listContactInquiries).toHaveBeenCalledTimes(1);
+});
+
+test('keeps a failed review available for retry', async () => {
+  markInquiryReviewed.mockRejectedValueOnce(new Error('offline')).mockResolvedValue({ ...inquiry, reviewedAtUtc: '2026-10-09T10:00:00Z' });
+  render(<AdminContactInquiriesPage />);
+  await userEvent.click(await screen.findByRole('button', { name: 'Mark as reviewed' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Unable to mark this inquiry reviewed');
+  expect(within(screen.getByRole('region', { name: 'Inquiry details' })).getByText('Please confirm your hours.')).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Mark as reviewed' }));
+  expect(await screen.findByText('Inquiry marked as reviewed.')).toBeInTheDocument();
+  expect(markInquiryReviewed).toHaveBeenCalledTimes(2);
+});
+
+test('loads the next server page and disables the boundary buttons', async () => {
+  listContactInquiries.mockResolvedValueOnce({ items: [inquiry], totalPages: 2 }).mockResolvedValueOnce({ items: [{ ...inquiry, id: 'page-two', subject: 'Second page' }], totalPages: 2 });
+  render(<AdminContactInquiriesPage />);
+  await screen.findByRole('button', { name: /Visitor Opening hours/ });
+  expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
+  await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+  expect(await screen.findByRole('heading', { name: 'Second page' })).toBeInTheDocument();
+  expect(listContactInquiries).toHaveBeenLastCalledWith(2);
+  expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
 });
 test('failed inquiry loading supports retry', async () => {
   listContactInquiries.mockRejectedValueOnce(new Error('offline')).mockResolvedValue({ items: [], totalPages: 0 });

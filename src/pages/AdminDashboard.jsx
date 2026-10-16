@@ -4,6 +4,8 @@ import DashboardLayout from '../components/DashboardLayout';
 import StatCard from '../components/StatCard';
 import { useAdminDashboard } from '../hooks/useAdminDashboard';
 import AdminDashboardSections from '../components/dashboard/AdminDashboardSections';
+import pharmacistPhoto from '../assets/home-hero-pharmacist.jpg';
+import '../styles/admin-dashboard.css';
 import {
   Users,
   UserCircle,
@@ -15,6 +17,8 @@ import {
   CreditCard,
   AlertTriangle,
   HandCoins,
+  CalendarDays,
+  RefreshCw,
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -26,14 +30,24 @@ const AdminDashboard = () => {
     ? dashboard.sections.medicinePayments.data.totalPayments + dashboard.sections.appointmentPayments.data.totalPayments : 'Unavailable';
   return (
     <DashboardLayout>
-      <div className="welcome-banner">
+      <div className="admin-dashboard">
+      <header className="ad-hero">
+        <div className="ad-hero-copy"><span className="ad-eyebrow">Administration workspace</span>
         <h1>
           Welcome back, <span className="welcome-name">Admin</span> 👋
         </h1>
         <p>Platform overview and user governance.</p>
-      </div>
+        <span className="ad-date"><CalendarDays size={16} aria-hidden="true" />{new Date().toLocaleDateString('en-LK', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Colombo' })}</span>
+        <nav className="ad-shortcuts" aria-label="Admin shortcuts">
+          <Link to="/admin/users" className="ad-shortcut ad-shortcut-red"><Users size={16} aria-hidden="true" />User directory</Link>
+          <Link to="/admin/fee-requests" className="ad-shortcut ad-shortcut-green"><HandCoins size={16} aria-hidden="true" />Review fee requests</Link>
+          <Link to="/admin/reports" className="ad-shortcut ad-shortcut-outline"><DollarSign size={16} aria-hidden="true" />Financial reports</Link>
+        </nav></div>
+        <img className="ad-hero-photo" src={pharmacistPhoto} alt="" aria-hidden="true" />
+      </header>
 
-      <div className="stat-card-grid">
+      <div className="ad-section-heading"><h2>Platform at a glance</h2><button type="button" className="ad-refresh" onClick={dashboard.refreshAll}><RefreshCw size={16} aria-hidden="true" />Refresh dashboard</button></div>
+      <div className="stat-card-grid ad-stats">
         <StatCard to="/admin/users" icon={Users} title="Total Users" value={users?.totalUsers ?? 'Unavailable'} />
         <StatCard to="/admin/users" icon={UserCircle} title="Patients" value={users?.patients ?? 'Unavailable'} />
         <StatCard to="/admin/users" icon={Briefcase} title="Pharmacy Staff" value={users?.pharmacyStaff ?? 'Unavailable'} />
@@ -45,9 +59,7 @@ const AdminDashboard = () => {
         <StatCard to="#admin-low-stock" icon={AlertTriangle} title="Low-Stock Alerts" value={operations?.lowStock.totalCount ?? 'Unavailable'} />
       </div>
 
-      <button type="button" className="btn btn-primary" onClick={dashboard.refreshAll}>Refresh dashboard</button>
-
-      <div className="dashboard-section">
+      <div className="dashboard-section ad-quick-links">
         <h2>Quick Links</h2>
         <div className="quicklink-row">
           <Link to="/admin/users" className="quicklink-card">
@@ -70,7 +82,9 @@ const AdminDashboard = () => {
           </Link>
         </div>
       </div>
+      <h2 className="ad-section-title">Platform activity</h2>
       <AdminDashboardSections dashboard={dashboard} />
+      </div>
     </DashboardLayout>
   );
 };
