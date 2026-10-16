@@ -53,9 +53,7 @@ export default function DoctorDashboard() {
     <DoctorAppointmentFeedback data={data ? { ...data, contactsUnavailable: false } : data} {...{ error, busy, refresh }} />
     {data && <>
       <div className="dd-workspace">{renderSection('upcoming', 'Upcoming appointments', 'isUpcoming', 'No upcoming appointments.', 'View all upcoming appointments')}
-        <div className="dd-side">{renderSection('today', "Today's appointments", 'isToday', 'No scheduled appointments today.', "View today's appointments")}
-          <section className="dd-panel dd-profile" aria-label="Professional profile"><span className="dd-profile-icon"><Stethoscope size={26} aria-hidden="true" /></span><h2>Professional Profile</h2><p>Specialization, fee, availability, qualifications and experience</p><Link className="dd-outline" to="/profile">Open professional profile</Link></section>
-        </div>
+        {renderSection('today', "Today's appointments", 'isToday', 'No scheduled appointments today.', "View today's appointments")}
       </div>
       {renderSection('completed', 'Completed appointments', 'isCompleted', 'No completed appointments yet.', 'View all completed appointments')}
     </>}
