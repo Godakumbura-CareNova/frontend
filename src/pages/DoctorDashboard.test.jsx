@@ -50,6 +50,15 @@ it('shows separate empty states for each appointment section', async () => {
   expect(screen.getByText('No completed appointments yet.')).toBeInTheDocument();
 });
 
+it('hides the contact warning while retaining missing-contact labels and appointment links', async () => {
+  http.get.mockResolvedValue({ data: { ...response([{ ...appointment(2, 'upcoming'), patientName: null, patientPhone: null }]).data, contactsUnavailable: true } });
+  render(<MemoryRouter><DoctorDashboard /></MemoryRouter>);
+  expect(await screen.findByText('Patient name unavailable')).toBeInTheDocument();
+  expect(screen.getByText('Phone number unavailable')).toBeInTheDocument();
+  expect(screen.queryByText(/Some patient contact information is unavailable/)).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'View details for APT-2' })).toHaveAttribute('href', '/doctor/appointments/2');
+});
+
 it('retries a failed dashboard load without displaying empty appointment states as results', async () => {
   http.get.mockRejectedValueOnce(new Error('Network unavailable')).mockResolvedValueOnce(response([appointment(2, 'upcoming')]));
   render(<MemoryRouter><DoctorDashboard /></MemoryRouter>);

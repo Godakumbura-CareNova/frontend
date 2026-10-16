@@ -28,11 +28,9 @@ test('selects messages and filters the current page without another API call', a
   await userEvent.click(screen.getByRole('button', { name: 'New', exact: true }));
   expect(screen.queryByRole('button', { name: /Kasun Silva/ })).not.toBeInTheDocument();
   expect(within(details).getByText('Please confirm your hours.')).toBeInTheDocument();
-  await userEvent.type(screen.getByRole('searchbox'), 'unmatched');
-  expect(screen.getByText(/No inquiries match/)).toBeInTheDocument();
-  await userEvent.click(screen.getByRole('button', { name: 'Clear search', exact: true }));
-  expect(screen.getByRole('searchbox')).toHaveFocus();
-  expect(within(details).getByText('Please confirm your hours.')).toBeInTheDocument();
+  expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'All inquiries', exact: true }));
+  expect(screen.getByRole('button', { name: /Kasun Silva/ })).toBeInTheDocument();
   expect(listContactInquiries).toHaveBeenCalledTimes(1);
 });
 
