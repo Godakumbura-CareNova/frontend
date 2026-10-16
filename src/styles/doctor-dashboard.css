@@ -1,0 +1,82 @@
+.doctor-dashboard { display: grid; gap: 20px; }
+.doctor-dashboard .dd-hero { position: relative; overflow: hidden; padding-right: 320px; border: 1px solid var(--cn-green-100); border-radius: 18px; background: linear-gradient(110deg, var(--cn-green-50), var(--cn-white)); box-shadow: var(--cn-shadow); }
+.dd-hero-copy { position: relative; z-index: 1; padding: 30px; }
+.dd-eyebrow { color: var(--cn-green-900); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.doctor-dashboard .dd-hero h1 { margin: 12px 0 6px; font-size: clamp(25px, 2.6vw, 34px); font-weight: 800; line-height: 1.2; letter-spacing: -.025em; }
+.dd-hero h1 span { color: var(--cn-red-600); }
+.dd-hero p { color: var(--cn-gray-600); margin: 0; font-size: 15px; }
+.dd-today { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding: 7px 10px; border: 1px solid var(--cn-green-100); border-radius: 999px; background: var(--cn-white); color: var(--cn-green-700); font-size: 12px; }
+.dd-hero nav { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 20px; }
+.dd-hero-photo { position: absolute; right: 0; top: 0; width: 350px; height: 100%; object-fit: cover; object-position: center 20%; mask-image: linear-gradient(to right, transparent, #000 25%); }
+.doctor-dashboard :is(.dd-primary, .dd-outline) { display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 11px 16px; border: 1px solid var(--cn-green-200); border-radius: 9px; font-size: 13px; font-weight: 700; text-decoration: none; }
+.doctor-dashboard .dd-primary { color: var(--cn-white); background: var(--cn-green-700); border-color: var(--cn-green-700); }
+.doctor-dashboard .dd-primary:hover { background: var(--cn-green-900); }
+.doctor-dashboard .dd-outline { color: var(--cn-green-700); background: var(--cn-white); }
+.doctor-dashboard .dd-outline:hover { background: var(--cn-green-50); border-color: var(--cn-green-700); }
+.doctor-dashboard :is(a, button):focus-visible { outline: 3px solid var(--cn-green-600); outline-offset: 3px; }
+.doctor-dashboard a:active { opacity: .85; }
+.doctor-dashboard .dd-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.doctor-dashboard .dd-stats .stat-card { --dd-tone: var(--cn-green-700); --dd-soft: var(--cn-green-100); display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-areas: 'icon title' 'icon value'; gap: 4px 12px; padding: 18px; border: 1px solid var(--cn-gray-200); border-radius: 14px; background: var(--cn-white); box-shadow: var(--cn-shadow); }
+.doctor-dashboard .dd-stats .stat-card:first-child { --dd-tone: var(--cn-amber-600); --dd-soft: var(--cn-amber-100); }
+.doctor-dashboard .dd-stats .stat-card:nth-child(3) { --dd-tone: var(--cn-red-600); --dd-soft: var(--cn-red-100); }
+.doctor-dashboard .dd-stats .stat-card-icon { grid-area: icon; margin: 0; width: 48px; height: 48px; border-radius: 12px; background: var(--dd-soft); color: var(--dd-tone); }
+.doctor-dashboard .dd-stats .stat-card-title { grid-area: title; font-size: 12px; color: var(--cn-gray-800); margin: 0; }
+.doctor-dashboard .dd-stats .stat-card-value { grid-area: value; font-size: 26px; font-weight: 800; color: var(--dd-tone); line-height: 1.2; overflow-wrap: anywhere; }
+.dd-workspace { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.dd-panel-today { display: flex; flex-direction: column; }
+.dd-panel { min-width: 0; padding: 20px; border: 1px solid var(--cn-green-100); border-radius: 16px; background: var(--cn-white); box-shadow: var(--cn-shadow); }
+.dd-panel-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.doctor-dashboard h2 { margin: 0; font-size: 17px; font-weight: 800; }
+.dd-heading-icon { display: inline-flex; justify-content: center; align-items: center; flex-shrink: 0; width: 36px; height: 36px; color: var(--cn-white); background: var(--cn-green-700); border-radius: 9px; }
+.dd-refresh { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-left: auto; padding: 8px 10px; background: var(--cn-white); border: 1px solid var(--cn-gray-200); border-radius: 8px; font: inherit; font-size: 12px; cursor: pointer; }
+.dd-refresh:hover:not(:disabled) { background: var(--cn-green-50); border-color: var(--cn-green-600); }
+.dd-refresh:disabled { opacity: .6; cursor: wait; }
+.dd-list-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 0 12px; }
+.dd-list-heading p { margin: 0; font-size: 12px; color: var(--cn-gray-600); }
+.dd-list-heading a { color: var(--cn-green-700); font-size: 12px; font-weight: 700; text-decoration: none; margin-left: auto; }
+.dd-list-heading a:hover { text-decoration: underline; }
+.dd-appointment-row { display: grid; grid-template-columns: 48px minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .9fr); gap: 12px; align-items: start; padding: 16px 0; border-top: 1px solid var(--cn-gray-200); }
+.dd-date-tile { display: grid; gap: 2px; justify-items: center; padding: 10px 4px; border-radius: 9px; color: var(--cn-green-900); background: var(--cn-green-100); }
+.dd-date-tile strong { font-size: 19px; line-height: 1; }
+.dd-date-tile span { text-transform: uppercase; font-size: 10px; font-weight: 700; }
+.dd-patient, .dd-time { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.dd-patient a { color: var(--cn-gray-900); font-size: 12px; font-weight: 800; text-decoration: none; overflow-wrap: anywhere; }
+.dd-patient a:hover { color: var(--cn-green-700); text-decoration: underline; }
+.dd-patient > span, .dd-time > span:not(.dd-sr-only) { display: flex; align-items: flex-start; gap: 5px; color: var(--cn-gray-600); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.dd-patient svg, .dd-time svg { flex-shrink: 0; color: var(--cn-green-700); margin-top: 1px; }
+.dd-time small { font-size: 10px; color: var(--cn-gray-600); }
+.dd-row-status { display: grid; justify-items: start; gap: 8px; min-width: 0; }
+.dd-row-status > span { max-width: 100%; box-sizing: border-box; white-space: normal; overflow-wrap: anywhere; }
+.doctor-dashboard .dd-row-status .appointment-status, .dd-payment { display: inline-flex; border-radius: 999px; padding: 4px 9px; font-size: 10px; font-weight: 600; line-height: 1.5; }
+.dd-payment-success { color: var(--cn-green-700); background: var(--cn-green-100); }
+.dd-payment-pending { color: var(--cn-amber-800); background: var(--cn-amber-50); }
+.dd-payment-danger { color: var(--cn-red-700); background: var(--cn-red-50); }
+.dd-payment-neutral { color: var(--cn-gray-600); background: var(--cn-gray-100); }
+.dd-row-notice { grid-column: 1 / -1; color: var(--cn-amber-800); font-size: 12px; margin: 0; }
+.dd-empty { display: flex; align-items: center; gap: 14px; padding: 16px 0; color: var(--cn-green-700); }
+.dd-empty p { color: var(--cn-gray-600); margin: 0; font-size: 13px; }
+.dd-empty-today { flex: 1; flex-direction: column; justify-content: center; padding: 24px 16px; min-height: 180px; text-align: center; border-radius: 12px; background: linear-gradient(var(--cn-gray-50), var(--cn-white)); }
+.dd-empty-today > svg { color: var(--cn-green-200); }
+.dd-empty-today p { color: var(--cn-gray-900); font-size: 14px; font-weight: 700; }
+.dd-empty-today small { color: var(--cn-gray-600); }
+.dd-panel-completed > .dd-appointment-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; }
+.dd-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 1250px) {
+  .dd-workspace { grid-template-columns: 1fr; }
+  .dd-panel-completed > .dd-appointment-list { grid-template-columns: 1fr; }
+  .doctor-dashboard .dd-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 800px) {
+  .doctor-dashboard .dd-hero { padding-right: 0; }
+  .dd-hero-photo { display: none; }
+}
+@media (max-width: 600px) {
+  .doctor-dashboard .dd-stats { grid-template-columns: 1fr; }
+  .dd-hero-copy, .dd-panel { padding: 20px; }
+  .dd-appointment-row { grid-template-columns: 42px minmax(0, 1fr); }
+  .dd-time { grid-column: 2; }
+  .dd-row-status { grid-column: 2; display: flex; flex-wrap: wrap; }
+  .dd-hero nav a { flex: 1 1 auto; }
+  .dd-refresh { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .doctor-dashboard .stat-card { transition: none; } }
